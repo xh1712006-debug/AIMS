@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  INTERN
+  MENTOR
+}
+
+enum Track {
+  SOFTWARE_DEVELOPMENT
+  DATA_ANALYTICS
+  AI_ML_RESEARCH
+  SOFTWARE_TESTING
+}
+
+enum BacklogType {
+  FEATURE
+  BUG
+  SPIKE
+  RESEARCH
+  ANALYSIS
+  EXPERIMENT
+  DOCUMENTATION
+}
+
+enum Status {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+  BLOCKED
+}
+
+enum Priority {
+  MUST
+  SHOULD
+  COULD
+}
+
+enum Risk {
+  GREEN
+  YELLOW
+  RED
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  password     String?
+  role         Role      @default(INTERN)
+  githubToken  String?
+  projects     Project[]
+}
+
+model Project {
+  id           String    @id @default(cuid())
+  internId     String
+  intern       User      @relation(fields: [internId], references: [id])
+  track        Track
+  title        String
+  startDate    DateTime
+  endDate      DateTime
+  githubRepo   String?
+  sprints      Sprint[]
+  backlogs     Backlog[]
+  checkIns     CheckIn[]
+}
+
+model Sprint {
+  id           String         @id @default(cuid())
+  projectId    String
+  project      Project        @relation(fields: [projectId], references: [id])
+  name         String
+  startDate    DateTime
+  endDate      DateTime
+  backlogs     Backlog[]
+  sprintReview SprintReview?
+}
+
+model Backlog {
+  id           String      @id @default(cuid())
+  projectId    String
+  project      Project     @relation(fields: [projectId], references: [id])
+  sprintId     String?
+  sprint       Sprint?     @relation(fields: [sprintId], references: [id])
+  title        String
+  description  String?
+  type         BacklogType
+  status       Status      @default(TODO)
+  priority     Priority
+  estimate     Int?
+  evidenceLink String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model CheckIn {
+  id           String    @id @default(cuid())
+  projectId    String
+  project      Project   @relation(fields: [projectId], references: [id])
+  doneTasks    String
+  nextTasks    String
+  blockers     String?
+  evidenceLink String?
+  riskStatus   Risk      @default(GREEN)
+  createdAt    DateTime  @default(now())
+}
+
+model SprintReview {
+  id             String   @id @default(cuid())
+  sprintId       String   @unique
+  sprint         Sprint   @relation(fields: [sprintId], references: [id])
+  goalResult     String
+  increment      String?
+  technicalFinds String?
+  keep           String?
+  problem        String?
+  tryItem        String?
+  mentorFeedback String?
+  score          Int?
+  createdAt      DateTime @default(now())
+}
