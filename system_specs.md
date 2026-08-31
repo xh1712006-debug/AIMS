@@ -31,10 +31,16 @@ Hệ thống quản lý sinh viên thực tập (Interns) theo mô hình Agile/S
   - **YELLOW**: Chậm trễ vài ngày hoặc có blocker (Inactive > 4 days).
   - **RED**: Nguy cơ cao, không hoàn thành tiến độ (Inactive > 7 days).
 
-### 5.2. Quản lý Backlog (Trello-like / Jira-like)
-- Phân loại công việc (Feature, Bug, Spike, Research, Analysis, Experiment, Documentation).
-- Status (Todo, In Progress, Review, Done, Blocked).
-- Estimate & Priority (Must, Should, Could).
+### 5.2. Cấu trúc Agile & Quản lý Công việc (WorkItems)
+- **Mô hình Phân cấp (Hierarchy)**:
+  - **Project** (Dự án) -> 1 **Product Backlog** (Danh sách tổng).
+  - **Epic** (Tính năng lớn) -> Chứa nhiều công việc con (Task, Story, Feature, Bug).
+  - **Sprint** (Chu kỳ lặp) -> Chứa các công việc rút ra từ Backlog để làm trong khoảng thời gian nhất định (Thể hiện độ ưu tiên).
+- **Loại Công việc (Type)**: `EPIC`, `STORY` (User Story), `FEATURE`, `TASK`, `BUG`.
+- **Trạng thái (Status)**: Todo, In Progress, Review, Done, Blocked.
+- **Triết lý theo dõi Agile**:
+  - Không dùng `% complete` làm chỉ số chính.
+  - Ưu tiên: **Sprint Goal** → **Increment/Evidence** → **Blocker** → **Risk** → **Next Milestone**.
 
 ### 5.3. Check-ins (Daily/Weekly)
 - Intern báo cáo trạng thái định kỳ.

@@ -19,14 +19,12 @@ enum Track {
   SOFTWARE_TESTING
 }
 
-enum BacklogType {
+enum ItemType {
+  EPIC
+  STORY
   FEATURE
+  TASK
   BUG
-  SPIKE
-  RESEARCH
-  ANALYSIS
-  EXPERIMENT
-  DOCUMENTATION
 }
 
 enum Status {
@@ -69,7 +67,7 @@ model Project {
   endDate      DateTime
   githubRepo   String?
   sprints      Sprint[]
-  backlogs     Backlog[]
+  workItems    WorkItem[]
   checkIns     CheckIn[]
 }
 
@@ -80,25 +78,30 @@ model Sprint {
   name         String
   startDate    DateTime
   endDate      DateTime
-  backlogs     Backlog[]
+  workItems    WorkItem[]
   sprintReview SprintReview?
 }
 
-model Backlog {
+model WorkItem {
   id           String      @id @default(cuid())
   projectId    String
   project      Project     @relation(fields: [projectId], references: [id])
   sprintId     String?
   sprint       Sprint?     @relation(fields: [sprintId], references: [id])
+  parentId     String?
+  parent       WorkItem?   @relation("ParentChild", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children     WorkItem[]  @relation("ParentChild")
   title        String
   description  String?
-  type         BacklogType
-  status       Status      @default(TODO)
-  priority     Priority
-  estimate     Int?
-  evidenceLink String?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  type           ItemType
+  status         Status      @default(TODO)
+  priority       Priority
+  estimate       Int?
+  evidenceLink   String?
+  mentorFeedback String?
+  requiresFix    Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 }
 
 model CheckIn {

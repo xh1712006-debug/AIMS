@@ -4,17 +4,21 @@ import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { saveSettings } from "@/app/actions";
 
-export default async function SettingsPage() {
+export default async function SettingsPage(props: { params: Promise<{ projectId: string }> }) {
+  const { projectId } = await props.params;
   const session = await getServerSession(authOptions);
   if (session?.user?.role !== 'INTERN') redirect('/dashboard');
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    include: { projects: true }
+  });
+  
+  const project = await prisma.project.findUnique({
+    where: { id: projectId, internId: session.user.id }
   });
 
   const githubToken = user?.githubToken || "";
-  const githubRepo = user?.projects[0]?.githubRepo || "";
+  const githubRepo = project?.githubRepo || "";
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -25,6 +29,7 @@ export default async function SettingsPage() {
         <p className="text-sm text-gray-500 mb-6">Kết nối để tự động đồng bộ báo cáo Check-ins của bạn lên kho lưu trữ GitHub dưới dạng Markdown.</p>
         
         <form action={saveSettings} className="space-y-6">
+          <input type="hidden" name="projectId" value={projectId} />
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">GitHub Personal Access Token (PAT)</label>
             <input 

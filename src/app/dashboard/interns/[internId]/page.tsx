@@ -1,0 +1,105 @@
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+
+export default async function InternDetailPage(props: { params: Promise<{ internId: string }> }) {
+  const { internId } = await props.params;
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.email || session.user.role !== 'MENTOR') {
+    redirect('/dashboard');
+  }
+
+  const intern = await prisma.user.findUnique({
+    where: { id: internId, role: 'INTERN' },
+    include: {
+      projects: {
+        orderBy: { startDate: 'desc' },
+        include: {
+          sprints: {
+            where: { startDate: { lte: new Date() }, endDate: { gte: new Date() } }
+          },
+          workItems: {
+            where: { status: { not: 'DONE' } }
+          },
+          checkIns: {
+            orderBy: { createdAt: 'desc' },
+            take: 3
+          }
+        }
+      }
+    }
+  });
+
+  if (!intern) return <div>Không tìm thấy thực tập sinh.</div>;
+
+  return (
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="mb-8">
+        <Link href="/dashboard/interns" className="text-sm font-semibold text-gray-500 hover:text-gray-900 flex items-center mb-4 transition-colors">
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          Quay lại danh sách Interns
+        </Link>
+        <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Hồ sơ: {intern.name}</h2>
+        <p className="text-gray-500">{intern.email}</p>
+      </div>
+
+      <div className="space-y-6">
+        <h3 className="text-xl font-bold text-gray-900">Các Dự án đang tham gia</h3>
+        {intern.projects.length === 0 ? (
+          <div className="p-8 bg-gray-50 rounded-2xl border border-gray-100 text-center text-gray-500">
+            Thực tập sinh này chưa được phân công dự án nào.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {intern.projects.map(project => (
+              <div key={project.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h4 className="text-lg font-black text-gray-900">{project.title}</h4>
+                    <span className="inline-flex items-center px-2.5 py-0.5 mt-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                      Track: {project.track}
+                    </span>
+                  </div>
+                  <Link href={`/dashboard/${project.id}`} className="px-3 py-1.5 bg-gray-900 text-white text-xs font-bold rounded-lg hover:bg-gray-800 transition-colors">
+                    Vào không gian làm việc
+                  </Link>
+                </div>
+
+                <div className="space-y-3 mt-6">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">Sprint hiện hành:</span>
+                    <span className="font-semibold text-gray-900">{project.sprints[0]?.name || 'Không có'}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">Work Items tồn đọng:</span>
+                    <span className="font-semibold text-red-600">{project.workItems.length} tasks</span>
+                  </div>
+                  
+                  {project.checkIns.length > 0 && (
+                    <div className="pt-4 mt-4 border-t border-gray-100">
+                      <p className="text-xs font-bold text-gray-400 uppercase mb-2">Check-in gần nhất ({new Date(project.checkIns[0].createdAt).toLocaleDateString('vi-VN')})</p>
+                      <p className="text-sm text-gray-700 line-clamp-2">{project.checkIns[0].doneTasks}</p>
+                      <div className="mt-2 flex items-center">
+                        <span className="text-xs font-semibold text-gray-500 mr-2">Trạng thái rủi ro:</span>
+                        <span className={`inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-full ${
+                          project.checkIns[0].riskStatus === 'RED' ? 'bg-red-100 text-red-700' :
+                          project.checkIns[0].riskStatus === 'YELLOW' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-green-100 text-green-700'
+                        }`}>
+                          {project.checkIns[0].riskStatus}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
