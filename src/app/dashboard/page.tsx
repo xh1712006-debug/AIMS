@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import CreateProjectForm from "./CreateProjectForm";
 import InternCharts from "./InternCharts";
+import { calculateProjectRisk } from "@/lib/risk";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -21,7 +22,8 @@ export default async function DashboardPage() {
       include: {
         projects: {
           include: {
-            checkIns: { orderBy: { createdAt: 'desc' }, take: 1 }
+            checkIns: { orderBy: { createdAt: 'desc' } },
+            workItems: { select: { status: true } }
           }
         }
       }
@@ -44,7 +46,10 @@ export default async function DashboardPage() {
             <div>
               <h3 className="text-gray-500 text-sm font-semibold uppercase tracking-wider">Cảnh báo rủi ro</h3>
               <p className="text-4xl font-black mt-2 text-red-600">
-                {interns.filter(i => i.projects.some(p => p.checkIns[0]?.riskStatus === 'RED' || p.checkIns[0]?.riskStatus === 'YELLOW')).length}
+                {interns.filter(i => i.projects.some(p => {
+                  const risk = calculateProjectRisk(p as any);
+                  return risk === 'RED' || risk === 'YELLOW';
+                })).length}
               </p>
             </div>
             <div className="p-3 bg-red-50 text-red-600 rounded-xl">
@@ -68,27 +73,34 @@ export default async function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
-                {interns.map(intern => (
+                {interns.map(intern => {
+                  const risk = intern.projects[0] ? calculateProjectRisk(intern.projects[0] as any) : 'N/A';
+                  return (
                   <tr key={intern.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="font-bold text-gray-900">{intern.name}</div>
                       <div className="text-sm text-gray-500">{intern.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-600">
-                      {intern.projects[0]?.title || 'Chưa phân bổ'}
+                      <div className="text-gray-900 font-semibold">{intern.projects[0]?.title || 'Chưa phân bổ'}</div>
+                      {intern.projects[0]?.status && intern.projects[0].status !== 'ACTIVE' && (
+                        <span className="inline-flex mt-1 items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                          {intern.projects[0].status}
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-full ${
-                        intern.projects[0]?.checkIns[0]?.riskStatus === 'RED' ? 'bg-red-100 text-red-700' :
-                        intern.projects[0]?.checkIns[0]?.riskStatus === 'YELLOW' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-green-100 text-green-700'
+                        risk === 'RED' ? 'bg-red-100 text-red-700' :
+                        risk === 'YELLOW' ? 'bg-yellow-100 text-yellow-700' :
+                        risk === 'GREEN' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
                       }`}>
                         <span className={`w-2 h-2 rounded-full mr-2 ${
-                          intern.projects[0]?.checkIns[0]?.riskStatus === 'RED' ? 'bg-red-500' :
-                          intern.projects[0]?.checkIns[0]?.riskStatus === 'YELLOW' ? 'bg-yellow-500' :
-                          'bg-green-500'
+                          risk === 'RED' ? 'bg-red-500' :
+                          risk === 'YELLOW' ? 'bg-yellow-500' :
+                          risk === 'GREEN' ? 'bg-green-500' : 'bg-gray-500'
                         }`}></span>
-                        {intern.projects[0]?.checkIns[0]?.riskStatus || 'N/A'}
+                        {risk}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -97,7 +109,8 @@ export default async function DashboardPage() {
                         : 'Chưa có dữ liệu'}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
                 {interns.length === 0 && (
                   <tr>
                     <td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500">
@@ -139,7 +152,7 @@ export default async function DashboardPage() {
   const doneWorkItems = projects.reduce((acc, p) => acc + p.workItems.filter(wi => wi.status === 'DONE').length, 0);
   const totalCheckIns = projects.reduce((acc, p) => acc + p.checkIns.length, 0);
   const totalSprints = projects.reduce((acc, p) => acc + p.sprints.length, 0);
-  const latestRisk = projects[0]?.checkIns[0]?.riskStatus || 'GREEN';
+  const latestRisk = projects[0] ? calculateProjectRisk(projects[0] as any) : 'GREEN';
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -201,6 +214,11 @@ export default async function DashboardPage() {
                           <span className="inline-flex items-center px-3 py-1 mt-2 text-xs font-semibold rounded-full bg-blue-50 text-blue-700">
                             Track: {project.track.replace(/_/g, ' ')}
                           </span>
+                          {project.status !== 'ACTIVE' && (
+                            <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 text-xs font-semibold rounded-full bg-gray-100 text-gray-700">
+                              Trạng thái: {project.status}
+                            </span>
+                          )}
                         </div>
                         <div className="text-right text-sm text-gray-500 font-medium bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
                           {project.startDate.toLocaleDateString('vi-VN')} - {project.endDate.toLocaleDateString('vi-VN')}

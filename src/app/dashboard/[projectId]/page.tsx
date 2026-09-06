@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import InternCharts from "../InternCharts";
+import { calculateProjectRisk } from "@/lib/risk";
 
 export default async function ProjectDetailPage(props: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await props.params;
@@ -34,7 +35,7 @@ export default async function ProjectDetailPage(props: { params: Promise<{ proje
   const totalWorkItems = project.workItems.length;
   const doneWorkItems = project.workItems.filter(wi => wi.status === 'DONE').length;
   const totalCheckIns = project.checkIns.length;
-  const latestRisk = project.checkIns[0]?.riskStatus || 'GREEN';
+  const latestRisk = calculateProjectRisk(project as any);
 
   // Get top priority tasks
   const priorityTasks = project.workItems.filter(wi => wi.status !== 'DONE').slice(0, 5);

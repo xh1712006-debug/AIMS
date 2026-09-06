@@ -31,46 +31,57 @@ export default function Sidebar({ user, projects = [] }: { user: { name: string,
             {projects.length > 0 && (
               <div className="pt-4 mt-4 border-t border-gray-100">
                 <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Dự án của tôi</p>
-                {projects.map((project) => (
-                  <div key={project.id} className="mb-2">
-                    <div className="px-4 py-2 text-sm font-bold text-gray-800 flex items-center gap-2">
-                      <span className="text-gray-400">📁</span>
-                      <span className="truncate">{project.title}</span>
+                {projects.map((project) => {
+                  const isActive = projectId === project.id;
+                  return (
+                    <div key={project.id} className="mb-2">
+                      <Link 
+                        href={`/dashboard/${project.id}`}
+                        className={`px-4 py-2 text-sm font-bold flex items-center gap-2 rounded-lg transition-colors ${isActive ? 'text-blue-700 bg-blue-50' : 'text-gray-700 hover:bg-gray-50'}`}
+                      >
+                        <span className={isActive ? "text-blue-500" : "text-gray-400"}>
+                          {isActive ? '📂' : '📁'}
+                        </span>
+                        <span className="truncate">{project.title}</span>
+                      </Link>
+                      
+                      {isActive && (
+                        <div className="ml-4 pl-3 border-l border-gray-100 space-y-0.5 mt-1">
+                          <Link 
+                            href={`/dashboard/${project.id}`} 
+                            className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname === `/dashboard/${project.id}` ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+                          >
+                            Chi tiết Dự án
+                          </Link>
+                          <Link 
+                            href={`/dashboard/${project.id}/work-items`} 
+                            className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname.includes(`/dashboard/${project.id}/work-items`) ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+                          >
+                            Work Items (Backlog)
+                          </Link>
+                          <Link 
+                            href={`/dashboard/${project.id}/sprints`} 
+                            className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname.includes(`/dashboard/${project.id}/sprints`) ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+                          >
+                            Sprint Planning
+                          </Link>
+                          <Link 
+                            href={`/dashboard/${project.id}/check-ins`} 
+                            className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname.includes(`/dashboard/${project.id}/check-ins`) ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+                          >
+                            Báo cáo hằng ngày
+                          </Link>
+                          <Link 
+                            href={`/dashboard/${project.id}/settings`} 
+                            className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname.includes(`/dashboard/${project.id}/settings`) ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+                          >
+                            Cài đặt GitHub
+                          </Link>
+                        </div>
+                      )}
                     </div>
-                    <div className="ml-4 pl-3 border-l border-gray-100 space-y-0.5 mt-1">
-                      <Link 
-                        href={`/dashboard/${project.id}`} 
-                        className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname === `/dashboard/${project.id}` ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
-                      >
-                        Chi tiết Dự án
-                      </Link>
-                      <Link 
-                        href={`/dashboard/${project.id}/work-items`} 
-                        className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname.includes(`/dashboard/${project.id}/work-items`) ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
-                      >
-                        Work Items (Backlog)
-                      </Link>
-                      <Link 
-                        href={`/dashboard/${project.id}/sprints`} 
-                        className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname.includes(`/dashboard/${project.id}/sprints`) ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
-                      >
-                        Sprint Planning
-                      </Link>
-                      <Link 
-                        href={`/dashboard/${project.id}/check-ins`} 
-                        className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname.includes(`/dashboard/${project.id}/check-ins`) ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
-                      >
-                        Báo cáo hằng ngày
-                      </Link>
-                      <Link 
-                        href={`/dashboard/${project.id}/settings`} 
-                        className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname.includes(`/dashboard/${project.id}/settings`) ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
-                      >
-                        Cài đặt GitHub
-                      </Link>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </>

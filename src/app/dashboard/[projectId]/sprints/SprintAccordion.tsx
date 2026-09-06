@@ -4,21 +4,36 @@ import { useState } from 'react';
 import SprintActionsMenu from "./SprintActionsMenu";
 import QuickAddWorkItem from "./QuickAddWorkItem";
 import WorkItemRow from "./WorkItemRow";
+import SprintReviewSection from "./SprintReviewSection";
+import { TRACK_GUIDES } from "@/lib/trackGuides";
 
 export default function SprintAccordion({
   sprint,
   projectId,
+  projectTrack,
   isIntern,
   unassignedWorkItems,
   priorityLevels
 }: {
   sprint: any;
   projectId: string;
+  projectTrack: string;
   isIntern: boolean;
   unassignedWorkItems: any[];
   priorityLevels: any[];
 }) {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Lấy guideline (Definition of Done) cho Sprint hiện tại dựa trên số thứ tự Sprint hoặc tên
+  // Tạm thời lấy bằng cách tìm kiếm "Sprint 1", "Sprint 2" trong tên. Mặc định là Sprint 1 nếu không thấy.
+  const trackInfo = TRACK_GUIDES[projectTrack];
+  let currentGuide = trackInfo?.sprints[0];
+  if (trackInfo) {
+    const match = sprint.name.match(/Sprint\s*(\d+)/i);
+    if (match && parseInt(match[1]) <= trackInfo.sprints.length) {
+      currentGuide = trackInfo.sprints[parseInt(match[1]) - 1];
+    }
+  }
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-200">
@@ -64,7 +79,17 @@ export default function SprintAccordion({
         }`}
       >
         <div className="overflow-hidden">
-          <div className="p-6 pt-2 space-y-2 bg-gray-50/50">
+          <div className="p-6 pt-2 space-y-4 bg-gray-50/50">
+            {/* Definition of Done Banner */}
+            {currentGuide && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm flex gap-3 shadow-sm mb-4">
+                <span className="text-amber-500 mt-0.5">💡</span>
+                <div>
+                  <h4 className="font-bold text-amber-900">Chuẩn đầu ra (Definition of Done) - {currentGuide.name}</h4>
+                  <p className="text-amber-800 mt-0.5">{currentGuide.dod}</p>
+                </div>
+              </div>
+            )}
             {sprint.workItems.length === 0 ? (
               <p className="text-gray-500 text-sm italic py-2 text-center">Sprint này chưa có công việc nào.</p>
             ) : (
@@ -89,6 +114,13 @@ export default function SprintAccordion({
                 />
               </div>
             )}
+            
+            <SprintReviewSection 
+              sprintId={sprint.id}
+              projectId={projectId}
+              isMentor={!isIntern}
+              review={sprint.sprintReview}
+            />
           </div>
         </div>
       </div>

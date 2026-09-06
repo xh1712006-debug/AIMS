@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { SYSTEM_CONFIG } from "@/lib/config";
 
 async function syncToGithub(token: string, repo: string, content: string, path: string) {
   const url = `https://api.github.com/repos/${repo}/contents/${path}`;
@@ -393,6 +394,7 @@ export async function createProject(formData: FormData) {
   const startDate = new Date(formData.get('startDate') as string);
   const endDate = new Date(formData.get('endDate') as string);
   const internId = formData.get('internId') as string;
+  const generateTimeline = formData.get('generateTimeline') === 'true';
 
   if (!internId) throw new Error("Intern ID is required");
 
@@ -406,15 +408,52 @@ export async function createProject(formData: FormData) {
     }
   });
 
-  // Create default priority levels
+  // Create default priority levels (MoSCoW)
   await prisma.priorityLevel.createMany({
     data: [
-      { projectId: project.id, name: 'Cấp 0', level: 0, color: '#991b1b' },
-      { projectId: project.id, name: 'Cấp 1', level: 1, color: '#ef4444' },
-      { projectId: project.id, name: 'Cấp 2', level: 2, color: '#f59e0b' },
-      { projectId: project.id, name: 'Cấp 3', level: 3, color: '#3b82f6' },
+      { projectId: project.id, name: 'Must Have', level: 0, color: '#dc2626' }, // Red-600
+      { projectId: project.id, name: 'Should Have', level: 1, color: '#ea580c' }, // Orange-600
+      { projectId: project.id, name: 'Could Have', level: 2, color: '#eab308' }, // Yellow-500
+      { projectId: project.id, name: 'Won\'t Have', level: 3, color: '#9ca3af' }, // Gray-400
     ]
   });
+
+  if (generateTimeline) {
+    const s1Start = new Date(startDate);
+    const s1End = new Date(s1Start);
+    s1End.setDate(s1End.getDate() + (SYSTEM_CONFIG.TIMELINE.STANDARD_SPRINT_WEEKS * 7));
+
+    const s2Start = new Date(s1End);
+    const s2End = new Date(s2Start);
+    s2End.setDate(s2End.getDate() + (SYSTEM_CONFIG.TIMELINE.STANDARD_SPRINT_WEEKS * 7));
+
+    const s3Start = new Date(s2End);
+    const s3End = new Date(s3Start);
+    s3End.setDate(s3End.getDate() + (SYSTEM_CONFIG.TIMELINE.STANDARD_SPRINT_WEEKS * 7));
+
+    const s4Start = new Date(s3End);
+    const s4End = new Date(s4Start);
+    s4End.setDate(s4End.getDate() + (SYSTEM_CONFIG.TIMELINE.STANDARD_SPRINT_WEEKS * 7));
+
+    const s5Start = new Date(s4End);
+    const s5End = new Date(s5Start);
+    s5End.setDate(s5End.getDate() + (SYSTEM_CONFIG.TIMELINE.FINAL_SPRINT_WEEKS * 7));
+
+    const s6Start = new Date(s5End);
+    const s6End = new Date(s6Start);
+    s6End.setDate(s6End.getDate() + (SYSTEM_CONFIG.TIMELINE.FINAL_SPRINT_WEEKS * 7));
+
+    await prisma.sprint.createMany({
+      data: [
+        { projectId: project.id, name: 'Onboarding & Tìm hiểu bài toán', startDate: s1Start, endDate: s1End },
+        { projectId: project.id, name: 'Sprint 1', startDate: s2Start, endDate: s2End },
+        { projectId: project.id, name: 'Sprint 2', startDate: s3Start, endDate: s3End },
+        { projectId: project.id, name: 'Sprint 3', startDate: s4Start, endDate: s4End },
+        { projectId: project.id, name: 'Sprint 4', startDate: s5Start, endDate: s5End },
+        { projectId: project.id, name: 'Final Review', startDate: s6Start, endDate: s6End },
+      ]
+    });
+  }
 
   revalidatePath('/dashboard');
 }
@@ -539,4 +578,79 @@ export async function deletePriorityLevel(formData: FormData) {
   revalidatePath(`/dashboard/${projectId}/settings`);
   revalidatePath(`/dashboard/${projectId}/sprints`);
   revalidatePath(`/dashboard/${projectId}/work-items`);
+}
+
+export async function updateProject(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id || session.user.role !== 'MENTOR') {
+    throw new Error("Unauthorized: Only Mentors can update projects");
+  }
+
+  const id = formData.get('id') as string;
+  const title = formData.get('title') as string;
+  const track = formData.get('track') as string;
+  const internId = formData.get('internId') as string;
+  const startDateStr = formData.get('startDate') as string;
+  const endDateStr = formData.get('endDate') as string;
+  const manualRisk = formData.get('manualRisk') as string;
+  const status = formData.get('status') as string;
+
+  if (!id || !title || !internId) throw new Error("Missing required fields");
+
+  await prisma.project.update({
+    where: { id },
+    data: {
+      title,
+      track: track ? (track as any) : undefined,
+      internId,
+      ...(startDateStr ? { startDate: new Date(startDateStr) } : {}),
+      ...(endDateStr ? { endDate: new Date(endDateStr) } : {}),
+      manualRisk: manualRisk === 'NONE' || !manualRisk ? null : (manualRisk as any),
+      ...(status ? { status: status as any } : {}),
+    }
+  });
+
+  revalidatePath('/dashboard/mentor/projects');
+  revalidatePath('/dashboard/mentor/projects');
+  revalidatePath('/dashboard');
+}
+
+export async function updateCheckInMentorAction(id: string, mentorAction: string, projectId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== 'MENTOR') throw new Error("Unauthorized");
+  await prisma.checkIn.update({
+    where: { id },
+    data: { mentorAction }
+  });
+  revalidatePath(`/dashboard/${projectId}/check-ins`);
+}
+
+export async function saveSprintReview(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== 'MENTOR') throw new Error("Unauthorized");
+
+  const sprintId = formData.get('sprintId') as string;
+  const projectId = formData.get('projectId') as string;
+  const goalResult = formData.get('goalResult') as string;
+  
+  if (!sprintId || !projectId || !goalResult) throw new Error("Missing required fields");
+
+  const data = {
+    sprintId,
+    goalResult,
+    increment: formData.get('increment') as string,
+    technicalFinds: formData.get('technicalFinds') as string,
+    keep: formData.get('keep') as string,
+    problem: formData.get('problem') as string,
+    tryItem: formData.get('tryItem') as string,
+    mentorFeedback: formData.get('mentorFeedback') as string,
+  };
+
+  await prisma.sprintReview.upsert({
+    where: { sprintId },
+    create: data,
+    update: data,
+  });
+
+  revalidatePath(`/dashboard/${projectId}/sprints`);
 }

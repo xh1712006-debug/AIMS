@@ -35,11 +35,17 @@ enum Status {
   BLOCKED
 }
 
-
 enum Risk {
   GREEN
   YELLOW
   RED
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  ON_HOLD
+  WITHDRAWN
 }
 
 model User {
@@ -61,6 +67,8 @@ model Project {
   startDate    DateTime
   endDate      DateTime
   githubRepo   String?
+  manualRisk   Risk?
+  status       ProjectStatus @default(ACTIVE)
   sprints      Sprint[]
   workItems    WorkItem[]
   checkIns     CheckIn[]
@@ -119,6 +127,7 @@ model CheckIn {
   nextTasks    String
   blockers     String?
   evidenceLink String?
+  mentorAction String?
   riskStatus   Risk      @default(GREEN)
   createdAt    DateTime  @default(now())
 }

@@ -3,6 +3,8 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import CreateProjectModal from "./CreateProjectModal";
+import EditProjectModal from "./EditProjectModal";
 
 export default async function MentorProjectsPage() {
   const session = await getServerSession(authOptions);
@@ -19,11 +21,19 @@ export default async function MentorProjectsPage() {
     orderBy: { startDate: 'desc' }
   });
 
+  const interns = await prisma.user.findMany({
+    where: { role: 'INTERN' },
+    select: { id: true, name: true, email: true }
+  });
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Quản lý Dự án Toàn cục</h2>
-        <p className="text-gray-500 mt-2">Tổng hợp tất cả dự án của các sinh viên đang thực tập.</p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Quản lý Dự án Toàn cục</h2>
+          <p className="text-gray-500 mt-2">Tổng hợp tất cả dự án của các sinh viên đang thực tập.</p>
+        </div>
+        <CreateProjectModal interns={interns} />
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -71,10 +81,11 @@ export default async function MentorProjectsPage() {
                         </div>
                         <div className="text-xs text-gray-500 mt-1">{doneItems}/{totalItems} tasks DONE</div>
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-4 text-right space-x-2 whitespace-nowrap">
                         <Link href={`/dashboard/${project.id}`} className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-bold bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg transition-colors">
                           Chi tiết
                         </Link>
+                        <EditProjectModal project={project} interns={interns} />
                       </td>
                     </tr>
                   )

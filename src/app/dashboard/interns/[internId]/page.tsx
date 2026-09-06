@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { calculateProjectRisk } from "@/lib/risk";
 
 export default async function InternDetailPage(props: { params: Promise<{ internId: string }> }) {
   const { internId } = await props.params;
@@ -22,7 +23,7 @@ export default async function InternDetailPage(props: { params: Promise<{ intern
             where: { startDate: { lte: new Date() }, endDate: { gte: new Date() } }
           },
           workItems: {
-            where: { status: { not: 'DONE' } }
+            select: { status: true }
           },
           checkIns: {
             orderBy: { createdAt: 'desc' },
@@ -54,7 +55,10 @@ export default async function InternDetailPage(props: { params: Promise<{ intern
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {intern.projects.map(project => (
+            {intern.projects.map(project => {
+              const pendingItemsCount = project.workItems.filter(wi => wi.status !== 'DONE').length;
+              const risk = calculateProjectRisk(project as any);
+              return (
               <div key={project.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div className="flex justify-between items-start mb-4">
                   <div>
@@ -75,7 +79,7 @@ export default async function InternDetailPage(props: { params: Promise<{ intern
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-500">Work Items tồn đọng:</span>
-                    <span className="font-semibold text-red-600">{project.workItems.length} tasks</span>
+                    <span className="font-semibold text-red-600">{pendingItemsCount} tasks</span>
                   </div>
                   
                   {project.checkIns.length > 0 && (
@@ -85,18 +89,19 @@ export default async function InternDetailPage(props: { params: Promise<{ intern
                       <div className="mt-2 flex items-center">
                         <span className="text-xs font-semibold text-gray-500 mr-2">Trạng thái rủi ro:</span>
                         <span className={`inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-full ${
-                          project.checkIns[0].riskStatus === 'RED' ? 'bg-red-100 text-red-700' :
-                          project.checkIns[0].riskStatus === 'YELLOW' ? 'bg-yellow-100 text-yellow-700' :
+                          risk === 'RED' ? 'bg-red-100 text-red-700' :
+                          risk === 'YELLOW' ? 'bg-yellow-100 text-yellow-700' :
                           'bg-green-100 text-green-700'
                         }`}>
-                          {project.checkIns[0].riskStatus}
+                          {risk}
                         </span>
                       </div>
                     </div>
                   )}
                 </div>
               </div>
-            ))}
+            );
+          })}
           </div>
         )}
       </div>

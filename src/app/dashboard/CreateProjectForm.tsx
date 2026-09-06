@@ -46,6 +46,12 @@ export default function CreateProjectForm({ interns }: { interns: { id: string, 
         <label className="block text-sm font-semibold text-gray-700 mb-1">Ngày kết thúc (10 tuần)</label>
         <input name="endDate" required type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full rounded-lg border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" />
       </div>
+      <div className="flex items-center space-x-2 pt-2">
+        <input type="checkbox" id="generateTimeline" name="generateTimeline" value="true" defaultChecked className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600" />
+        <label htmlFor="generateTimeline" className="text-sm font-medium text-gray-700">
+          Tự động tạo lộ trình chuẩn (10 tuần) cho Intern
+        </label>
+      </div>
       <button type="submit" className="w-full bg-blue-600 text-white font-bold rounded-lg py-2.5 hover:bg-blue-500 transition-colors mt-2">
         Tạo Dự án
       </button>

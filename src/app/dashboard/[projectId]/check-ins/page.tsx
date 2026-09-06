@@ -56,6 +56,27 @@ export default async function CheckInsPage(props: { params: Promise<{ projectId:
                       {ci.evidenceLink && (
                         <p><a href={ci.evidenceLink} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">Xem minh chứng &rarr;</a></p>
                       )}
+                      
+                      {session.user.role === 'MENTOR' ? (
+                        <form action={async (formData) => {
+                          "use server";
+                          const { updateCheckInMentorAction } = await import('@/app/actions');
+                          await updateCheckInMentorAction(ci.id, formData.get('mentorAction') as string, projectId);
+                        }} className="mt-3 pt-3 border-t border-gray-200">
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Mentor Action (Ghi chú / Hỗ trợ)</label>
+                          <textarea name="mentorAction" defaultValue={ci.mentorAction || ''} rows={2} className="w-full rounded-lg border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm bg-white" placeholder="Ghi chú phương án giải quyết blocker..."></textarea>
+                          <div className="flex justify-end mt-2">
+                            <button type="submit" className="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-md hover:bg-indigo-500 font-medium">Lưu ghi chú</button>
+                          </div>
+                        </form>
+                      ) : (
+                        ci.mentorAction && (
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                            <p className="text-xs font-semibold text-indigo-700 mb-1">Mentor Action</p>
+                            <p className="text-sm bg-indigo-50 p-2 rounded-lg text-indigo-900 whitespace-pre-wrap">{ci.mentorAction}</p>
+                          </div>
+                        )
+                      )}
                     </div>
                   </div>
                 ))

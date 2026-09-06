@@ -20,7 +20,8 @@ export default async function SprintsPlanningPage(props: { params: Promise<{ pro
         include: { 
           workItems: {
             include: { priority: true }
-          }
+          },
+          sprintReview: true
         },
         orderBy: { startDate: 'desc' }
       },
@@ -57,6 +58,7 @@ export default async function SprintsPlanningPage(props: { params: Promise<{ pro
               key={sprint.id}
               sprint={sprint}
               projectId={projectId}
+              projectTrack={project.track}
               isIntern={session.user.role === 'INTERN'}
               unassignedWorkItems={project.workItems}
               priorityLevels={project.priorityLevels}
