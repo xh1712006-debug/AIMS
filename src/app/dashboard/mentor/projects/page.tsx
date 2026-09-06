@@ -73,7 +73,7 @@ export default async function MentorProjectsPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Link href={`/dashboard/${project.id}`} className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-bold bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg transition-colors">
-                          Vào Không Gian
+                          Chi tiết
                         </Link>
                       </td>
                     </tr>

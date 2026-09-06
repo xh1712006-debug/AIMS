@@ -35,11 +35,6 @@ enum Status {
   BLOCKED
 }
 
-enum Priority {
-  MUST
-  SHOULD
-  COULD
-}
 
 enum Risk {
   GREEN
@@ -69,6 +64,17 @@ model Project {
   sprints      Sprint[]
   workItems    WorkItem[]
   checkIns     CheckIn[]
+  priorityLevels PriorityLevel[]
+}
+
+model PriorityLevel {
+  id        String     @id @default(cuid())
+  projectId String
+  project   Project    @relation(fields: [projectId], references: [id])
+  name      String
+  level     Int
+  color     String?
+  workItems WorkItem[]
 }
 
 model Sprint {
@@ -95,7 +101,8 @@ model WorkItem {
   description  String?
   type           ItemType
   status         Status      @default(TODO)
-  priority       Priority
+  priorityId     String?
+  priority       PriorityLevel? @relation(fields: [priorityId], references: [id])
   estimate       Int?
   evidenceLink   String?
   mentorFeedback String?

@@ -1,0 +1,106 @@
+'use client';
+
+import { useState } from 'react';
+import { createPriorityLevel, updatePriorityLevel, deletePriorityLevel } from '@/app/actions';
+
+export default function PrioritySettings({ projectId, initialPriorities }: { projectId: string, initialPriorities: any[] }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const handleCreate = async (formData: FormData) => {
+    setIsSubmitting(true);
+    await createPriorityLevel(formData);
+    setIsSubmitting(false);
+    (document.getElementById('create-priority-form') as HTMLFormElement)?.reset();
+  };
+
+  const handleUpdate = async (formData: FormData) => {
+    setIsSubmitting(true);
+    await updatePriorityLevel(formData);
+    setIsSubmitting(false);
+    setEditingId(null);
+  };
+
+  const handleDelete = async (formData: FormData) => {
+    if (!confirm('Bạn có chắc chắn muốn xóa cấp độ ưu tiên này? Các công việc đang dùng cấp độ này sẽ bị mất thông tin ưu tiên.')) return;
+    setIsSubmitting(true);
+    await deletePriorityLevel(formData);
+    setIsSubmitting(false);
+  };
+
+  return (
+    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-2xl mt-8">
+      <h3 className="text-xl font-bold mb-2 text-gray-900">Quản lý Mức độ Ưu tiên</h3>
+      <p className="text-sm text-gray-500 mb-6">Thêm, sửa, xóa các cấp độ ưu tiên (Ví dụ: Cấp 1, Khẩn cấp, Must Have...).</p>
+      
+      <div className="space-y-4 mb-8">
+        {initialPriorities.map(p => (
+          <div key={p.id} className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+            {editingId === p.id ? (
+              <form action={handleUpdate} className="flex gap-2 items-end">
+                <input type="hidden" name="id" value={p.id} />
+                <input type="hidden" name="projectId" value={projectId} />
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Tên cấp độ</label>
+                  <input name="name" defaultValue={p.name} required className="w-full rounded border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 p-1.5 text-sm" />
+                </div>
+                <div className="w-20">
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Trọng số</label>
+                  <input name="level" type="number" defaultValue={p.level} required className="w-full rounded border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 p-1.5 text-sm" />
+                </div>
+                <div className="w-24">
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Màu (Mã HEX)</label>
+                  <input name="color" defaultValue={p.color || ''} placeholder="#ff0000" className="w-full rounded border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 p-1.5 text-sm font-mono" />
+                </div>
+                <div className="flex gap-2">
+                  <button type="submit" disabled={isSubmitting} className="p-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200">Lưu</button>
+                  <button type="button" onClick={() => setEditingId(null)} className="p-1.5 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Hủy</button>
+                </div>
+              </form>
+            ) : (
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <span className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-200 text-xs font-bold text-gray-600">{p.level}</span>
+                  <span className="font-bold text-gray-900" style={{ color: p.color || 'inherit' }}>{p.name}</span>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => setEditingId(p.id)} className="text-blue-600 hover:underline text-sm font-semibold">Sửa</button>
+                  <form action={handleDelete}>
+                    <input type="hidden" name="id" value={p.id} />
+                    <input type="hidden" name="projectId" value={projectId} />
+                    <button type="submit" disabled={isSubmitting} className="text-red-600 hover:underline text-sm font-semibold">Xóa</button>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+        {initialPriorities.length === 0 && (
+          <p className="text-gray-500 italic text-sm text-center py-4">Chưa có cấp độ ưu tiên nào. Bạn hãy tạo mới ở bên dưới.</p>
+        )}
+      </div>
+
+      <div className="pt-6 border-t border-gray-100">
+        <h4 className="text-sm font-bold text-gray-900 mb-3">Tạo cấp độ mới</h4>
+        <form id="create-priority-form" action={handleCreate} className="flex gap-2 items-end">
+          <input type="hidden" name="projectId" value={projectId} />
+          <div className="flex-1">
+            <label className="block text-xs font-semibold text-gray-700 mb-1">Tên cấp độ</label>
+            <input name="name" required placeholder="VD: Khẩn cấp, Cấp 1..." className="w-full rounded border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 p-2 text-sm" />
+          </div>
+          <div className="w-24">
+            <label className="block text-xs font-semibold text-gray-700 mb-1">Trọng số (Số)</label>
+            <input name="level" type="number" required placeholder="1, 2, 3" className="w-full rounded border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 p-2 text-sm" />
+          </div>
+          <div className="w-28">
+            <label className="block text-xs font-semibold text-gray-700 mb-1">Màu (Tùy chọn)</label>
+            <input name="color" placeholder="#ef4444" className="w-full rounded border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 p-2 text-sm font-mono" />
+          </div>
+          <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white font-bold rounded px-4 py-2 hover:bg-blue-700 transition-colors">
+            Thêm
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}

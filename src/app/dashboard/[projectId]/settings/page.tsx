@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { saveSettings } from "@/app/actions";
+import PrioritySettings from "./PrioritySettings";
 
 export default async function SettingsPage(props: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await props.params;
@@ -14,7 +15,10 @@ export default async function SettingsPage(props: { params: Promise<{ projectId:
   });
   
   const project = await prisma.project.findUnique({
-    where: { id: projectId, internId: session.user.id }
+    where: { id: projectId, internId: session.user.id },
+    include: {
+      priorityLevels: { orderBy: { level: 'asc' } }
+    }
   });
 
   const githubToken = user?.githubToken || "";
@@ -57,6 +61,8 @@ export default async function SettingsPage(props: { params: Promise<{ projectId:
           </button>
         </form>
       </div>
+
+      <PrioritySettings projectId={projectId} initialPriorities={project?.priorityLevels || []} />
     </div>
   );
 }

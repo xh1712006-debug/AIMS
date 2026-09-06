@@ -14,7 +14,8 @@ export default async function MentorProgressPage() {
     include: {
       intern: true,
       workItems: {
-        orderBy: { updatedAt: 'desc' }
+        orderBy: { updatedAt: 'desc' },
+        include: { priority: true }
       }
     },
     orderBy: { startDate: 'desc' }
@@ -65,10 +66,18 @@ export default async function MentorProgressPage() {
                           </div>
                           <div className="flex items-center gap-2 mt-2">
                             <span className="text-xs text-gray-500 font-semibold">{item.type}</span>
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
-                              item.priority === 'MUST' ? 'bg-red-100 text-red-700' :
-                              item.priority === 'SHOULD' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
-                            }`}>{item.priority}</span>
+                            {item.priority && (
+                              <span 
+                                className="px-1.5 py-0.5 text-[10px] rounded font-bold border opacity-90"
+                                style={{ 
+                                  backgroundColor: item.priority.color ? `${item.priority.color}20` : '#f3f4f6', 
+                                  color: item.priority.color || '#374151',
+                                  borderColor: item.priority.color ? `${item.priority.color}40` : '#e5e7eb'
+                                }}
+                              >
+                                {item.priority.name}
+                              </span>
+                            )}
                           </div>
                         </div>
                       ))
