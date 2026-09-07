@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
+import { updateWorkItemOrder } from '@/app/actions';
 import SprintActionsMenu from "./SprintActionsMenu";
 import QuickAddWorkItem from "./QuickAddWorkItem";
 import WorkItemRow from "./WorkItemRow";
@@ -23,6 +24,25 @@ export default function SprintAccordion({
   priorityLevels: any[];
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const handleDropToSprint = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('bg-blue-50');
+    const data = e.dataTransfer.getData('application/json');
+    if (data) {
+      const { id } = JSON.parse(data);
+      // Nếu thả vào sprint này, cho order là lớn nhất (nằm cuối)
+      const newOrder = sprint.workItems.length;
+      startTransition(() => {
+        updateWorkItemOrder(id, newOrder, sprint.id, projectId);
+      });
+    }
+  };
+
+  const totalTasks = sprint.workItems.length;
+  const doneTasks = sprint.workItems.filter((i: any) => i.status === 'DONE').length;
+  const progressPercent = totalTasks === 0 ? 0 : Math.round((doneTasks / totalTasks) * 100);
 
   // Lấy guideline (Definition of Done) cho Sprint hiện tại dựa trên số thứ tự Sprint hoặc tên
   // Tạm thời lấy bằng cách tìm kiếm "Sprint 1", "Sprint 2" trong tên. Mặc định là Sprint 1 nếu không thấy.
@@ -38,9 +58,16 @@ export default function SprintAccordion({
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-200">
       <div 
-        className={`flex justify-between items-center p-6 cursor-pointer hover:bg-gray-50 transition-colors ${isOpen ? 'border-b border-gray-100 pb-4' : ''}`}
+        className={`relative flex justify-between items-center p-6 cursor-pointer hover:bg-gray-50 transition-colors ${isOpen ? 'border-b border-gray-100 pb-4' : ''} ${isPending ? 'opacity-50' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
+        onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('bg-blue-50'); }}
+        onDragLeave={(e) => { e.currentTarget.classList.remove('bg-blue-50'); }}
+        onDrop={handleDropToSprint}
       >
+        <div 
+          className="absolute bottom-0 left-0 h-1 bg-blue-500 transition-all duration-500" 
+          style={{ width: `${progressPercent}%` }}
+        />
         <div className="flex items-center gap-3">
           <button 
             className={`p-1 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-all ${isOpen ? 'rotate-90' : ''}`}

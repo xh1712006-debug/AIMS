@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import EditWorkItemModal from './EditWorkItemModal';
-import { removeWorkItemFromSprint } from '@/app/actions';
+import { removeWorkItemFromSprint, updateWorkItemOrder } from '@/app/actions';
 
 export default function WorkItemRow({ 
   item, 
@@ -16,6 +16,25 @@ export default function WorkItemRow({
 }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData('application/json', JSON.stringify({ id: item.id, sprintId: item.sprintId, order: item.order }));
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50');
+    const data = e.dataTransfer.getData('application/json');
+    if (data) {
+      const draggedItem = JSON.parse(data);
+      if (draggedItem.id !== item.id) {
+        startTransition(() => {
+          updateWorkItemOrder(draggedItem.id, item.order, item.sprintId, projectId);
+        });
+      }
+    }
+  };
 
   const handleDelete = async () => {
     if (!confirm('Bạn có chắc muốn đưa công việc này ra khỏi Sprint hiện tại (trở lại Backlog)?')) return;
@@ -44,10 +63,21 @@ export default function WorkItemRow({
 
   return (
     <>
-      <div className={`group flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-all rounded-xl border border-transparent hover:border-gray-200 hover:shadow-sm ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
-        <div className="flex-1 min-w-0 pr-4">
-          <p className="font-bold text-gray-900 text-sm truncate">{item.title}</p>
-          <div className="flex items-center gap-2 mt-1.5">
+      <div 
+        draggable
+        onDragStart={handleDragStart}
+        onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-blue-400', 'bg-blue-50'); }}
+        onDragLeave={(e) => { e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50'); }}
+        onDrop={handleDrop}
+        className={`group flex items-center justify-between p-3 bg-white hover:bg-gray-50 transition-all rounded-xl border hover:border-gray-300 shadow-sm cursor-grab active:cursor-grabbing ${isDeleting || isPending ? 'opacity-50 pointer-events-none' : 'border-gray-100'}`}
+      >
+        <div className="flex-1 min-w-0 pr-4 flex items-start gap-3">
+          <div className="mt-0.5 text-gray-300 cursor-grab active:cursor-grabbing hover:text-gray-500">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+          </div>
+          <div>
+            <p className="font-bold text-gray-900 text-sm truncate">{item.title}</p>
+            <div className="flex items-center gap-2 mt-1.5">
             <span className={`px-2 py-0.5 text-[11px] rounded-md font-bold border ${getTypeColor(item.type)}`}>
               {item.type}
             </span>

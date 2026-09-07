@@ -725,3 +725,19 @@ export async function updateWorkItemStatus(id: string, newStatus: string, projec
   revalidatePath(`/dashboard/${projectId}/work-items`);
   revalidatePath(`/dashboard/${projectId}/sprints`);
 }
+
+export async function updateWorkItemOrder(id: string, newOrder: number, sprintId: string | null, projectId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  await prisma.workItem.update({
+    where: { id },
+    data: { 
+      order: newOrder,
+      sprintId: sprintId // Cho phép kéo thả chuyển sprint hoặc đưa về backlog
+    }
+  });
+
+  revalidatePath(`/dashboard/${projectId}/sprints`);
+  revalidatePath(`/dashboard/${projectId}/work-items`);
+}

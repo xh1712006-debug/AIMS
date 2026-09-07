@@ -111,6 +111,7 @@ model WorkItem {
   status         Status      @default(TODO)
   priorityId     String?
   priority       PriorityLevel? @relation(fields: [priorityId], references: [id])
+  order          Int         @default(0)
   estimate       Int?
   evidenceLink   String?
   mentorFeedback String?

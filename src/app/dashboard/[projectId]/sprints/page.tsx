@@ -19,7 +19,8 @@ export default async function SprintsPlanningPage(props: { params: Promise<{ pro
       sprints: {
         include: { 
           workItems: {
-            include: { priority: true }
+            include: { priority: true },
+            orderBy: { order: 'asc' }
           },
           sprintReview: true
         },
@@ -27,7 +28,8 @@ export default async function SprintsPlanningPage(props: { params: Promise<{ pro
       },
       workItems: {
         where: { sprintId: null, type: { not: 'EPIC' } },
-        include: { priority: true }
+        include: { priority: true },
+        orderBy: { order: 'asc' }
       },
       priorityLevels: {
         orderBy: { level: 'asc' }
