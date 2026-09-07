@@ -49,7 +49,7 @@ export default async function CheckInsPage(props: { params: Promise<{ projectId:
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <h2 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">Daily Check-ins</h2>
+      <h2 className="text-3xl font-extrabold mb-8 tracking-tight" style={{ color: 'var(--text-primary)' }}>Daily Check-ins</h2>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className={session.user.role === 'INTERN' ? "lg:col-span-2" : "lg:col-span-3"}>

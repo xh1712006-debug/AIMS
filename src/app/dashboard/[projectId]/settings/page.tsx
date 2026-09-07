@@ -26,7 +26,7 @@ export default async function SettingsPage(props: { params: Promise<{ projectId:
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <h2 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">Cài đặt (Settings)</h2>
+      <h2 className="text-3xl font-extrabold mb-8 tracking-tight" style={{ color: 'var(--text-primary)' }}>Cài đặt (Settings)</h2>
       
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-2xl">
         <h3 className="text-xl font-bold mb-2 text-gray-900">Tích hợp GitHub</h3>

@@ -43,7 +43,7 @@ export default async function ProjectDetailPage(props: { params: Promise<{ proje
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Chi tiết dự án: {project.title}</h2>
+        <h2 className="text-3xl font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>Tổng quan Dự án</h2>
       </div>
 
       {/* TỔNG QUAN THỐNG KÊ (NEW) */}

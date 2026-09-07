@@ -35,7 +35,7 @@ export default async function SprintsPage(props: { params: Promise<{ projectId: 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-        <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Work Items - {project.title}</h2>
+        <h2 className="text-3xl font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>Roadmap & Backlog</h2>
         {session.user.role === 'INTERN' && (
           <CreateWorkItemForm projectId={projectId} epics={epics} priorityLevels={project.priorityLevels} />
         )}
