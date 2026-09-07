@@ -29,13 +29,13 @@ export default function PrioritySettings({ projectId, initialPriorities }: { pro
   };
 
   return (
-    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-2xl mt-8">
-      <h3 className="text-xl font-bold mb-2 text-gray-900">Quản lý Mức độ Ưu tiên</h3>
-      <p className="text-sm text-gray-500 mb-6">Thêm, sửa, xóa các cấp độ ưu tiên (Ví dụ: Cấp 1, Khẩn cấp, Must Have...).</p>
+    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-2xl mt-6">
+      <h3 className="text-base font-bold mb-1 text-gray-900">Quản lý Mức độ Ưu tiên</h3>
+      <p className="text-sm text-gray-500 mb-5">Thêm, sửa, xóa các cấp độ ưu tiên (Ví dụ: Cấp 1, Khẩn cấp, Must Have...).</p>
       
-      <div className="space-y-4 mb-8">
+      <div className="space-y-3 mb-6">
         {initialPriorities.map(p => (
-          <div key={p.id} className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <div key={p.id} className="p-3.5 bg-gray-50 rounded-xl border border-gray-200">
             {editingId === p.id ? (
               <form action={handleUpdate} className="flex gap-2 items-end">
                 <input type="hidden" name="id" value={p.id} />
@@ -80,8 +80,8 @@ export default function PrioritySettings({ projectId, initialPriorities }: { pro
         )}
       </div>
 
-      <div className="pt-6 border-t border-gray-100">
-        <h4 className="text-sm font-bold text-gray-900 mb-3">Tạo cấp độ mới</h4>
+      <div className="pt-5 border-t border-gray-100">
+        <h4 className="text-xs font-bold text-gray-900 mb-2.5 uppercase tracking-wider">Tạo cấp độ mới</h4>
         <form id="create-priority-form" action={handleCreate} className="flex gap-2 items-end">
           <input type="hidden" name="projectId" value={projectId} />
           <div className="flex-1">
