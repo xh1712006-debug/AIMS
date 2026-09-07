@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Register font variable for Tailwind v4 */
+@theme {
+  --font-sans: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
+}
+
 /* ============================================
    AIMS - Design Token System
    Font: Inter (Google Fonts)
@@ -76,6 +81,7 @@ html {
 }
 
 body {
+  font-family: var(--font-inter, 'Inter', system-ui, -apple-system, sans-serif);
   background-color: var(--bg-base);
   color: var(--text-primary);
   transition: background-color 0.2s ease, color 0.2s ease;
