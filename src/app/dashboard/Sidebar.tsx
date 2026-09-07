@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -68,12 +68,12 @@ export default function Sidebar({ user, projects = [] }: { user: { name: string,
       <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
         {user.role === 'INTERN' ? (
           <>
-            {navLink('/dashboard', 'Báº£ng Äiá»u Khiá»ƒn (Dashboard)', true)}
+            {navLink('/dashboard', 'Bảng Điều Khiển (Dashboard)', true)}
 
             {projects.length > 0 && (
               <div className="pt-4 mt-2" style={{ borderTop: '1px solid var(--border-color)' }}>
                 <p className="px-3 text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-                  KhÃ´ng gian lÃ m viá»‡c
+                  Không gian làm việc
                 </p>
                 {projects.map((project) => {
                   const isActive = projectId === project.id;
@@ -87,17 +87,17 @@ export default function Sidebar({ user, projects = [] }: { user: { name: string,
                           color: isActive ? 'var(--sidebar-active-text)' : 'var(--text-primary)',
                         }}
                       >
-                        <span>{isActive ? 'ðŸ“‚' : 'ðŸ“'}</span>
+                        <span>{isActive ? '📂' : '📁'}</span>
                         <span className="truncate">{project.title}</span>
                       </Link>
 
                       {isActive && (
                         <div className="ml-4 pl-3 mt-0.5 space-y-0.5" style={{ borderLeft: '2px solid var(--border-color)' }}>
-                          {subNavLink(`/dashboard/${project.id}`, 'Tá»•ng quan Dá»± Ã¡n')}
+                          {subNavLink(`/dashboard/${project.id}`, 'Tổng quan Dự án')}
                           {subNavLink(`/dashboard/${project.id}/work-items`, 'Roadmap & Backlog')}
-                          {subNavLink(`/dashboard/${project.id}/sprints`, 'Káº¿ hoáº¡ch Sprint')}
-                          {subNavLink(`/dashboard/${project.id}/check-ins`, 'BÃ¡o cÃ¡o Tiáº¿n Ä‘á»™ (Standup)')}
-                          {subNavLink(`/dashboard/${project.id}/settings`, 'TÃ­ch há»£p GitHub')}
+                          {subNavLink(`/dashboard/${project.id}/sprints`, 'Kế hoạch Sprint')}
+                          {subNavLink(`/dashboard/${project.id}/check-ins`, 'Báo cáo Tiến độ (Standup)')}
+                          {subNavLink(`/dashboard/${project.id}/settings`, 'Tích hợp GitHub')}
                         </div>
                       )}
                     </div>
@@ -108,22 +108,22 @@ export default function Sidebar({ user, projects = [] }: { user: { name: string,
           </>
         ) : (
           <>
-            {navLink('/dashboard', 'Trung tÃ¢m Quáº£n lÃ½ (Command Center)', true)}
+            {navLink('/dashboard', 'Trung tâm Quản lý (Command Center)', true)}
 
             <div className="pt-4 mt-2" style={{ borderTop: '1px solid var(--border-color)' }}>
               <p className="px-3 text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-                CÃ´ng cá»¥ Quáº£n lÃ½
+                Công cụ Quản lý
               </p>
-              {navLink('/dashboard/mentor/projects', 'Danh má»¥c Dá»± Ã¡n (Portfolios)')}
-              {navLink('/dashboard/mentor/progress', 'Kiá»ƒm soÃ¡t Tiáº¿n Ä‘á»™ (Progress Tracker)')}
-              {navLink('/dashboard/mentor/feedbacks', 'Cháº¥t lÆ°á»£ng & Pháº£n há»“i (QA)')}
-              {navLink('/dashboard/interns', 'Quáº£n lÃ½ Thá»±c táº­p sinh (Members)')}
+              {navLink('/dashboard/mentor/projects', 'Danh mục Dự án (Portfolios)')}
+              {navLink('/dashboard/mentor/progress', 'Kiểm soát Tiến độ (Progress Tracker)')}
+              {navLink('/dashboard/mentor/feedbacks', 'Chất lượng & Phản hồi (QA)')}
+              {navLink('/dashboard/interns', 'Quản lý Thực tập sinh (Members)')}
             </div>
           </>
         )}
       </nav>
 
-      {/* Footer â€” User info + ThemeToggle + Logout */}
+      {/* Footer — User info + ThemeToggle + Logout */}
       <div className="p-3 flex-shrink-0 space-y-2" style={{ borderTop: '1px solid var(--border-color)' }}>
         <ThemeToggle />
         <div className="px-3 py-2 rounded-lg" style={{ backgroundColor: 'var(--bg-muted)' }}>
