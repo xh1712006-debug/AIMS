@@ -15,8 +15,10 @@ export default function SprintReviewSection({
 }) {
   if (!isMentor && !review) {
     return (
-      <div className="mt-4 p-4 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-center">
-        <p className="text-sm font-medium text-gray-500 italic">⏳ Đang chờ Mentor nghiệm thu Sprint này...</p>
+      <div className="mt-2 flex justify-end px-2">
+        <span className="text-xs font-medium text-gray-400 italic flex items-center gap-1">
+          <span>⏳</span> Đang chờ Mentor nghiệm thu Sprint này...
+        </span>
       </div>
     );
   }

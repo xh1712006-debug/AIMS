@@ -76,25 +76,21 @@ export default function QuickAddWorkItem({
 
   return (
     <div className="relative mt-3 group" ref={wrapperRef}>
-      <form 
-        ref={formRef} 
-        action={handleCreateNew} 
-        className="flex items-center gap-2 p-2 bg-gray-50 border border-dashed border-gray-300 rounded-xl hover:border-blue-400 focus-within:border-blue-500 focus-within:bg-white focus-within:shadow-sm transition-all"
-      >
+      <form ref={formRef} action={handleCreateNew} className="relative flex items-center gap-2 py-1 px-1 group border-b border-transparent hover:border-gray-200 focus-within:border-blue-500 transition-colors">
         <input type="hidden" name="projectId" value={projectId} />
         <input type="hidden" name="sprintId" value={sprintId} />
         
-        <div className="flex-1 flex items-center relative">
-          <svg className="w-4 h-4 text-gray-400 mr-2 group-focus-within:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          <input 
-            type="text" 
-            name="title" 
-            required 
+        <span className="text-gray-300 group-focus-within:text-blue-500 ml-1">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+        </span>
+        <div className="flex-1">
+          <input
+            type="text"
+            name="title"
+            required
             autoComplete="off"
             placeholder="Thêm công việc mới vào Sprint (nhấn Enter để lưu)..."
-            className="w-full bg-transparent border-none text-sm focus:ring-0 text-gray-900 placeholder:text-gray-400 p-1"
+            className="w-full bg-transparent text-sm border-none focus:ring-0 text-gray-900 placeholder:text-gray-400 p-1"
             value={inputValue}
             onChange={(e) => {
               setInputValue(e.target.value);
@@ -105,21 +101,21 @@ export default function QuickAddWorkItem({
           />
         </div>
         
-        <div className="flex items-center gap-2 opacity-70 group-focus-within:opacity-100 transition-opacity">
-          <select name="type" className="text-xs font-medium bg-white border border-gray-200 rounded p-1 text-gray-700 cursor-pointer hover:border-gray-300 focus:ring-1 focus:ring-blue-500" disabled={isSubmitting}>
+        <div className="flex items-center gap-2 opacity-0 group-focus-within:opacity-100 transition-opacity">
+          <select name="type" className="text-xs font-medium bg-transparent border-none focus:ring-0 text-gray-500 cursor-pointer p-0" disabled={isSubmitting}>
             <option value="TASK">Task</option>
             <option value="STORY">Story</option>
             <option value="FEATURE">Feature</option>
             <option value="BUG">Bug</option>
           </select>
           
-          <select name="priorityId" className="text-xs font-medium bg-white border border-gray-200 rounded p-1 text-gray-700 cursor-pointer hover:border-gray-300 focus:ring-1 focus:ring-blue-500" disabled={isSubmitting}>
+          <select name="priorityId" className="text-xs font-medium bg-transparent border-none focus:ring-0 text-gray-500 cursor-pointer p-0" disabled={isSubmitting}>
             {priorityLevels?.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
 
-          <button type="submit" disabled={isSubmitting || !inputValue.trim()} className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 disabled:opacity-50 transition-colors">
+          <button type="submit" disabled={isSubmitting || !inputValue.trim()} className="p-1.5 text-blue-600 rounded-lg hover:bg-blue-50 disabled:opacity-50 transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
           </button>
         </div>

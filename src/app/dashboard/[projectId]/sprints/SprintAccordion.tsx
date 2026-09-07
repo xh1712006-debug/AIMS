@@ -82,11 +82,11 @@ export default function SprintAccordion({
           <div className="p-6 pt-2 space-y-4 bg-gray-50/50">
             {/* Definition of Done Banner */}
             {currentGuide && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm flex gap-3 shadow-sm mb-4">
-                <span className="text-amber-500 mt-0.5">💡</span>
-                <div>
-                  <h4 className="font-bold text-amber-900">Chuẩn đầu ra (Definition of Done) - {currentGuide.name}</h4>
-                  <p className="text-amber-800 mt-0.5">{currentGuide.dod}</p>
+              <div className="flex items-start gap-2 mb-3 px-2">
+                <span className="text-amber-500 text-xs mt-0.5">💡</span>
+                <div className="text-xs">
+                  <span className="font-bold text-gray-700">Chuẩn đầu ra ({currentGuide.name}): </span>
+                  <span className="text-gray-600">{currentGuide.dod}</span>
                 </div>
               </div>
             )}
@@ -105,7 +105,7 @@ export default function SprintAccordion({
             )}
             
             {isIntern && (
-              <div className="mt-4">
+              <div className="mt-1 border-t border-gray-100 pt-1">
                 <QuickAddWorkItem 
                   sprintId={sprint.id} 
                   projectId={projectId} 
