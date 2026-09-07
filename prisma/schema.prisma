@@ -117,6 +117,9 @@ model WorkItem {
   requiresFix    Boolean     @default(false)
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
+  startedAt      DateTime?
+  completedAt    DateTime?
+  dueDate        DateTime?
 }
 
 model CheckIn {

@@ -25,12 +25,12 @@ export default function Sidebar({ user, projects = [] }: { user: { name: string,
         {user.role === 'INTERN' ? (
           <>
             <Link href="/dashboard" className={`block px-4 py-2 text-sm font-medium rounded-lg transition-colors ${pathname === '/dashboard' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`}>
-              Tổng quan (Trang chủ)
+              Bảng Điều Khiển (Dashboard)
             </Link>
             
             {projects.length > 0 && (
               <div className="pt-4 mt-4 border-t border-gray-100">
-                <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Dự án của tôi</p>
+                <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Không gian làm việc</p>
                 {projects.map((project) => {
                   const isActive = projectId === project.id;
                   return (
@@ -51,31 +51,31 @@ export default function Sidebar({ user, projects = [] }: { user: { name: string,
                             href={`/dashboard/${project.id}`} 
                             className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname === `/dashboard/${project.id}` ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
                           >
-                            Chi tiết Dự án
+                            Tổng quan Dự án
                           </Link>
                           <Link 
                             href={`/dashboard/${project.id}/work-items`} 
                             className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname.includes(`/dashboard/${project.id}/work-items`) ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
                           >
-                            Work Items (Backlog)
+                            Roadmap & Backlog
                           </Link>
                           <Link 
                             href={`/dashboard/${project.id}/sprints`} 
                             className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname.includes(`/dashboard/${project.id}/sprints`) ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
                           >
-                            Sprint Planning
+                            Kế hoạch Sprint
                           </Link>
                           <Link 
                             href={`/dashboard/${project.id}/check-ins`} 
                             className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname.includes(`/dashboard/${project.id}/check-ins`) ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
                           >
-                            Báo cáo hằng ngày
+                            Báo cáo Tiến độ (Standup)
                           </Link>
                           <Link 
                             href={`/dashboard/${project.id}/settings`} 
                             className={`block px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${pathname.includes(`/dashboard/${project.id}/settings`) ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
                           >
-                            Cài đặt GitHub
+                            Tích hợp GitHub
                           </Link>
                         </div>
                       )}
@@ -88,25 +88,24 @@ export default function Sidebar({ user, projects = [] }: { user: { name: string,
         ) : (
           <>
             <Link href="/dashboard" className={`block px-4 py-2 text-sm font-medium rounded-lg transition-colors ${pathname === '/dashboard' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`}>
-              Bảng điều khiển Mentor
+              Trung tâm Quản lý (Command Center)
             </Link>
 
             <div className="pt-4 mt-4 border-t border-gray-100">
-              <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Công cụ Mentor</p>
+              <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Công cụ Quản lý</p>
               <Link href="/dashboard/mentor/projects" className={`block px-4 py-2 text-sm font-medium rounded-lg transition-colors ${pathname.includes('/mentor/projects') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`}>
-                Quản lý Dự án
+                Danh mục Dự án (Portfolios)
               </Link>
               <Link href="/dashboard/mentor/progress" className={`block px-4 py-2 text-sm font-medium rounded-lg transition-colors ${pathname.includes('/mentor/progress') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`}>
-                Quản lý Tiến độ
+                Kiểm soát Tiến độ (Progress Tracker)
               </Link>
               <Link href="/dashboard/mentor/feedbacks" className={`block px-4 py-2 text-sm font-medium rounded-lg transition-colors ${pathname.includes('/mentor/feedbacks') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`}>
-                Phản hồi & Khắc phục
+                Chất lượng & Phản hồi (QA)
               </Link>
               <Link href="/dashboard/interns" className={`block px-4 py-2 text-sm font-medium rounded-lg transition-colors ${pathname === '/dashboard/interns' || pathname.match(/\/dashboard\/interns\/.+/) ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`}>
-                Quản lý Interns
+                Quản lý Thực tập sinh (Members)
               </Link>
             </div>
-
           </>
         )}
       </nav>

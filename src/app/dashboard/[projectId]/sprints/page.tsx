@@ -26,7 +26,7 @@ export default async function SprintsPlanningPage(props: { params: Promise<{ pro
         orderBy: { startDate: 'desc' }
       },
       workItems: {
-        where: { sprintId: null },
+        where: { sprintId: null, type: { not: 'EPIC' } },
         include: { priority: true }
       },
       priorityLevels: {

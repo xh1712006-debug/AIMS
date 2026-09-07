@@ -8,9 +8,9 @@ export default function ProjectTabs({ projectId, userRole }: { projectId: string
 
   const tabs = [
     { name: 'Tổng quan Dự án', href: `/dashboard/${projectId}` },
-    { name: 'Work Items (Backlog)', href: `/dashboard/${projectId}/work-items` },
-    { name: 'Sprint Planning', href: `/dashboard/${projectId}/sprints` },
-    { name: 'Báo cáo hằng ngày', href: `/dashboard/${projectId}/check-ins` },
+    { name: 'Roadmap & Backlog', href: `/dashboard/${projectId}/work-items` },
+    { name: 'Kế hoạch Sprint', href: `/dashboard/${projectId}/sprints` },
+    { name: 'Báo cáo Tiến độ (Standup)', href: `/dashboard/${projectId}/check-ins` },
   ];
 
   return (

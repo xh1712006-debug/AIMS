@@ -23,6 +23,30 @@ export default async function CheckInsPage(props: { params: Promise<{ projectId:
     orderBy: { createdAt: 'desc' },
   });
 
+  // Auto-fill logic
+  let defaultDone = "";
+  let defaultNext = "";
+  let defaultBlockers = "";
+
+  if (session.user.role === 'INTERN') {
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+    const doneItems = await prisma.workItem.findMany({
+      where: { projectId, type: { not: 'EPIC' }, status: 'DONE', updatedAt: { gte: twoDaysAgo } }
+    });
+    const activeItems = await prisma.workItem.findMany({
+      where: { projectId, type: { not: 'EPIC' }, status: { in: ['IN_PROGRESS', 'REVIEW'] } }
+    });
+    const blockedItems = await prisma.workItem.findMany({
+      where: { projectId, type: { not: 'EPIC' }, status: 'BLOCKED' }
+    });
+
+    defaultDone = doneItems.map(i => `- [Hoàn thành] ${i.title}`).join('\n');
+    defaultNext = activeItems.map(i => `- [Tiếp tục] ${i.title}`).join('\n');
+    defaultBlockers = blockedItems.map(i => `- [Bị chặn] ${i.title}`).join('\n');
+  }
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <h2 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">Daily Check-ins</h2>
@@ -93,15 +117,15 @@ export default async function CheckInsPage(props: { params: Promise<{ projectId:
                 <input type="hidden" name="projectId" value={projectId} />
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Đã làm gì (DONE)</label>
-                  <textarea name="doneTasks" required rows={3} className="w-full rounded-lg border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" placeholder="Mô tả công việc đã hoàn thành..."></textarea>
+                  <textarea name="doneTasks" required rows={3} defaultValue={defaultDone} className="w-full rounded-lg border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" placeholder="Mô tả công việc đã hoàn thành..."></textarea>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Sẽ làm gì (NEXT)</label>
-                  <textarea name="nextTasks" required rows={3} className="w-full rounded-lg border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" placeholder="Kế hoạch công việc tiếp theo..."></textarea>
+                  <textarea name="nextTasks" required rows={3} defaultValue={defaultNext} className="w-full rounded-lg border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" placeholder="Kế hoạch công việc tiếp theo..."></textarea>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Khó khăn (BLOCKERS)</label>
-                  <textarea name="blockers" rows={2} className="w-full rounded-lg border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" placeholder="Có gặp khó khăn gì không? (Ghi vào đây sẽ bị đánh dấu Vàng)"></textarea>
+                  <textarea name="blockers" rows={2} defaultValue={defaultBlockers} className="w-full rounded-lg border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" placeholder="Có gặp khó khăn gì không? (Ghi vào đây sẽ bị đánh dấu Vàng)"></textarea>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Link minh chứng (GitHub/Docs)</label>

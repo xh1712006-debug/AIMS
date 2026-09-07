@@ -123,6 +123,17 @@ export default function CreateWorkItemForm({ projectId, epics, priorityLevels = 
                   </select>
                 </div>
 
+                {type === 'EPIC' && (
+                  <div className="animate-in fade-in duration-300">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Hạn chót (Due Date)</label>
+                    <input 
+                      name="dueDate" 
+                      type="date" 
+                      className="w-full rounded-lg border-gray-300 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" 
+                    />
+                  </div>
+                )}
+
                 <div className="pt-4 border-t border-gray-100 flex gap-3 justify-end">
                   <button 
                     type="button" 

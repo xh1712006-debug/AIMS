@@ -102,6 +102,7 @@ export async function createWorkItem(formData: FormData) {
   const priorityId = formData.get('priorityId') as string;
   const parentId = formData.get('parentId') as string || null;
   const sprintId = formData.get('sprintId') as string || null;
+  const dueDate = formData.get('dueDate') as string || null;
 
   const projectId = formData.get('projectId') as string;
   if (!projectId) throw new Error("Project ID is required");
@@ -121,6 +122,7 @@ export async function createWorkItem(formData: FormData) {
       status: 'TODO',
       parentId: parentId && parentId !== "" ? parentId : null,
       sprintId: sprintId && sprintId !== "" ? sprintId : null,
+      dueDate: dueDate ? new Date(dueDate) : null,
     }
   });
 
@@ -149,6 +151,8 @@ export async function updateWorkItem(formData: FormData) {
   });
   if (!project || project.internId !== session.user.id) throw new Error("Unauthorized");
 
+  const dueDate = formData.get('dueDate') as string || null;
+
   await prisma.workItem.update({
     where: { id },
     data: {
@@ -158,6 +162,7 @@ export async function updateWorkItem(formData: FormData) {
       status: status ? (status as any) : undefined,
       sprintId: sprintId && sprintId !== "" ? sprintId : null,
       parentId: parentId && parentId !== "" ? parentId : null,
+      dueDate: dueDate ? new Date(dueDate) : null,
     }
   });
 
@@ -652,5 +657,71 @@ export async function saveSprintReview(formData: FormData) {
     update: data,
   });
 
+  revalidatePath(`/dashboard/${projectId}/sprints`);
+}
+
+export async function updateWorkItemStatus(id: string, newStatus: string, projectId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const project = await prisma.project.findUnique({ where: { id: projectId } });
+  if (!project) throw new Error("Unauthorized");
+
+  const workItem = await prisma.workItem.findUnique({ where: { id } });
+  if (!workItem) throw new Error("WorkItem not found");
+
+  const updateData: any = { status: newStatus };
+
+  if (newStatus === 'IN_PROGRESS' && !workItem.startedAt) {
+    updateData.startedAt = new Date();
+  }
+
+  if (newStatus === 'DONE') {
+    updateData.completedAt = new Date();
+  } else if (workItem.status === 'DONE' && newStatus !== 'DONE') {
+    updateData.completedAt = null;
+  }
+
+  await prisma.workItem.update({
+    where: { id },
+    data: updateData
+  });
+
+  // Auto-update Epic status if this is a child item
+  if (workItem.parentId) {
+    const parentId = workItem.parentId;
+    const allSiblings = await prisma.workItem.findMany({
+      where: { parentId }
+    });
+    const parentEpic = await prisma.workItem.findUnique({ where: { id: parentId } });
+    
+    if (parentEpic && parentEpic.type === 'EPIC' && allSiblings.length > 0) {
+      const allDone = allSiblings.every(s => s.status === 'DONE');
+      const allTodo = allSiblings.every(s => s.status === 'TODO');
+      
+      let newParentStatus = parentEpic.status;
+      if (allDone) {
+        newParentStatus = 'DONE';
+      } else if (allTodo) {
+        newParentStatus = 'TODO';
+      } else {
+        newParentStatus = 'IN_PROGRESS';
+      }
+
+      if (newParentStatus !== parentEpic.status) {
+        const updateEpicData: any = { status: newParentStatus };
+        if (newParentStatus === 'IN_PROGRESS' && !parentEpic.startedAt) updateEpicData.startedAt = new Date();
+        if (newParentStatus === 'DONE') updateEpicData.completedAt = new Date();
+        else if (parentEpic.status === 'DONE' && newParentStatus !== 'DONE') updateEpicData.completedAt = null;
+
+        await prisma.workItem.update({
+          where: { id: parentId },
+          data: updateEpicData
+        });
+      }
+    }
+  }
+
+  revalidatePath(`/dashboard/${projectId}/work-items`);
   revalidatePath(`/dashboard/${projectId}/sprints`);
 }
