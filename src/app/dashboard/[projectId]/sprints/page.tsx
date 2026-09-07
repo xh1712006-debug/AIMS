@@ -42,14 +42,17 @@ export default async function SprintsPlanningPage(props: { params: Promise<{ pro
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-        <h2 className="text-3xl font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>Kế hoạch Sprint</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Kế hoạch Sprint</h2>
+          <p className="text-sm text-gray-500 mt-1">Theo dõi mục tiêu và tiến độ công việc theo từng giai đoạn.</p>
+        </div>
         {session.user.role === 'INTERN' && (
           <CreateSprintModal projectId={projectId} />
         )}
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {sprints.length === 0 ? (
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center text-gray-500">
             Chưa có Sprint nào. Hãy tạo Sprint đầu tiên!

@@ -58,19 +58,19 @@ export default function SprintAccordion({
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-200">
       <div 
-        className={`relative flex justify-between items-center p-6 cursor-pointer hover:bg-gray-50 transition-colors ${isOpen ? 'border-b border-gray-100 pb-4' : ''} ${isPending ? 'opacity-50' : ''}`}
+        className={`relative flex justify-between items-center px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors ${isOpen ? 'border-b border-gray-100 pb-3' : ''} ${isPending ? 'opacity-50' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
         onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('bg-blue-50'); }}
         onDragLeave={(e) => { e.currentTarget.classList.remove('bg-blue-50'); }}
         onDrop={handleDropToSprint}
       >
         <div 
-          className="absolute bottom-0 left-0 h-1 bg-blue-500 transition-all duration-500" 
+          className="absolute bottom-0 left-0 h-0.5 bg-blue-500 transition-all duration-500" 
           style={{ width: `${progressPercent}%` }}
         />
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button 
-            className={`p-1 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-all ${isOpen ? 'rotate-90' : ''}`}
+            className={`p-0.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-all ${isOpen ? 'rotate-90' : ''}`}
             onClick={(e) => {
               e.stopPropagation();
               setIsOpen(!isOpen);
@@ -81,16 +81,16 @@ export default function SprintAccordion({
             </svg>
           </button>
           <div>
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <h3 className="text-base font-bold text-gray-800 flex items-center gap-2">
               {sprint.name}
-              <span className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+              <span className="text-[11px] font-bold bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-md">
                 {sprint.workItems.length} công việc
               </span>
             </h3>
           </div>
         </div>
-        <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
-          <span className="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+          <span className="text-xs font-medium text-gray-500 bg-gray-50 border border-gray-100 px-2.5 py-0.5 rounded-md">
             {new Date(sprint.startDate).toLocaleDateString('vi-VN')} - {new Date(sprint.endDate).toLocaleDateString('vi-VN')}
           </span>
           {isIntern && (
@@ -106,7 +106,7 @@ export default function SprintAccordion({
         }`}
       >
         <div className="overflow-hidden">
-          <div className="p-6 pt-2 space-y-4 bg-gray-50/50">
+          <div className="px-5 pb-4 pt-2 space-y-3 bg-gray-50/50">
             {/* Definition of Done Banner */}
             {currentGuide && (
               <div className="flex items-start gap-2 mb-3 px-2">
