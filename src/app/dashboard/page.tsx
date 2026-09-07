@@ -31,63 +31,58 @@ export default async function DashboardPage() {
 
     return (
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <h2 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">Tổng quan Hệ thống</h2>
+        <h2 className="text-3xl font-extrabold mb-8 tracking-tight" style={{ color: 'var(--text-primary)' }}>Tổng quan Hệ thống</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+          <div className="aims-card p-6 flex items-center justify-between">
             <div>
-              <h3 className="text-gray-500 text-sm font-semibold uppercase tracking-wider">Tổng số Interns</h3>
-              <p className="text-4xl font-black mt-2 text-gray-900">{interns.length}</p>
+              <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Tổng số Interns</h3>
+              <p className="text-4xl font-black mt-2" style={{ color: 'var(--text-primary)' }}>{interns.length}</p>
             </div>
-            <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+            <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--accent-light)', color: 'var(--accent)' }}>
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             </div>
           </div>
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+          <div className="aims-card p-6 flex items-center justify-between">
             <div>
-              <h3 className="text-gray-500 text-sm font-semibold uppercase tracking-wider">Cảnh báo rủi ro</h3>
-              <p className="text-4xl font-black mt-2 text-red-600">
+              <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Cảnh báo rủi ro</h3>
+              <p className="text-4xl font-black mt-2" style={{ color: 'var(--danger)' }}>
                 {interns.filter(i => i.projects.some(p => {
                   const risk = calculateProjectRisk(p as any);
                   return risk === 'RED' || risk === 'YELLOW';
                 })).length}
               </p>
             </div>
-            <div className="p-3 bg-red-50 text-red-600 rounded-xl">
+            <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--danger-light)', color: 'var(--danger)' }}>
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-              <h3 className="text-lg font-bold text-gray-900">Danh sách Interns theo dõi</h3>
+          <div className="lg:col-span-2 aims-card overflow-hidden">
+            <div className="p-6" style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-muted)' }}>
+              <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Danh sách Interns theo dõi</h3>
             </div>
-            <table className="min-w-full divide-y divide-gray-100">
-              <thead className="bg-gray-50">
+            <table className="min-w-full">
+              <thead style={{ backgroundColor: 'var(--bg-muted)' }}>
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Thực tập sinh</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Dự án</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng thái (Risk)</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Báo cáo gần nhất</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}>Thực tập sinh</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}>Dự án</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}>Trạng thái (Risk)</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}>Báo cáo gần nhất</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-100">
+              <tbody>
                 {interns.map(intern => {
                   const risk = intern.projects[0] ? calculateProjectRisk(intern.projects[0] as any) : 'N/A';
                   return (
-                  <tr key={intern.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={intern.id} className="transition-colors" style={{ borderBottom: '1px solid var(--border-muted)' }}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-bold text-gray-900">{intern.name}</div>
-                      <div className="text-sm text-gray-500">{intern.email}</div>
+                      <div className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{intern.name}</div>
+                      <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{intern.email}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-600">
-                      <div className="text-gray-900 font-semibold">{intern.projects[0]?.title || 'Chưa phân bổ'}</div>
-                      {intern.projects[0]?.status && intern.projects[0].status !== 'ACTIVE' && (
-                        <span className="inline-flex mt-1 items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
-                          {intern.projects[0].status}
-                        </span>
-                      )}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{intern.projects[0]?.title || 'Chưa phân bổ'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-full ${
@@ -95,15 +90,11 @@ export default async function DashboardPage() {
                         risk === 'YELLOW' ? 'bg-yellow-100 text-yellow-700' :
                         risk === 'GREEN' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
                       }`}>
-                        <span className={`w-2 h-2 rounded-full mr-2 ${
-                          risk === 'RED' ? 'bg-red-500' :
-                          risk === 'YELLOW' ? 'bg-yellow-500' :
-                          risk === 'GREEN' ? 'bg-green-500' : 'bg-gray-500'
-                        }`}></span>
+                        <span className={`w-2 h-2 rounded-full mr-2 ${risk === 'RED' ? 'bg-red-500' : risk === 'YELLOW' ? 'bg-yellow-500' : risk === 'GREEN' ? 'bg-green-500' : 'bg-gray-500'}`}></span>
                         {risk}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
                       {intern.projects[0]?.checkIns[0]?.createdAt 
                         ? new Date(intern.projects[0].checkIns[0].createdAt).toLocaleDateString('vi-VN') 
                         : 'Chưa có dữ liệu'}
@@ -113,7 +104,7 @@ export default async function DashboardPage() {
                 })}
                 {interns.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500">
+                    <td colSpan={4} className="px-6 py-8 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
                       Chưa có thực tập sinh nào trong hệ thống.
                     </td>
                   </tr>
@@ -123,8 +114,8 @@ export default async function DashboardPage() {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-6">
-              <h3 className="text-lg font-bold mb-4 text-gray-900">Phân công Dự án Mới</h3>
+            <div className="aims-card p-6 sticky top-6">
+              <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Phân công Dự án Mới</h3>
               <CreateProjectForm interns={interns} />
             </div>
           </div>
