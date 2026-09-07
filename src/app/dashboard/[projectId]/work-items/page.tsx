@@ -34,18 +34,21 @@ export default async function SprintsPage(props: { params: Promise<{ projectId: 
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-        <h2 className="text-3xl font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>Roadmap & Backlog</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Roadmap & Backlog</h2>
+          <p className="text-sm text-gray-500 mt-1">Quản lý tầm nhìn dự án (Epic) và các công việc chưa được gán vào Sprint.</p>
+        </div>
         {session.user.role === 'INTERN' && (
           <CreateWorkItemForm projectId={projectId} epics={epics} priorityLevels={project.priorityLevels} />
         )}
       </div>
       
       {/* Roadmap (Epics) Section */}
-      <div className="mb-8 bg-gray-50 p-6 rounded-2xl border border-gray-100">
-        <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+      <div className="mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">
+        <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
           🗺️ Roadmap (Epics)
-          <span className="text-xs font-medium bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+          <span className="text-[11px] font-bold bg-purple-100 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-md">
             {epics.length} tính năng lớn
           </span>
         </h3>
@@ -160,7 +163,7 @@ export default async function SprintsPage(props: { params: Promise<{ projectId: 
       
       {/* Kanban Board (Stories, Tasks, Bugs) */}
       <div>
-        <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
           📋 Bảng công việc chi tiết
         </h3>
         <KanbanBoard 
