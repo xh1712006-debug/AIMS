@@ -99,9 +99,10 @@ export default function WorkItemRow({
             )}
           </div>
         </div>
+      </div>
         
-        <div className="flex items-center gap-3">
-          <span className={`px-2.5 py-1 text-xs font-bold rounded-lg whitespace-nowrap border ${
+      <div className="flex items-center gap-3">
+        <span className={`px-2.5 py-1 text-xs font-bold rounded-lg whitespace-nowrap border ${
             item.status === 'DONE' ? 'bg-green-50 text-green-700 border-green-200' :
             item.status === 'IN_PROGRESS' ? 'bg-blue-50 text-blue-700 border-blue-200' :
             item.status === 'REVIEW' ? 'bg-purple-50 text-purple-700 border-purple-200' :
