@@ -25,18 +25,18 @@ export default async function MentorFeedbacksPage() {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Phản hồi & Khắc phục</h2>
-        <p className="text-gray-500 mt-2">Danh sách các công việc Mentor đã phản hồi và đang chờ sinh viên khắc phục.</p>
+        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#F1F5F9] tracking-tight">Phản hồi & Khắc phục</h2>
+        <p className="text-gray-500 dark:text-[#64748B] mt-2">Danh sách các công việc Mentor đã phản hồi và đang chờ sinh viên khắc phục.</p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white dark:bg-[#1E293B] rounded-2xl shadow-sm dark:shadow-none border border-gray-200 dark:border-[#475569] overflow-hidden">
         {itemsRequiringFix.length === 0 ? (
           <div className="p-12 text-center">
-            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
             </div>
-            <h3 className="text-lg font-bold text-gray-900">Không có công việc nào cần khắc phục!</h3>
-            <p className="text-gray-500 mt-1">Mọi thứ đang hoạt động trơn tru.</p>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-[#F1F5F9]">Không có công việc nào cần khắc phục!</h3>
+            <p className="text-gray-500 dark:text-[#64748B] mt-1">Mọi thứ đang hoạt động trơn tru.</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
@@ -46,29 +46,29 @@ export default async function MentorFeedbacksPage() {
                   {/* Cột thông tin */}
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold rounded">
+                      <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 text-xs font-bold rounded">
                         CẦN KHẮC PHỤC
                       </span>
-                      <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                      <span className="text-xs font-semibold text-gray-500 dark:text-[#64748B] bg-gray-100 dark:bg-[#334155] px-2 py-0.5 rounded">
                         {item.type}
                       </span>
                     </div>
                     
-                    <h4 className="text-lg font-bold text-gray-900 mb-1">{item.title}</h4>
-                    <p className="text-sm text-gray-500">
-                      Dự án: <span className="font-semibold text-gray-700">{item.project.title}</span> 
-                      &nbsp;&bull;&nbsp; Intern: <span className="font-semibold text-gray-700">{item.project.intern.name}</span>
+                    <h4 className="text-lg font-bold text-gray-900 dark:text-[#F1F5F9] mb-1">{item.title}</h4>
+                    <p className="text-sm text-gray-500 dark:text-[#64748B]">
+                      Dự án: <span className="font-semibold text-gray-700 dark:text-[#CBD5E1]">{item.project.title}</span> 
+                      &nbsp;&bull;&nbsp; Intern: <span className="font-semibold text-gray-700 dark:text-[#CBD5E1]">{item.project.intern.name}</span>
                     </p>
 
-                    <div className="mt-4 p-4 bg-yellow-50 rounded-xl border border-yellow-100">
-                      <p className="text-xs font-bold text-yellow-800 uppercase mb-1">Mentor Phản hồi:</p>
+                    <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-xl border border-yellow-100">
+                      <p className="text-xs font-bold text-yellow-800 dark:text-yellow-200 uppercase mb-1">Mentor Phản hồi:</p>
                       <p className="text-sm text-yellow-900 font-medium whitespace-pre-wrap">{item.mentorFeedback}</p>
                     </div>
                   </div>
 
                   {/* Cột thao tác */}
-                  <div className="flex flex-col gap-3 justify-center md:items-end md:w-48 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
-                    <Link href={`/dashboard/${item.projectId}/work-items`} className="w-full text-center px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+                  <div className="flex flex-col gap-3 justify-center md:items-end md:w-48 border-t md:border-t-0 md:border-l border-gray-100 dark:border-[#334155] pt-4 md:pt-0 md:pl-6">
+                    <Link href={`/dashboard/${item.projectId}/work-items`} className="w-full text-center px-4 py-2 bg-white dark:bg-[#1E293B] border border-gray-200 dark:border-[#475569] text-gray-700 dark:text-[#CBD5E1] text-sm font-bold rounded-lg hover:bg-gray-50 dark:bg-[#0F172A] transition-colors shadow-sm dark:shadow-none">
                       Đến Backlog
                     </Link>
                   </div>

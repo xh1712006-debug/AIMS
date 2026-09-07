@@ -37,7 +37,7 @@ export default async function ProjectLayout(props: {
 
       {session.user.role === 'MENTOR' && (
         <div
-          className="p-6 md:p-8 rounded-2xl shadow-sm mb-6"
+          className="p-6 md:p-8 rounded-2xl shadow-sm dark:shadow-none mb-6"
           style={{
             backgroundColor: 'var(--bg-surface)',
             border: '1px solid var(--border-color)',

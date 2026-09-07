@@ -76,7 +76,7 @@ export default function QuickAddWorkItem({
 
   return (
     <div className="relative mt-3 group" ref={wrapperRef}>
-      <form ref={formRef} action={handleCreateNew} className="relative flex items-center gap-2 py-1 px-1 group border-b border-transparent hover:border-gray-200 focus-within:border-blue-500 transition-colors">
+      <form ref={formRef} action={handleCreateNew} className="relative flex items-center gap-2 py-1 px-1 group border-b border-transparent hover:border-gray-200 dark:border-[#475569] focus-within:border-blue-500 transition-colors">
         <input type="hidden" name="projectId" value={projectId} />
         <input type="hidden" name="sprintId" value={sprintId} />
         
@@ -90,7 +90,7 @@ export default function QuickAddWorkItem({
             required
             autoComplete="off"
             placeholder="Thêm công việc mới vào Sprint (nhấn Enter để lưu)..."
-            className="w-full bg-transparent text-sm border-0 ring-0 focus:border-0 focus:ring-0 focus:outline-none text-gray-900 placeholder:text-gray-400 p-1 shadow-none"
+            className="w-full bg-transparent text-sm border-0 ring-0 focus:border-0 focus:ring-0 focus:outline-none text-gray-900 dark:text-[#F1F5F9] placeholder:text-gray-400 dark:text-[#475569] p-1 shadow-none"
             value={inputValue}
             onChange={(e) => {
               setInputValue(e.target.value);
@@ -102,20 +102,20 @@ export default function QuickAddWorkItem({
         </div>
         
         <div className="flex items-center gap-2 opacity-0 group-focus-within:opacity-100 transition-opacity">
-          <select name="type" className="text-xs font-medium bg-transparent border-none focus:ring-0 text-gray-500 cursor-pointer p-0" disabled={isSubmitting}>
+          <select name="type" className="text-xs font-medium bg-transparent border-none focus:ring-0 text-gray-500 dark:text-[#64748B] cursor-pointer p-0" disabled={isSubmitting}>
             <option value="TASK">Task</option>
             <option value="STORY">Story</option>
             <option value="FEATURE">Feature</option>
             <option value="BUG">Bug</option>
           </select>
           
-          <select name="priorityId" className="text-xs font-medium bg-transparent border-none focus:ring-0 text-gray-500 cursor-pointer p-0" disabled={isSubmitting}>
+          <select name="priorityId" className="text-xs font-medium bg-transparent border-none focus:ring-0 text-gray-500 dark:text-[#64748B] cursor-pointer p-0" disabled={isSubmitting}>
             {priorityLevels?.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
 
-          <button type="submit" disabled={isSubmitting || !inputValue.trim()} className="p-1.5 text-blue-600 rounded-lg hover:bg-blue-50 disabled:opacity-50 transition-colors">
+          <button type="submit" disabled={isSubmitting || !inputValue.trim()} className="p-1.5 text-blue-600 rounded-lg hover:bg-blue-50 dark:bg-blue-900/30 disabled:opacity-50 transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
           </button>
         </div>
@@ -123,29 +123,29 @@ export default function QuickAddWorkItem({
 
       {/* Suggestions Dropdown */}
       {showSuggestions && filteredSuggestions.length > 0 && (
-        <div className="mt-2 bg-white rounded-xl border border-gray-100 shadow-sm max-h-60 overflow-y-auto">
+        <div className="mt-2 bg-white dark:bg-[#1E293B] rounded-xl border border-gray-100 dark:border-[#334155] shadow-sm dark:shadow-none max-h-60 overflow-y-auto">
           <div className="p-2">
-            <div className="text-xs font-bold text-gray-400 mb-2 px-2 uppercase tracking-wider">Công việc trong Backlog</div>
+            <div className="text-xs font-bold text-gray-400 dark:text-[#475569] mb-2 px-2 uppercase tracking-wider">Công việc trong Backlog</div>
             {filteredSuggestions.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => handleSelectExisting(item.id)}
-                className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center justify-between group transition-colors"
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 dark:bg-[#0F172A] flex items-center justify-between group transition-colors"
               >
                 <div className="flex-1 truncate">
-                  <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-[#F1F5F9] truncate">{item.title}</p>
                 </div>
                 <div className="flex items-center gap-2 ml-4">
                   <span className={`px-2 py-0.5 text-[10px] rounded font-bold border ${
-                    item.type === 'BUG' ? 'bg-red-50 text-red-700 border-red-200' :
-                    item.type === 'FEATURE' ? 'bg-purple-50 text-purple-700 border-purple-200' :
-                    item.type === 'STORY' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                    item.type === 'BUG' ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800' :
+                    item.type === 'FEATURE' ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800' :
+                    item.type === 'STORY' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800' :
                     'bg-emerald-50 text-emerald-700 border-emerald-200'
                   }`}>
                     {item.type}
                   </span>
-                  <span className="text-xs font-medium text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity bg-blue-50 px-2 py-1 rounded">
+                  <span className="text-xs font-medium text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded">
                     Thêm +
                   </span>
                 </div>

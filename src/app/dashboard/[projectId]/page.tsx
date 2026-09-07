@@ -45,26 +45,26 @@ export default async function ProjectDetailPage(props: { params: Promise<{ proje
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Tổng quan Dự án</h2>
-          <p className="text-sm text-gray-500 mt-1">Cái nhìn toàn cảnh về hiệu suất và trạng thái của dự án.</p>
+          <p className="text-sm text-gray-500 dark:text-[#64748B] mt-1">Cái nhìn toàn cảnh về hiệu suất và trạng thái của dự án.</p>
         </div>
       </div>
 
       {/* TỔNG QUAN THỐNG KÊ (NEW) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-center">
-          <span className="text-gray-500 text-[11px] font-bold uppercase tracking-wider mb-1">Công việc hiện tại</span>
-          <span className="text-2xl font-black text-gray-900">{totalWorkItems}</span>
+        <div className="bg-white dark:bg-[#1E293B] p-4 rounded-xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155] flex flex-col justify-center">
+          <span className="text-gray-500 dark:text-[#64748B] text-[11px] font-bold uppercase tracking-wider mb-1">Công việc hiện tại</span>
+          <span className="text-2xl font-black text-gray-900 dark:text-[#F1F5F9]">{totalWorkItems}</span>
         </div>
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-center">
-          <span className="text-gray-500 text-[11px] font-bold uppercase tracking-wider mb-1">Hoàn thành</span>
-          <span className="text-2xl font-black text-blue-600">{doneWorkItems} <span className="text-base text-gray-400 font-bold">/ {totalWorkItems}</span></span>
+        <div className="bg-white dark:bg-[#1E293B] p-4 rounded-xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155] flex flex-col justify-center">
+          <span className="text-gray-500 dark:text-[#64748B] text-[11px] font-bold uppercase tracking-wider mb-1">Hoàn thành</span>
+          <span className="text-2xl font-black text-blue-600">{doneWorkItems} <span className="text-base text-gray-400 dark:text-[#475569] font-bold">/ {totalWorkItems}</span></span>
         </div>
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-center">
-          <span className="text-gray-500 text-[11px] font-bold uppercase tracking-wider mb-1">Số lần Check-in</span>
+        <div className="bg-white dark:bg-[#1E293B] p-4 rounded-xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155] flex flex-col justify-center">
+          <span className="text-gray-500 dark:text-[#64748B] text-[11px] font-bold uppercase tracking-wider mb-1">Số lần Check-in</span>
           <span className="text-2xl font-black text-purple-600">{totalCheckIns}</span>
         </div>
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-center">
-          <span className="text-gray-500 text-[11px] font-bold uppercase tracking-wider mb-1">Trạng thái rủi ro</span>
+        <div className="bg-white dark:bg-[#1E293B] p-4 rounded-xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155] flex flex-col justify-center">
+          <span className="text-gray-500 dark:text-[#64748B] text-[11px] font-bold uppercase tracking-wider mb-1">Trạng thái rủi ro</span>
           <span className={`text-lg mt-1 font-bold inline-flex items-center gap-1.5 ${
             latestRisk === 'RED' ? 'text-red-600' : latestRisk === 'YELLOW' ? 'text-yellow-600' : 'text-green-600'
           }`}>
@@ -82,54 +82,54 @@ export default async function ProjectDetailPage(props: { params: Promise<{ proje
 
       {/* THÔNG TIN SPRINT VÀ ƯU TIÊN */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-          <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Sprint hiện hành</h4>
+        <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155]">
+          <h4 className="text-xs font-bold text-gray-500 dark:text-[#64748B] uppercase tracking-wider mb-4">Sprint hiện hành</h4>
           {project.sprints.length > 0 ? (
-            <div className="flex items-center p-3 bg-gray-50 rounded-xl border border-gray-100">
-              <div className="p-3 bg-white rounded-lg shadow-sm border border-gray-100 mr-4">
+            <div className="flex items-center p-3 bg-gray-50 dark:bg-[#0F172A] rounded-xl border border-gray-100 dark:border-[#334155]">
+              <div className="p-3 bg-white dark:bg-[#1E293B] rounded-lg shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155] mr-4">
                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
               </div>
               <div>
-                <span className="font-bold text-gray-900 block">{project.sprints[0].name}</span>
-                <span className="text-sm text-gray-500 block mt-1">
+                <span className="font-bold text-gray-900 dark:text-[#F1F5F9] block">{project.sprints[0].name}</span>
+                <span className="text-sm text-gray-500 dark:text-[#64748B] block mt-1">
                   Từ {new Date(project.sprints[0].startDate).toLocaleDateString('vi-VN')} đến {new Date(project.sprints[0].endDate).toLocaleDateString('vi-VN')}
                 </span>
               </div>
             </div>
           ) : (
-            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 border-dashed text-gray-500 text-sm">
+            <div className="p-4 bg-gray-50 dark:bg-[#0F172A] rounded-xl border border-gray-100 dark:border-[#334155] border-dashed text-gray-500 dark:text-[#64748B] text-sm">
               Hiện tại không có Sprint nào đang diễn ra.
             </div>
           )}
         </div>
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-          <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Thông tin Thời gian</h4>
-          <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
-            <p className="text-sm text-gray-700 mb-1.5"><strong>Bắt đầu:</strong> {project.startDate.toLocaleDateString('vi-VN')}</p>
-            <p className="text-sm text-gray-700"><strong>Kết thúc:</strong> {project.endDate.toLocaleDateString('vi-VN')}</p>
+        <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155]">
+          <h4 className="text-xs font-bold text-gray-500 dark:text-[#64748B] uppercase tracking-wider mb-4">Thông tin Thời gian</h4>
+          <div className="p-3 bg-gray-50 dark:bg-[#0F172A] rounded-xl border border-gray-100 dark:border-[#334155]">
+            <p className="text-sm text-gray-700 dark:text-[#CBD5E1] mb-1.5"><strong>Bắt đầu:</strong> {project.startDate.toLocaleDateString('vi-VN')}</p>
+            <p className="text-sm text-gray-700 dark:text-[#CBD5E1]"><strong>Kết thúc:</strong> {project.endDate.toLocaleDateString('vi-VN')}</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Công việc Ưu tiên (To-Do / In Progress)</h4>
+      <div className="bg-white dark:bg-[#1E293B] p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155]">
+        <h4 className="text-xs font-bold text-gray-500 dark:text-[#64748B] uppercase tracking-wider mb-4">Công việc Ưu tiên (To-Do / In Progress)</h4>
         {priorityTasks.length > 0 ? (
           <ul className="space-y-2.5">
             {priorityTasks.map(item => (
-              <li key={item.id} className="flex items-center justify-between p-3.5 bg-gray-50 hover:bg-gray-100 transition-colors rounded-xl border border-transparent hover:border-gray-200">
+              <li key={item.id} className="flex items-center justify-between p-3.5 bg-gray-50 dark:bg-[#0F172A] hover:bg-gray-100 dark:bg-[#334155] transition-colors rounded-xl border border-transparent hover:border-gray-200 dark:border-[#475569]">
                 <div>
-                  <p className="font-bold text-sm text-gray-900">{item.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5 font-medium">Type: {item.type} &bull; Priority: {item.priority?.name || 'Chưa phân loại'}</p>
+                  <p className="font-bold text-sm text-gray-900 dark:text-[#F1F5F9]">{item.title}</p>
+                  <p className="text-xs text-gray-500 dark:text-[#64748B] mt-0.5 font-medium">Type: {item.type} &bull; Priority: {item.priority?.name || 'Chưa phân loại'}</p>
                 </div>
-                <span className="px-2.5 py-1 text-[11px] font-bold bg-blue-100 text-blue-800 rounded-lg">
+                <span className="px-2.5 py-1 text-[11px] font-bold bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 rounded-lg">
                   {item.status}
                 </span>
               </li>
             ))}
           </ul>
         ) : (
-          <div className="text-center py-8 bg-gray-50 rounded-xl border border-gray-100 border-dashed">
-            <p className="text-gray-500 text-sm font-medium">Tuyệt vời! Bạn không còn việc nào đang tồn đọng.</p>
+          <div className="text-center py-8 bg-gray-50 dark:bg-[#0F172A] rounded-xl border border-gray-100 dark:border-[#334155] border-dashed">
+            <p className="text-gray-500 dark:text-[#64748B] text-sm font-medium">Tuyệt vời! Bạn không còn việc nào đang tồn đọng.</p>
           </div>
         )}
       </div>

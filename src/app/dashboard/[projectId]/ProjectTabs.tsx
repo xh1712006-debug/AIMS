@@ -14,7 +14,7 @@ export default function ProjectTabs({ projectId, userRole }: { projectId: string
   ];
 
   return (
-    <div className="border-b border-gray-200 mb-6 mt-2">
+    <div className="border-b border-gray-200 dark:border-[#475569] mb-6 mt-2">
       <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
         {tabs.map((tab) => {
           const isActive = pathname === tab.href;
