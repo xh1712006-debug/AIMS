@@ -25,22 +25,40 @@ export default async function ProjectLayout(props: {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-4 flex items-center gap-2 text-sm text-gray-500 font-medium">
-        <Link href={session.user.role === 'MENTOR' ? '/dashboard/mentor/projects' : '/dashboard'} className="hover:text-blue-600 transition-colors">
-          &larr; Quay lại danh sách
+      <div className="mb-4 flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
+        <Link
+          href={session.user.role === 'MENTOR' ? '/dashboard/mentor/projects' : '/dashboard'}
+          className="hover:underline transition-colors"
+          style={{ color: 'var(--accent)' }}
+        >
+          ← Quay lại danh sách
         </Link>
       </div>
-      
-      <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 mb-8">
+
+      <div
+        className="p-6 md:p-8 rounded-2xl shadow-sm mb-8"
+        style={{
+          backgroundColor: 'var(--bg-surface)',
+          border: '1px solid var(--border-color)',
+        }}
+      >
         <div className="flex items-center justify-between mb-2">
           <div>
-            <h3 className="text-3xl font-black text-gray-900 tracking-tight">{project.title}</h3>
-            <span className="inline-flex items-center px-3 py-1 mt-2 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+            <h3
+              className="text-3xl font-black tracking-tight"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              {project.title}
+            </h3>
+            <span
+              className="inline-flex items-center px-3 py-1 mt-2 text-xs font-semibold rounded-full"
+              style={{ backgroundColor: 'var(--accent-light)', color: 'var(--accent-text)' }}
+            >
               Track: {project.track}
             </span>
           </div>
         </div>
-        
+
         {session.user.role === 'MENTOR' && (
           <ProjectTabs projectId={projectId} userRole={session.user.role} />
         )}

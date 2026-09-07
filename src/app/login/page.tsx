@@ -29,63 +29,81 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-xl border border-gray-100">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900">AIMS Login</h2>
-          <p className="mt-2 text-sm text-gray-500">
-            Hệ thống Quản lý Sinh viên Thực tập
-          </p>
+    <div
+      className="flex min-h-screen items-center justify-center p-4"
+      style={{ backgroundColor: 'var(--bg-base)' }}
+    >
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-black tracking-tight mb-1" style={{ color: 'var(--accent)' }}>AIMS</h1>
+          <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Agile Internship Management System</p>
         </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-          
-          <div className="-space-y-px rounded-md shadow-sm">
+
+        {/* Card */}
+        <div
+          className="rounded-2xl p-8 shadow-lg"
+          style={{
+            backgroundColor: 'var(--bg-surface)',
+            border: '1px solid var(--border-color)',
+          }}
+        >
+          <div className="mb-6">
+            <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Đăng nhập</h2>
+            <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Hệ thống Quản lý Thực tập Agile/Scrum</p>
+          </div>
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            {error && (
+              <div
+                className="rounded-lg p-3 text-sm font-medium"
+                style={{ backgroundColor: 'var(--danger-light)', color: 'var(--danger)' }}
+              >
+                {error}
+              </div>
+            )}
+
             <div>
-              <label htmlFor="email-address" className="sr-only">Email</label>
+              <label htmlFor="email-address" className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                Địa chỉ Email
+              </label>
               <input
                 id="email-address"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="relative block w-full rounded-t-md border-0 py-2.5 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
-                placeholder="Địa chỉ Email"
+                className="aims-input"
+                placeholder="Nhập email của bạn..."
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+
             <div>
-              <label htmlFor="password" className="sr-only">Mật khẩu</label>
+              <label htmlFor="password" className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                Mật khẩu
+              </label>
               <input
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="current-password"
                 required
-                className="relative block w-full rounded-b-md border-0 py-2.5 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
-                placeholder="Mật khẩu"
+                className="aims-input"
+                placeholder="Nhập mật khẩu..."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-          </div>
 
-          <div>
-            <button
-              type="submit"
-              className="group relative flex w-full justify-center rounded-md bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-colors"
-            >
-              Đăng nhập
+            <button type="submit" className="aims-btn-primary w-full mt-2">
+              Đăng nhập →
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );
 }
+

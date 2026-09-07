@@ -25,7 +25,10 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col md:flex-row overflow-hidden">
+    <div
+      className="h-screen flex flex-col md:flex-row overflow-hidden"
+      style={{ backgroundColor: 'var(--bg-base)' }}
+    >
       <Sidebar user={session.user as any} projects={projects} />
       <main className="flex-1 p-4 md:p-8 overflow-y-auto">
         <div className="max-w-6xl mx-auto pb-10">
