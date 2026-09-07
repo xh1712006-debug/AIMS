@@ -19,19 +19,19 @@ export default function CreateProjectForm({ interns }: { interns: { id: string, 
   return (
     <form action={createProject} className="space-y-4">
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-[#CBD5E1] mb-1">Thực tập sinh</label>
-        <select name="internId" required className="w-full rounded-lg border-gray-300 dark:border-[#475569] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Thực tập sinh</label>
+        <select name="internId" required className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm">
           <option value="">Chọn một Intern...</option>
           {interns.map(i => <option key={i.id} value={i.id}>{i.name} ({i.email})</option>)}
         </select>
       </div>
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-[#CBD5E1] mb-1">Tên Dự án</label>
-        <input name="title" required type="text" className="w-full rounded-lg border-gray-300 dark:border-[#475569] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" placeholder="VD: Ứng dụng E-commerce" />
+        <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Tên Dự án</label>
+        <input name="title" required type="text" className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" placeholder="VD: Ứng dụng E-commerce" />
       </div>
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-[#CBD5E1] mb-1">Track</label>
-        <select name="track" className="w-full rounded-lg border-gray-300 dark:border-[#475569] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Track</label>
+        <select name="track" className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm">
           <option value="SOFTWARE_DEVELOPMENT">Software Development</option>
           <option value="AI_ML_RESEARCH">AI/ML Research</option>
           <option value="DATA_ANALYTICS">Data Analytics</option>
@@ -39,16 +39,16 @@ export default function CreateProjectForm({ interns }: { interns: { id: string, 
         </select>
       </div>
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-[#CBD5E1] mb-1">Ngày bắt đầu</label>
-        <input name="startDate" required type="date" onChange={handleStartDateChange} className="w-full rounded-lg border-gray-300 dark:border-[#475569] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" />
+        <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Ngày bắt đầu</label>
+        <input name="startDate" required type="date" onChange={handleStartDateChange} className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" />
       </div>
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-[#CBD5E1] mb-1">Ngày kết thúc (10 tuần)</label>
-        <input name="endDate" required type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full rounded-lg border-gray-300 dark:border-[#475569] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" />
+        <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Ngày kết thúc (10 tuần)</label>
+        <input name="endDate" required type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" />
       </div>
       <div className="flex items-center space-x-2 pt-2">
-        <input type="checkbox" id="generateTimeline" name="generateTimeline" value="true" defaultChecked className="h-4 w-4 rounded border-gray-300 dark:border-[#475569] text-blue-600 focus:ring-blue-600" />
-        <label htmlFor="generateTimeline" className="text-sm font-medium text-gray-700 dark:text-[#CBD5E1]">
+        <input type="checkbox" id="generateTimeline" name="generateTimeline" value="true" defaultChecked className="h-4 w-4 rounded border-gray-300 dark:border-[#383838] text-blue-600 focus:ring-blue-600" />
+        <label htmlFor="generateTimeline" className="text-sm font-medium text-gray-700 dark:text-[#D4D4D4]">
           Tự động tạo lộ trình chuẩn (10 tuần) cho Intern
         </label>
       </div>

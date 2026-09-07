@@ -3,7 +3,7 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 const STATUS_COLORS = {
-  'TODO': '#94a3b8',
+  'TODO': '#A3A3A3',
   'IN_PROGRESS': '#3b82f6',
   'REVIEW': '#eab308',
   'DONE': '#22c55e',
@@ -68,20 +68,20 @@ export default function InternCharts({ projects }: { projects: any[] }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
       {/* Biểu đồ trạng thái công việc */}
-      <div className="bg-white dark:bg-[#1E293B] p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155] relative overflow-hidden group">
+      <div className="bg-white dark:bg-[#171717] p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] relative overflow-hidden group">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <h3 className="text-lg font-bold text-gray-900 dark:text-[#F1F5F9] mb-6 flex items-center gap-2">
-          <svg className="w-5 h-5 text-gray-400 dark:text-[#475569]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-[#EDEDED] mb-6 flex items-center gap-2">
+          <svg className="w-5 h-5 text-gray-400 dark:text-[#383838]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
           Phân bổ Trạng thái
         </h3>
         <div className="h-64 flex items-center justify-center">
           {!hasData ? (
             <div className="text-center">
-              <div className="bg-gray-50 dark:bg-[#0F172A] rounded-full p-4 inline-block mb-3">
+              <div className="bg-gray-50 dark:bg-[#0A0A0A] rounded-full p-4 inline-block mb-3">
                 <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
               </div>
-              <p className="text-sm font-medium text-gray-500 dark:text-[#64748B]">Chưa có công việc nào</p>
-              <p className="text-xs text-gray-400 dark:text-[#475569] mt-1">Biểu đồ sẽ hiển thị khi bạn tạo công việc</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-[#737373]">Chưa có công việc nào</p>
+              <p className="text-xs text-gray-400 dark:text-[#383838] mt-1">Biểu đồ sẽ hiển thị khi bạn tạo công việc</p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -102,8 +102,8 @@ export default function InternCharts({ projects }: { projects: any[] }) {
                 </Pie>
                 <Tooltip 
                   formatter={(value: number) => [`${value} công việc`, 'Số lượng']}
-                  contentStyle={{ borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)' }}
-                  itemStyle={{ color: '#1e293b', fontWeight: 600 }}
+                  contentStyle={{ borderRadius: '12px', border: '1px solid #EDEDED', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)' }}
+                  itemStyle={{ color: '#171717', fontWeight: 600 }}
                 />
                 <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '13px', paddingTop: '10px' }} />
               </PieChart>
@@ -113,20 +113,20 @@ export default function InternCharts({ projects }: { projects: any[] }) {
       </div>
 
       {/* Biểu đồ mức độ ưu tiên */}
-      <div className="bg-white dark:bg-[#1E293B] p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155] relative overflow-hidden group">
+      <div className="bg-white dark:bg-[#171717] p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] relative overflow-hidden group">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-400 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <h3 className="text-lg font-bold text-gray-900 dark:text-[#F1F5F9] mb-6 flex items-center gap-2">
-          <svg className="w-5 h-5 text-gray-400 dark:text-[#475569]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-[#EDEDED] mb-6 flex items-center gap-2">
+          <svg className="w-5 h-5 text-gray-400 dark:text-[#383838]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
           Mức độ Ưu tiên
         </h3>
         <div className="h-64 flex items-center justify-center">
           {!hasData ? (
             <div className="text-center">
-              <div className="bg-gray-50 dark:bg-[#0F172A] rounded-full p-4 inline-block mb-3">
+              <div className="bg-gray-50 dark:bg-[#0A0A0A] rounded-full p-4 inline-block mb-3">
                 <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
               </div>
-              <p className="text-sm font-medium text-gray-500 dark:text-[#64748B]">Chưa có công việc nào</p>
-              <p className="text-xs text-gray-400 dark:text-[#475569] mt-1">Biểu đồ sẽ hiển thị khi bạn tạo công việc</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-[#737373]">Chưa có công việc nào</p>
+              <p className="text-xs text-gray-400 dark:text-[#383838] mt-1">Biểu đồ sẽ hiển thị khi bạn tạo công việc</p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -134,14 +134,14 @@ export default function InternCharts({ projects }: { projects: any[] }) {
                 data={priorityData}
                 margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 13, fontWeight: 500}} dy={10} />
-                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EDEDED" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#737373', fontSize: 13, fontWeight: 500}} dy={10} />
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{fill: '#A3A3A3', fontSize: 12}} />
                 <Tooltip 
                   cursor={{fill: '#f8fafc'}}
                   formatter={(value: number) => [`${value} công việc`, 'Số lượng']}
-                  contentStyle={{ borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                  itemStyle={{ color: '#1e293b', fontWeight: 600 }}
+                  contentStyle={{ borderRadius: '12px', border: '1px solid #EDEDED', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  itemStyle={{ color: '#171717', fontWeight: 600 }}
                 />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={48} animationDuration={1500} />
               </BarChart>

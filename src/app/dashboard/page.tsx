@@ -88,7 +88,7 @@ export default async function DashboardPage() {
                       <span className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-full ${
                         risk === 'RED' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' :
                         risk === 'YELLOW' ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300' :
-                        risk === 'GREEN' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-[#334155] text-gray-700 dark:text-[#CBD5E1]'
+                        risk === 'GREEN' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-[#262626] text-gray-700 dark:text-[#D4D4D4]'
                       }`}>
                         <span className={`w-2 h-2 rounded-full mr-2 ${risk === 'RED' ? 'bg-red-500' : risk === 'YELLOW' ? 'bg-yellow-500' : risk === 'GREEN' ? 'bg-green-500' : 'bg-gray-500'}`}></span>
                         {risk}
@@ -148,25 +148,25 @@ export default async function DashboardPage() {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#F1F5F9] tracking-tight">Xin chào, {user.name} 👋</h2>
+        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Xin chào, {user.name} 👋</h2>
       </div>
 
       {/* TỔNG QUAN THỐNG KÊ (NEW) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155] flex flex-col justify-center">
-          <span className="text-gray-500 dark:text-[#64748B] text-xs font-semibold uppercase tracking-wider mb-1">Dự án tham gia</span>
-          <span className="text-3xl font-black text-gray-900 dark:text-[#F1F5F9]">{totalProjects}</span>
+        <div className="bg-white dark:bg-[#171717] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] flex flex-col justify-center">
+          <span className="text-gray-500 dark:text-[#737373] text-xs font-semibold uppercase tracking-wider mb-1">Dự án tham gia</span>
+          <span className="text-3xl font-black text-gray-900 dark:text-[#EDEDED]">{totalProjects}</span>
         </div>
-        <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155] flex flex-col justify-center">
-          <span className="text-gray-500 dark:text-[#64748B] text-xs font-semibold uppercase tracking-wider mb-1">Công việc hoàn thành</span>
-          <span className="text-3xl font-black text-blue-600">{doneWorkItems} <span className="text-lg text-gray-400 dark:text-[#475569]">/ {totalWorkItems}</span></span>
+        <div className="bg-white dark:bg-[#171717] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] flex flex-col justify-center">
+          <span className="text-gray-500 dark:text-[#737373] text-xs font-semibold uppercase tracking-wider mb-1">Công việc hoàn thành</span>
+          <span className="text-3xl font-black text-blue-600">{doneWorkItems} <span className="text-lg text-gray-400 dark:text-[#383838]">/ {totalWorkItems}</span></span>
         </div>
-        <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155] flex flex-col justify-center">
-          <span className="text-gray-500 dark:text-[#64748B] text-xs font-semibold uppercase tracking-wider mb-1">Số lần Check-in</span>
+        <div className="bg-white dark:bg-[#171717] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] flex flex-col justify-center">
+          <span className="text-gray-500 dark:text-[#737373] text-xs font-semibold uppercase tracking-wider mb-1">Số lần Check-in</span>
           <span className="text-3xl font-black text-purple-600">{totalCheckIns}</span>
         </div>
-        <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155] flex flex-col justify-center">
-          <span className="text-gray-500 dark:text-[#64748B] text-xs font-semibold uppercase tracking-wider mb-1">Trạng thái rủi ro</span>
+        <div className="bg-white dark:bg-[#171717] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] flex flex-col justify-center">
+          <span className="text-gray-500 dark:text-[#737373] text-xs font-semibold uppercase tracking-wider mb-1">Trạng thái rủi ro</span>
           <span className={`text-xl mt-1 font-bold inline-flex items-center gap-1 ${
             latestRisk === 'RED' ? 'text-red-600' : latestRisk === 'YELLOW' ? 'text-yellow-600' : 'text-green-600'
           }`}>
@@ -184,7 +184,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-[#F1F5F9] mb-4">Các dự án của bạn</h3>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-[#EDEDED] mb-4">Các dự án của bạn</h3>
           {projects.length === 0 ? (
             <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 p-6 rounded-2xl text-yellow-800 dark:text-yellow-200 shadow-sm dark:shadow-none">
               <p className="font-semibold text-lg">Bạn chưa có dự án nào!</p>
@@ -198,41 +198,41 @@ export default async function DashboardPage() {
                 
                 return (
                   <a href={`/dashboard/${project.id}`} key={project.id} className="block group">
-                    <div className="bg-white dark:bg-[#1E293B] p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155] group-hover:border-blue-500 group-hover:shadow-md transition-all cursor-pointer">
+                    <div className="bg-white dark:bg-[#171717] p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] group-hover:border-blue-500 group-hover:shadow-md transition-all cursor-pointer">
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h3 className="text-xl font-black text-gray-900 dark:text-[#F1F5F9] tracking-tight group-hover:text-blue-600 transition-colors">{project.title}</h3>
+                          <h3 className="text-xl font-black text-gray-900 dark:text-[#EDEDED] tracking-tight group-hover:text-blue-600 transition-colors">{project.title}</h3>
                           <span className="inline-flex items-center px-3 py-1 mt-2 text-xs font-semibold rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
                             Track: {project.track.replace(/_/g, ' ')}
                           </span>
                           {project.status !== 'ACTIVE' && (
-                            <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 text-xs font-semibold rounded-full bg-gray-100 dark:bg-[#334155] text-gray-700 dark:text-[#CBD5E1]">
+                            <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 text-xs font-semibold rounded-full bg-gray-100 dark:bg-[#262626] text-gray-700 dark:text-[#D4D4D4]">
                               Trạng thái: {project.status}
                             </span>
                           )}
                         </div>
-                        <div className="text-right text-sm text-gray-500 dark:text-[#64748B] font-medium bg-gray-50 dark:bg-[#0F172A] px-3 py-1.5 rounded-lg border border-gray-100 dark:border-[#334155]">
+                        <div className="text-right text-sm text-gray-500 dark:text-[#737373] font-medium bg-gray-50 dark:bg-[#0A0A0A] px-3 py-1.5 rounded-lg border border-gray-100 dark:border-[#262626]">
                           {project.startDate.toLocaleDateString('vi-VN')} - {project.endDate.toLocaleDateString('vi-VN')}
                         </div>
                       </div>
                       
                       <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-50">
                         <div>
-                          <p className="text-xs text-gray-500 dark:text-[#64748B] font-medium uppercase mb-1">Tiến độ công việc</p>
+                          <p className="text-xs text-gray-500 dark:text-[#737373] font-medium uppercase mb-1">Tiến độ công việc</p>
                           <div className="flex items-center gap-3">
-                            <div className="flex-1 h-2 bg-gray-100 dark:bg-[#334155] rounded-full overflow-hidden">
+                            <div className="flex-1 h-2 bg-gray-100 dark:bg-[#262626] rounded-full overflow-hidden">
                               <div className="h-full bg-blue-500 rounded-full" style={{ width: `${progress}%` }}></div>
                             </div>
-                            <span className="text-sm font-bold text-gray-700 dark:text-[#CBD5E1]">{progress}%</span>
+                            <span className="text-sm font-bold text-gray-700 dark:text-[#D4D4D4]">{progress}%</span>
                           </div>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500 dark:text-[#64748B] font-medium uppercase mb-1">Check-ins</p>
-                          <p className="text-sm font-bold text-gray-700 dark:text-[#CBD5E1]">{project.checkIns.length} lần</p>
+                          <p className="text-xs text-gray-500 dark:text-[#737373] font-medium uppercase mb-1">Check-ins</p>
+                          <p className="text-sm font-bold text-gray-700 dark:text-[#D4D4D4]">{project.checkIns.length} lần</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500 dark:text-[#64748B] font-medium uppercase mb-1">Sprints</p>
-                          <p className="text-sm font-bold text-gray-700 dark:text-[#CBD5E1]">{project.sprints.length} Sprints</p>
+                          <p className="text-xs text-gray-500 dark:text-[#737373] font-medium uppercase mb-1">Sprints</p>
+                          <p className="text-sm font-bold text-gray-700 dark:text-[#D4D4D4]">{project.sprints.length} Sprints</p>
                         </div>
                       </div>
                     </div>
@@ -244,14 +244,14 @@ export default async function DashboardPage() {
         </div>
 
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-[#1E293B] p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155] sticky top-6">
-            <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-[#F1F5F9]">Thông báo</h3>
-            <p className="text-sm text-gray-600 dark:text-[#94A3B8] leading-relaxed">
+          <div className="bg-white dark:bg-[#171717] p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] sticky top-6">
+            <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-[#EDEDED]">Thông báo</h3>
+            <p className="text-sm text-gray-600 dark:text-[#A3A3A3] leading-relaxed">
               Quyền tạo dự án thuộc về Mentor. Vui lòng liên hệ Mentor của bạn nếu cần phân bổ thêm dự án mới.
             </p>
-            <div className="mt-6 pt-6 border-t border-gray-100 dark:border-[#334155]">
-              <h4 className="text-sm font-bold text-gray-900 dark:text-[#F1F5F9] mb-2">Lời khuyên (Agile)</h4>
-              <ul className="text-sm text-gray-600 dark:text-[#94A3B8] space-y-2 list-disc pl-4 marker:text-gray-300">
+            <div className="mt-6 pt-6 border-t border-gray-100 dark:border-[#262626]">
+              <h4 className="text-sm font-bold text-gray-900 dark:text-[#EDEDED] mb-2">Lời khuyên (Agile)</h4>
+              <ul className="text-sm text-gray-600 dark:text-[#A3A3A3] space-y-2 list-disc pl-4 marker:text-gray-300">
                 <li>Luôn cập nhật Daily Check-in đầy đủ.</li>
                 <li>Không sử dụng % complete làm chỉ số duy nhất để đánh giá dự án.</li>
                 <li>Gắn Evidence Link minh chứng cho các công việc Done.</li>

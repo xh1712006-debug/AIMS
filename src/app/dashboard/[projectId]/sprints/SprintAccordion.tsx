@@ -56,9 +56,9 @@ export default function SprintAccordion({
   }
 
   return (
-    <div className="bg-white dark:bg-[#1E293B] rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#334155] overflow-hidden transition-all duration-200">
+    <div className="bg-white dark:bg-[#171717] rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] overflow-hidden transition-all duration-200">
       <div 
-        className={`relative flex justify-between items-center px-5 py-4 cursor-pointer hover:bg-gray-50 dark:bg-[#0F172A] transition-colors ${isOpen ? 'border-b border-gray-100 dark:border-[#334155] pb-3' : ''} ${isPending ? 'opacity-50' : ''}`}
+        className={`relative flex justify-between items-center px-5 py-4 cursor-pointer hover:bg-gray-50 dark:bg-[#0A0A0A] transition-colors ${isOpen ? 'border-b border-gray-100 dark:border-[#262626] pb-3' : ''} ${isPending ? 'opacity-50' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
         onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('bg-blue-50 dark:bg-blue-900/30'); }}
         onDragLeave={(e) => { e.currentTarget.classList.remove('bg-blue-50 dark:bg-blue-900/30'); }}
@@ -70,7 +70,7 @@ export default function SprintAccordion({
         />
         <div className="flex items-center gap-2">
           <button 
-            className={`p-0.5 rounded-md text-gray-400 dark:text-[#475569] hover:text-gray-700 dark:text-[#CBD5E1] hover:bg-gray-200 transition-all ${isOpen ? 'rotate-90' : ''}`}
+            className={`p-0.5 rounded-md text-gray-400 dark:text-[#383838] hover:text-gray-700 dark:text-[#D4D4D4] hover:bg-gray-200 transition-all ${isOpen ? 'rotate-90' : ''}`}
             onClick={(e) => {
               e.stopPropagation();
               setIsOpen(!isOpen);
@@ -81,7 +81,7 @@ export default function SprintAccordion({
             </svg>
           </button>
           <div>
-            <h3 className="text-base font-bold text-gray-800 dark:text-[#F1F5F9] flex items-center gap-2">
+            <h3 className="text-base font-bold text-gray-800 dark:text-[#EDEDED] flex items-center gap-2">
               {sprint.name}
               <span className="text-[11px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-md">
                 {sprint.workItems.length} công việc
@@ -90,7 +90,7 @@ export default function SprintAccordion({
           </div>
         </div>
         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-          <span className="text-xs font-medium text-gray-500 dark:text-[#64748B] bg-gray-50 dark:bg-[#0F172A] border border-gray-100 dark:border-[#334155] px-2.5 py-0.5 rounded-md">
+          <span className="text-xs font-medium text-gray-500 dark:text-[#737373] bg-gray-50 dark:bg-[#0A0A0A] border border-gray-100 dark:border-[#262626] px-2.5 py-0.5 rounded-md">
             {new Date(sprint.startDate).toLocaleDateString('vi-VN')} - {new Date(sprint.endDate).toLocaleDateString('vi-VN')}
           </span>
           {isIntern && (
@@ -106,19 +106,19 @@ export default function SprintAccordion({
         }`}
       >
         <div className="overflow-hidden">
-          <div className="px-5 pb-4 pt-2 space-y-3 bg-gray-50/50 dark:bg-[#0F172A]/50">
+          <div className="px-5 pb-4 pt-2 space-y-3 bg-gray-50/50 dark:bg-[#0A0A0A]/50">
             {/* Definition of Done Banner */}
             {currentGuide && (
               <div className="flex items-start gap-2 mb-3 px-2">
                 <span className="text-amber-500 text-xs mt-0.5">💡</span>
                 <div className="text-xs">
-                  <span className="font-bold text-gray-700 dark:text-[#CBD5E1]">Chuẩn đầu ra ({currentGuide.name}): </span>
-                  <span className="text-gray-600 dark:text-[#94A3B8]">{currentGuide.dod}</span>
+                  <span className="font-bold text-gray-700 dark:text-[#D4D4D4]">Chuẩn đầu ra ({currentGuide.name}): </span>
+                  <span className="text-gray-600 dark:text-[#A3A3A3]">{currentGuide.dod}</span>
                 </div>
               </div>
             )}
             {sprint.workItems.length === 0 ? (
-              <p className="text-gray-500 dark:text-[#64748B] text-sm italic py-2 text-center">Sprint này chưa có công việc nào.</p>
+              <p className="text-gray-500 dark:text-[#737373] text-sm italic py-2 text-center">Sprint này chưa có công việc nào.</p>
             ) : (
               sprint.workItems.map((item: any) => (
                 <WorkItemRow 
@@ -132,7 +132,7 @@ export default function SprintAccordion({
             )}
             
             {isIntern && (
-              <div className="mt-1 border-t border-gray-100 dark:border-[#334155] pt-1">
+              <div className="mt-1 border-t border-gray-100 dark:border-[#262626] pt-1">
                 <QuickAddWorkItem 
                   sprintId={sprint.id} 
                   projectId={projectId} 
