@@ -49,18 +49,21 @@ export default async function CheckInsPage(props: { params: Promise<{ projectId:
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <h2 className="text-3xl font-extrabold mb-8 tracking-tight" style={{ color: 'var(--text-primary)' }}>Daily Check-ins</h2>
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Daily Check-ins</h2>
+        <p className="text-sm text-gray-500 mt-1">Báo cáo tiến độ hàng ngày và cập nhật các khó khăn.</p>
+      </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className={session.user.role === 'INTERN' ? "lg:col-span-2" : "lg:col-span-3"}>
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-bold mb-4 text-gray-900">Lịch sử báo cáo</h3>
-            <div className="space-y-4">
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+            <h3 className="text-base font-bold mb-3 text-gray-900">Lịch sử báo cáo</h3>
+            <div className="space-y-3">
               {checkIns.length === 0 ? (
                 <p className="text-gray-500 text-sm italic">Chưa có báo cáo nào.</p>
               ) : (
                 checkIns.map((ci) => (
-                  <div key={ci.id} className="p-4 rounded-xl border border-gray-100 bg-gray-50/50">
+                  <div key={ci.id} className="p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 transition-colors">
                     <div className="flex justify-between items-center mb-3">
                       <span className="text-sm font-bold text-gray-500">
                         {new Date(ci.createdAt).toLocaleString('vi-VN')}
@@ -111,8 +114,8 @@ export default async function CheckInsPage(props: { params: Promise<{ projectId:
 
         {session.user.role === 'INTERN' && (
           <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-6">
-              <h3 className="text-lg font-bold mb-4 text-gray-900">Báo cáo hôm nay</h3>
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 sticky top-6">
+              <h3 className="text-base font-bold mb-3 text-gray-900">Báo cáo hôm nay</h3>
               <form action={createCheckIn} className="space-y-4">
                 <input type="hidden" name="projectId" value={projectId} />
                 <div>
