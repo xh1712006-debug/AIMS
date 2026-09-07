@@ -90,7 +90,7 @@ export default function QuickAddWorkItem({
             required
             autoComplete="off"
             placeholder="Thêm công việc mới vào Sprint (nhấn Enter để lưu)..."
-            className="w-full bg-transparent text-sm border-none focus:ring-0 text-gray-900 placeholder:text-gray-400 p-1"
+            className="w-full bg-transparent text-sm border-0 ring-0 focus:border-0 focus:ring-0 focus:outline-none text-gray-900 placeholder:text-gray-400 p-1 shadow-none"
             value={inputValue}
             onChange={(e) => {
               setInputValue(e.target.value);
@@ -123,7 +123,7 @@ export default function QuickAddWorkItem({
 
       {/* Suggestions Dropdown */}
       {showSuggestions && filteredSuggestions.length > 0 && (
-        <div className="absolute z-10 w-full mt-1 bg-white rounded-xl shadow-lg border border-gray-100 max-h-60 overflow-y-auto">
+        <div className="mt-2 bg-white rounded-xl border border-gray-100 shadow-sm max-h-60 overflow-y-auto">
           <div className="p-2">
             <div className="text-xs font-bold text-gray-400 mb-2 px-2 uppercase tracking-wider">Công việc trong Backlog</div>
             {filteredSuggestions.map((item) => (
