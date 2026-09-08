@@ -69,48 +69,60 @@ export default function WorkItemRow({
         onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-blue-400', 'bg-blue-50 dark:bg-blue-900/30'); }}
         onDragLeave={(e) => { e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50 dark:bg-blue-900/30'); }}
         onDrop={handleDrop}
-        className={`group flex items-center justify-between p-3 bg-white dark:bg-[#171717] hover:bg-gray-50 dark:bg-[#0A0A0A] transition-all rounded-xl border hover:border-gray-300 dark:border-[#383838] shadow-sm dark:shadow-none cursor-grab active:cursor-grabbing ${isDeleting || isPending ? 'opacity-50 pointer-events-none' : 'border-gray-100 dark:border-[#262626]'}`}
+        className={`group flex items-center justify-between p-3 bg-white dark:bg-[#171717] hover:bg-gray-50/80 dark:hover:bg-[#262626]/50 transition-all rounded-xl border border-transparent hover:border-gray-200 dark:hover:border-[#383838] shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:shadow-sm dark:shadow-none cursor-grab active:cursor-grabbing ${isDeleting || isPending ? 'opacity-50 pointer-events-none' : 'border-gray-100 dark:border-[#262626]'}`}
       >
-        <div className="flex-1 min-w-0 pr-4 flex items-start gap-3">
-          <div className="mt-0.5 text-gray-300 cursor-grab active:cursor-grabbing hover:text-gray-500 dark:text-[#737373]">
+        <div className="flex-1 min-w-0 pr-4 flex items-center gap-3">
+          <div className="text-gray-300 cursor-grab active:cursor-grabbing hover:text-gray-500 dark:text-[#737373]">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
           </div>
-          <div>
-            <p className="font-bold text-gray-900 dark:text-[#EDEDED] text-sm truncate">{item.title}</p>
-            <div className="flex items-center gap-2 mt-1.5">
-            <span className={`px-2 py-0.5 text-[11px] rounded-md font-bold border ${getTypeColor(item.type)}`}>
-              {item.type}
-            </span>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <p className="font-medium text-gray-900 dark:text-[#EDEDED] text-sm truncate mr-1">{item.title}</p>
+          </div>
+        </div>
+        
+      <div className="flex items-center gap-3 shrink-0">
+        <div className="hidden md:flex items-center gap-3">
+          {/* Priority Column */}
+          <div className="w-[90px] flex justify-end">
             {item.priority ? (
               <span 
-                className="px-2 py-0.5 text-[11px] rounded-md font-bold border opacity-90"
+                className="px-2 py-0.5 text-[10px] uppercase tracking-wider rounded font-bold border opacity-90 truncate max-w-full"
                 style={{ 
-                  backgroundColor: item.priority.color ? `${item.priority.color}20` : '#f3f4f6', 
+                  backgroundColor: item.priority.color ? `${item.priority.color}15` : '#f3f4f6', 
                   color: item.priority.color || '#374151',
-                  borderColor: item.priority.color ? `${item.priority.color}40` : '#e5e7eb'
+                  borderColor: item.priority.color ? `${item.priority.color}30` : '#e5e7eb'
                 }}
+                title={item.priority.name}
               >
                 {item.priority.name}
               </span>
             ) : (
-              <span className="px-2 py-0.5 text-[11px] rounded-md font-bold border bg-gray-100 dark:bg-[#262626] text-gray-500 dark:text-[#737373] border-gray-200 dark:border-[#383838] opacity-90">
-                Chưa phân loại
+              <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider rounded font-bold border bg-gray-50 dark:bg-[#262626] text-gray-400 dark:text-[#737373] border-gray-100 dark:border-[#383838] opacity-90 truncate max-w-full" title="Chưa phân loại">
+                Chưa PL
               </span>
             )}
           </div>
+          
+          {/* Type Column */}
+          <div className="w-[70px] flex justify-end">
+            <span className={`px-2 py-0.5 text-[10px] uppercase tracking-wider rounded font-bold border truncate max-w-full ${getTypeColor(item.type)}`} title={item.type}>
+              {item.type}
+            </span>
+          </div>
         </div>
-      </div>
-        
-      <div className="flex items-center gap-3">
-        <span className={`px-2.5 py-1 text-xs font-bold rounded-lg whitespace-nowrap border ${
-            item.status === 'DONE' ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800' :
-            item.status === 'IN_PROGRESS' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800' :
-            item.status === 'REVIEW' ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800' :
-            item.status === 'BLOCKED' ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800' :
-            'bg-gray-100 dark:bg-[#262626] text-gray-600 dark:text-[#A3A3A3] border-gray-200 dark:border-[#383838]'
+
+        {/* Status Column */}
+        <div className="w-[100px] flex justify-end">
+          <span className={`px-2.5 py-1 text-[11px] uppercase tracking-wider font-bold rounded-md whitespace-nowrap border w-full text-center ${
+            item.status === 'DONE' ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200/50 dark:border-green-800' :
+            item.status === 'IN_PROGRESS' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200/50 dark:border-blue-800' :
+            item.status === 'REVIEW' ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200/50 dark:border-purple-800' :
+            item.status === 'BLOCKED' ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200/50 dark:border-red-800' :
+            'bg-gray-50 dark:bg-[#262626] text-gray-500 dark:text-[#A3A3A3] border-gray-200/50 dark:border-[#383838]'
           }`}>
             {item.status.replace('_', ' ')}
           </span>
+        </div>
 
           {isIntern && (
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

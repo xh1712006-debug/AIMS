@@ -1,7 +1,9 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import Link from "next/link";
 import CreateProjectForm from "./CreateProjectForm";
+import MentorCharts from "./MentorCharts";
 import InternCharts from "./InternCharts";
 import { calculateProjectRisk } from "@/lib/risk";
 
@@ -21,103 +23,276 @@ export default async function DashboardPage() {
       where: { role: 'INTERN' },
       include: {
         projects: {
+          where: { status: 'ACTIVE' },
           include: {
             checkIns: { orderBy: { createdAt: 'desc' } },
-            workItems: { select: { status: true } }
+            workItems: true,
+            sprints: { include: { sprintReview: true } }
           }
         }
       }
     });
 
+    // 1. Calculate Metrics & Insights
+    let activeProjects = 0;
+    let atRiskProjects = 0;
+    
+    type ActionItem = { id: string, type: 'MISSING_CHECKIN' | 'BLOCKED_TASK' | 'PENDING_REVIEW', title: string, internName: string, link: string, urgency: 'high' | 'medium' };
+    const pendingActions: ActionItem[] = [];
+
+    const now = new Date();
+    const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+
+    interns.forEach(intern => {
+      intern.projects.forEach(p => {
+        activeProjects++;
+        
+        const risk = calculateProjectRisk(p as any);
+        if (risk === 'RED' || risk === 'YELLOW') atRiskProjects++;
+
+        // Insight 1: Missing Check-in
+        const lastCheckIn = p.checkIns[0];
+        if (!lastCheckIn || lastCheckIn.createdAt < twoDaysAgo) {
+          pendingActions.push({
+            id: `chk-${p.id}`,
+            type: 'MISSING_CHECKIN',
+            title: 'Chưa Check-in (>2 ngày)',
+            internName: intern.name,
+            link: `/dashboard/${p.id}`,
+            urgency: 'medium'
+          });
+        }
+
+        // Insight 2: Blocked Tasks
+        const blockedTasks = p.workItems.filter(wi => wi.status === 'BLOCKED');
+        blockedTasks.forEach(task => {
+          pendingActions.push({
+            id: `blk-${task.id}`,
+            type: 'BLOCKED_TASK',
+            title: `Task kẹt: ${task.title.substring(0, 20)}...`,
+            internName: intern.name,
+            link: `/dashboard/${p.id}/sprints`,
+            urgency: 'high'
+          });
+        });
+
+        // Insight 3: Pending Sprint Review
+        p.sprints.forEach(sprint => {
+          if (sprint.endDate < now && !sprint.sprintReview) {
+            pendingActions.push({
+              id: `rvw-${sprint.id}`,
+              type: 'PENDING_REVIEW',
+              title: `Thiếu Đánh giá: ${sprint.name}`,
+              internName: intern.name,
+              link: `/dashboard/${p.id}/sprints`,
+              urgency: 'high'
+            });
+          }
+        });
+      });
+    });
+
+    // Sort actions by urgency
+    pendingActions.sort((a, b) => (a.urgency === 'high' ? -1 : 1));
+
     return (
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <h2 className="text-3xl font-extrabold mb-8 tracking-tight" style={{ color: 'var(--text-primary)' }}>Tổng quan Hệ thống</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="aims-card p-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Tổng số Interns</h3>
-              <p className="text-4xl font-black mt-2" style={{ color: 'var(--text-primary)' }}>{interns.length}</p>
-            </div>
-            <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--accent-light)', color: 'var(--accent)' }}>
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-            </div>
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Trung tâm Quản lý (Command Center)</h2>
+            <p className="text-gray-500 dark:text-[#A3A3A3] mt-2">Theo dõi tiến độ và xử lý các điểm nghẽn của Thực tập sinh.</p>
           </div>
-          <div className="aims-card p-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Cảnh báo rủi ro</h3>
-              <p className="text-4xl font-black mt-2" style={{ color: 'var(--danger)' }}>
-                {interns.filter(i => i.projects.some(p => {
-                  const risk = calculateProjectRisk(p as any);
-                  return risk === 'RED' || risk === 'YELLOW';
-                })).length}
-              </p>
+          <div>
+            <CreateProjectForm interns={interns} />
+          </div>
+        </div>
+        
+        {/* TOP METRICS */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white dark:bg-[#171717] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] flex flex-col justify-center">
+            <span className="text-gray-500 dark:text-[#737373] text-[10px] font-bold uppercase tracking-wider mb-1">Tổng Interns</span>
+            <span className="text-3xl font-black text-gray-900 dark:text-[#EDEDED]">{interns.length}</span>
+          </div>
+          <div className="bg-white dark:bg-[#171717] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] flex flex-col justify-center">
+            <span className="text-gray-500 dark:text-[#737373] text-[10px] font-bold uppercase tracking-wider mb-1">Dự án đang chạy</span>
+            <span className="text-3xl font-black text-blue-600">{activeProjects}</span>
+          </div>
+          <div className="bg-white dark:bg-[#171717] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] flex flex-col justify-center">
+            <span className="text-gray-500 dark:text-[#737373] text-[10px] font-bold uppercase tracking-wider mb-1">Cảnh báo rủi ro</span>
+            <span className="text-3xl font-black text-red-500">{atRiskProjects}</span>
+          </div>
+          <div className="bg-white dark:bg-[#171717] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] flex flex-col justify-center relative overflow-hidden">
+            <div className="relative z-10">
+              <span className="text-gray-500 dark:text-[#737373] text-[10px] font-bold uppercase tracking-wider mb-1">Cần Mentor xử lý</span>
+              <span className="text-3xl font-black text-purple-600">{pendingActions.length}</span>
             </div>
-            <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--danger-light)', color: 'var(--danger)' }}>
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-            </div>
+            {pendingActions.length > 0 && (
+              <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full animate-pulse"></div>
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 aims-card overflow-hidden">
-            <div className="p-6" style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-muted)' }}>
-              <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Danh sách Interns theo dõi</h3>
+        {/* BIỂU ĐỒ TỔNG HỢP MENTOR */}
+        {interns.length > 0 && (
+          <MentorCharts interns={interns} />
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* MAIN TABLE */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white dark:bg-[#171717] rounded-2xl shadow-sm border border-gray-100 dark:border-[#262626] overflow-hidden min-h-[400px] flex flex-col">
+              <div className="p-5 border-b border-gray-100 dark:border-[#262626] flex justify-between items-center bg-gray-50/50 dark:bg-[#0A0A0A]/50">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-[#EDEDED]">Danh sách Interns theo dõi</h3>
+              </div>
+              <div className="overflow-x-auto flex-1">
+                <table className="min-w-full text-left">
+                  <thead className="bg-gray-50/50 dark:bg-[#0A0A0A]/50 border-b border-gray-100 dark:border-[#262626]">
+                    <tr>
+                      <th className="px-5 py-3 text-[10px] font-bold text-gray-500 dark:text-[#737373] uppercase tracking-wider">Thực tập sinh</th>
+                      <th className="px-5 py-3 text-[10px] font-bold text-gray-500 dark:text-[#737373] uppercase tracking-wider">Dự án & Tiến độ</th>
+                      <th className="px-5 py-3 text-[10px] font-bold text-gray-500 dark:text-[#737373] uppercase tracking-wider text-center">Trạng thái (Risk)</th>
+                      <th className="px-5 py-3 text-[10px] font-bold text-gray-500 dark:text-[#737373] uppercase tracking-wider text-right">Báo cáo gần nhất</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-[#262626]">
+                    {[...interns]
+                      .sort((a, b) => {
+                        const riskA = a.projects[0] ? calculateProjectRisk(a.projects[0] as any) : 'N/A';
+                        const riskB = b.projects[0] ? calculateProjectRisk(b.projects[0] as any) : 'N/A';
+                        const weight: Record<string, number> = { 'RED': 3, 'YELLOW': 2, 'GREEN': 1, 'N/A': 0 };
+                        return weight[riskB] - weight[riskA];
+                      })
+                      .slice(0, 4)
+                      .map(intern => {
+                      const project = intern.projects[0];
+                      const risk = project ? calculateProjectRisk(project as any) : 'N/A';
+                      
+                      let progress = 0;
+                      if (project && project.workItems.length > 0) {
+                        const done = project.workItems.filter(w => w.status === 'DONE').length;
+                        progress = Math.round((done / project.workItems.length) * 100);
+                      }
+
+                      return (
+                      <tr key={intern.id} className="hover:bg-gray-50/50 dark:hover:bg-[#262626]/50 transition-colors group">
+                        <td className="px-5 py-4">
+                          <Link href={project ? `/dashboard/${project.id}` : '#'} className="block">
+                            <div className="font-bold text-sm text-gray-900 dark:text-[#EDEDED] group-hover:text-blue-600 transition-colors">{intern.name}</div>
+                            <div className="text-xs mt-0.5 text-gray-500 dark:text-[#737373]">{intern.email}</div>
+                          </Link>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="text-sm font-semibold text-gray-800 dark:text-[#D4D4D4] mb-1.5 truncate max-w-[200px]">
+                            {project?.title || 'Chưa phân bổ'}
+                          </div>
+                          {project && (
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 h-1.5 bg-gray-100 dark:bg-[#383838] rounded-full overflow-hidden w-24">
+                                <div className="h-full bg-blue-500 rounded-full" style={{ width: `${progress}%` }}></div>
+                              </div>
+                              <span className="text-[10px] font-bold text-gray-500">{progress}%</span>
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-5 py-4 text-center">
+                          {risk !== 'N/A' ? (
+                            <span className={`inline-flex items-center justify-center px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md ${
+                              risk === 'RED' ? 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/30 dark:border-red-800 dark:text-red-400' :
+                              risk === 'YELLOW' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200 dark:bg-yellow-900/30 dark:border-yellow-800 dark:text-yellow-400' :
+                              'bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:border-green-800 dark:text-green-400'
+                            }`}>
+                              {risk}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="px-5 py-4 text-right">
+                          <div className="text-xs font-medium text-gray-600 dark:text-[#A3A3A3]">
+                            {project?.checkIns[0]?.createdAt 
+                              ? new Date(project.checkIns[0].createdAt).toLocaleDateString('vi-VN') 
+                              : 'Chưa có'}
+                          </div>
+                        </td>
+                      </tr>
+                      );
+                    })}
+                    {interns.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="px-5 py-8 text-center text-sm text-gray-500">
+                          Chưa có thực tập sinh nào.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              
+              {interns.length > 4 && (
+                <div className="p-4 border-t border-gray-100 dark:border-[#262626] bg-gray-50/50 dark:bg-[#0A0A0A]/50 text-center mt-auto">
+                  <Link href="/dashboard/members" className="text-[13px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors flex items-center justify-center gap-1.5">
+                    Xem toàn bộ {interns.length} Thực tập sinh
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                  </Link>
+                </div>
+              )}
             </div>
-            <table className="min-w-full">
-              <thead style={{ backgroundColor: 'var(--bg-muted)' }}>
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}>Thực tập sinh</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}>Dự án</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}>Trạng thái (Risk)</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}>Báo cáo gần nhất</th>
-                </tr>
-              </thead>
-              <tbody>
-                {interns.map(intern => {
-                  const risk = intern.projects[0] ? calculateProjectRisk(intern.projects[0] as any) : 'N/A';
-                  return (
-                  <tr key={intern.id} className="transition-colors" style={{ borderBottom: '1px solid var(--border-muted)' }}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{intern.name}</div>
-                      <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{intern.email}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{intern.projects[0]?.title || 'Chưa phân bổ'}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-full ${
-                        risk === 'RED' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' :
-                        risk === 'YELLOW' ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300' :
-                        risk === 'GREEN' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-[#262626] text-gray-700 dark:text-[#D4D4D4]'
-                      }`}>
-                        <span className={`w-2 h-2 rounded-full mr-2 ${risk === 'RED' ? 'bg-red-500' : risk === 'YELLOW' ? 'bg-yellow-500' : risk === 'GREEN' ? 'bg-green-500' : 'bg-gray-500'}`}></span>
-                        {risk}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      {intern.projects[0]?.checkIns[0]?.createdAt 
-                        ? new Date(intern.projects[0].checkIns[0].createdAt).toLocaleDateString('vi-VN') 
-                        : 'Chưa có dữ liệu'}
-                    </td>
-                  </tr>
-                  );
-                })}
-                {interns.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
-                      Chưa có thực tập sinh nào trong hệ thống.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
           </div>
 
-          <div className="lg:col-span-1">
-            <div className="aims-card p-6 sticky top-6">
-              <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Phân công Dự án Mới</h3>
-              <CreateProjectForm interns={interns} />
+          {/* ACTIONABLE INSIGHTS & UTILITIES */}
+          <div className="lg:col-span-1 space-y-6">
+            
+            {/* Insights Panel */}
+            <div className="bg-white dark:bg-[#171717] rounded-2xl shadow-sm border border-gray-100 dark:border-[#262626] overflow-hidden sticky top-6">
+              <div className="p-4 border-b border-gray-100 dark:border-[#262626] bg-gradient-to-r from-purple-50 to-white dark:from-purple-900/10 dark:to-[#171717]">
+                <h3 className="font-bold text-gray-900 dark:text-[#EDEDED] flex items-center gap-2">
+                  <span className="text-purple-600 dark:text-purple-400">⚡</span> Hoạt động Cần xử lý
+                </h3>
+              </div>
+              <div className="p-4 max-h-[500px] overflow-y-auto">
+                {pendingActions.length === 0 ? (
+                  <div className="text-center py-10">
+                    <div className="text-4xl mb-3">🎉</div>
+                    <p className="text-sm text-gray-500 font-medium">Tuyệt vời! Không có việc gì tồn đọng.</p>
+                    <p className="text-xs text-gray-400 mt-1">Đội ngũ của bạn đang hoạt động rất trơn tru.</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col h-full">
+                    <ul className="space-y-3 flex-1">
+                      {pendingActions.slice(0, 4).map(action => (
+                        <li key={action.id}>
+                          <Link href={action.link} className={`block p-3 rounded-xl border transition-colors hover:shadow-sm ${
+                            action.urgency === 'high' 
+                              ? 'bg-red-50/50 border-red-100 hover:bg-red-50 dark:bg-red-900/10 dark:border-red-900/30' 
+                              : 'bg-orange-50/50 border-orange-100 hover:bg-orange-50 dark:bg-orange-900/10 dark:border-orange-900/30'
+                          }`}>
+                            <div className="flex justify-between items-start mb-1">
+                              <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                                action.urgency === 'high' ? 'text-red-600 dark:text-red-400' : 'text-orange-600 dark:text-orange-400'
+                              }`}>
+                                {action.type === 'MISSING_CHECKIN' ? 'Bỏ lỡ Check-in' : action.type === 'BLOCKED_TASK' ? 'Task bị kẹt' : 'Chưa Review'}
+                              </span>
+                              <span className="text-[10px] font-semibold text-gray-500">{action.internName}</span>
+                            </div>
+                            <p className="text-xs font-semibold text-gray-900 dark:text-[#EDEDED] leading-relaxed">{action.title}</p>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                    
+                    {pendingActions.length > 4 && (
+                      <div className="mt-4 pt-3 border-t border-gray-100 dark:border-[#262626] text-center">
+                        <Link href="/dashboard/mentor/inbox" className="text-[12px] font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 flex items-center justify-center gap-1.5 transition-colors">
+                          + {pendingActions.length - 4} hoạt động khác chưa xử lý
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
+
           </div>
         </div>
       </div>

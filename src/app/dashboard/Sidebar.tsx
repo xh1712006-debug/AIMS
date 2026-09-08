@@ -5,28 +5,33 @@ import { usePathname } from "next/navigation";
 import LogoutButton from "./LogoutButton";
 import ThemeToggle from "@/components/ThemeToggle";
 
-export default function Sidebar({ user, projects = [] }: { user: { name: string, email: string, role: string }, projects?: { id: string, title: string }[] }) {
+export default function Sidebar({ user, projects = [], pendingActionCount = 0 }: { user: { name: string, email: string, role: string }, projects?: { id: string, title: string }[], pendingActionCount?: number }) {
   const pathname = usePathname();
   
   const parts = pathname.split('/');
   const isDashboardRoot = pathname === '/dashboard';
   const projectId = (!isDashboardRoot && parts[2] && parts[2] !== 'interns' && parts[2] !== 'mentor') ? parts[2] : null;
 
-  const navLink = (href: string, label: string, exact = false) => {
+  const navLink = (href: string, label: string, exact = false, badge?: number) => {
     const isActive = exact ? pathname === href : pathname.startsWith(href) && href !== '/dashboard';
     const isRootActive = href === '/dashboard' && pathname === '/dashboard';
     const active = isActive || isRootActive;
     return (
       <Link
         href={href}
-        className="block px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150"
+        className="px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150 flex justify-between items-center"
         style={{
           backgroundColor: active ? 'var(--sidebar-active-bg)' : 'transparent',
           color: active ? 'var(--sidebar-active-text)' : 'var(--sidebar-text)',
           fontWeight: active ? '600' : '500',
         }}
       >
-        {label}
+        <span>{label}</span>
+        {badge !== undefined && badge > 0 && (
+          <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full min-w-[20px] text-center">
+            {badge}
+          </span>
+        )}
       </Link>
     );
   };
@@ -114,6 +119,7 @@ export default function Sidebar({ user, projects = [] }: { user: { name: string,
               <p className="px-3 text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
                 Công cụ Quản lý
               </p>
+              {navLink('/dashboard/mentor/inbox', 'Hộp thư Xử lý (Inbox)', false, pendingActionCount)}
               {navLink('/dashboard/mentor/projects', 'Danh mục Dự án (Portfolios)')}
               {navLink('/dashboard/mentor/progress', 'Kiểm soát Tiến độ (Progress Tracker)')}
               {navLink('/dashboard/mentor/feedbacks', 'Chất lượng & Phản hồi (QA)')}
