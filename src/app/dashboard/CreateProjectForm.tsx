@@ -3,7 +3,15 @@
 import { createProject } from '@/app/actions';
 import { useState } from 'react';
 
-export default function CreateProjectForm({ interns }: { interns: { id: string, name: string | null, email: string | null }[] }) {
+export default function CreateProjectForm({ 
+  interns,
+  memberManagers,
+  partners
+}: { 
+  interns: { id: string, name: string | null, email: string | null }[],
+  memberManagers?: { id: string, name: string | null, email: string | null }[],
+  partners?: { id: string, name: string | null, email: string | null }[]
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [endDate, setEndDate] = useState('');
 
@@ -56,6 +64,24 @@ export default function CreateProjectForm({ interns }: { interns: { id: string, 
                     {interns.map(i => <option key={i.id} value={i.id}>{i.name} ({i.email})</option>)}
                   </select>
                 </div>
+                {memberManagers && memberManagers.length > 0 && (
+                  <div>
+                    <label className="block text-[13px] uppercase tracking-wider font-bold text-gray-500 dark:text-[#737373] mb-1.5">Quản lý Thành viên (Scrum Master)</label>
+                    <select name="memberManagerId" className="w-full rounded-xl border-gray-200 dark:border-[#383838] bg-white dark:bg-[#0A0A0A] text-gray-900 dark:text-[#EDEDED] focus:ring-2 focus:ring-blue-500 focus:border-transparent p-3 text-sm transition-shadow">
+                      <option value="">-- Tùy chọn --</option>
+                      {memberManagers.map(m => <option key={m.id} value={m.id}>{m.name} ({m.email})</option>)}
+                    </select>
+                  </div>
+                )}
+                {partners && partners.length > 0 && (
+                  <div>
+                    <label className="block text-[13px] uppercase tracking-wider font-bold text-gray-500 dark:text-[#737373] mb-1.5">Đối tác (Khách hàng)</label>
+                    <select name="partnerId" className="w-full rounded-xl border-gray-200 dark:border-[#383838] bg-white dark:bg-[#0A0A0A] text-gray-900 dark:text-[#EDEDED] focus:ring-2 focus:ring-blue-500 focus:border-transparent p-3 text-sm transition-shadow">
+                      <option value="">-- Tùy chọn --</option>
+                      {partners.map(p => <option key={p.id} value={p.id}>{p.name} ({p.email})</option>)}
+                    </select>
+                  </div>
+                )}
                 <div>
                   <label className="block text-[13px] uppercase tracking-wider font-bold text-gray-500 dark:text-[#737373] mb-1.5">Tên Dự án</label>
                   <input name="title" required type="text" className="w-full rounded-xl border-gray-200 dark:border-[#383838] bg-white dark:bg-[#0A0A0A] text-gray-900 dark:text-[#EDEDED] focus:ring-2 focus:ring-blue-500 focus:border-transparent p-3 text-sm transition-shadow" placeholder="VD: Ứng dụng E-commerce" />

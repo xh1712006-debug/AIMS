@@ -101,6 +101,48 @@ export default function LoginPage() {
               Đăng nhập →
             </button>
           </form>
+
+          {/* Quick Login for Testing */}
+          <div className="mt-8 pt-6" style={{ borderTop: '1px solid var(--border-color)' }}>
+            <p className="text-xs font-semibold mb-3 text-center" style={{ color: 'var(--text-muted)' }}>
+              Đăng nhập nhanh để test (Dev Mode)
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('admin@test.com');
+                  setPassword('password123');
+                }}
+                className="w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors border"
+                style={{ backgroundColor: 'transparent', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+              >
+                Tự điền tk Quản trị (Admin)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('projectManager@test.com');
+                  setPassword('password123');
+                }}
+                className="w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors border"
+                style={{ backgroundColor: 'transparent', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+              >
+                Tự điền tk ProjectManager
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('intern@test.com');
+                  setPassword('password123');
+                }}
+                className="w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors border"
+                style={{ backgroundColor: 'transparent', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+              >
+                Tự điền tk Intern
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

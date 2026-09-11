@@ -17,7 +17,9 @@ export default async function ProjectLayout(props: {
   const project = await prisma.project.findUnique({
     where: { 
       id: projectId,
-      ...(session.user.role === 'INTERN' ? { internId: session.user.id } : {}) 
+      ...(session.user.role === 'INTERN' ? { internId: session.user.id } :
+          session.user.role === 'MEMBER_MANAGER' ? { memberManagerId: session.user.id } :
+          session.user.role === 'PARTNER' ? { partnerId: session.user.id } : {})
     }
   });
 
@@ -27,7 +29,7 @@ export default async function ProjectLayout(props: {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="mb-4 flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
         <Link
-          href={session.user.role === 'MENTOR' ? '/dashboard/mentor/projects' : '/dashboard'}
+          href={session.user.role === 'PROJECT_MANAGER' ? '/dashboard/project-manager/projects' : '/dashboard'}
           className="hover:underline transition-colors"
           style={{ color: 'var(--accent)' }}
         >
@@ -35,7 +37,7 @@ export default async function ProjectLayout(props: {
         </Link>
       </div>
 
-      {session.user.role === 'MENTOR' && (
+      {session.user.role === 'PROJECT_MANAGER' && (
         <div
           className="p-6 md:p-8 rounded-2xl shadow-sm dark:shadow-none mb-6"
           style={{

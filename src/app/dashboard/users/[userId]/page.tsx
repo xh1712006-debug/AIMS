@@ -5,18 +5,18 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { calculateProjectRisk } from "@/lib/risk";
 
-export default async function InternDetailPage(props: { params: Promise<{ internId: string }> }) {
-  const { internId } = await props.params;
+export default async function InternDetailPage(props: { params: Promise<{ userId: string }> }) {
+  const { userId } = await props.params;
   const session = await getServerSession(authOptions);
   
-  if (!session?.user?.email || session.user.role !== 'MENTOR') {
+  if (!session?.user?.email || session.user.role !== 'ADMIN') {
     redirect('/dashboard');
   }
 
   const intern = await prisma.user.findUnique({
-    where: { id: internId, role: 'INTERN' },
+    where: { id: userId, role: 'INTERN' },
     include: {
-      projects: {
+      projectsAsIntern: {
         orderBy: { startDate: 'desc' },
         include: {
           sprints: {
@@ -39,7 +39,7 @@ export default async function InternDetailPage(props: { params: Promise<{ intern
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="mb-8">
-        <Link href="/dashboard/interns" className="text-sm font-semibold text-gray-500 dark:text-[#737373] hover:text-gray-900 dark:text-[#EDEDED] flex items-center mb-4 transition-colors">
+        <Link href="/dashboard/users" className="text-sm font-semibold text-gray-500 dark:text-[#737373] hover:text-gray-900 dark:text-[#EDEDED] flex items-center mb-4 transition-colors">
           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           Quay lại danh sách Interns
         </Link>
@@ -49,15 +49,15 @@ export default async function InternDetailPage(props: { params: Promise<{ intern
 
       <div className="space-y-6">
         <h3 className="text-xl font-bold text-gray-900 dark:text-[#EDEDED]">Các Dự án đang tham gia</h3>
-        {intern.projects.length === 0 ? (
+        {intern.projectsAsIntern.length === 0 ? (
           <div className="p-8 bg-gray-50 dark:bg-[#0A0A0A] rounded-2xl border border-gray-100 dark:border-[#262626] text-center text-gray-500 dark:text-[#737373]">
             Thực tập sinh này chưa được phân công dự án nào.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {intern.projects.map(project => {
-              const pendingItemsCount = project.workItems.filter(wi => wi.status !== 'DONE').length;
-              const risk = calculateProjectRisk(project as any);
+            {intern.projectsAsIntern.map((project: any) => {
+              const pendingItemsCount = project.workItems.filter((wi: any) => wi.status !== 'DONE').length;
+              const risk = calculateProjectRisk(project);
               return (
               <div key={project.id} className="bg-white dark:bg-[#171717] p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626]">
                 <div className="flex justify-between items-start mb-4">

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import CreateProjectForm from '@/app/dashboard/CreateProjectForm';
 
-export default function CreateProjectModal({ interns }: { interns: any[] }) {
+export default function CreateProjectModal({ interns, memberManagers, partners }: { interns: any[], memberManagers?: any[], partners?: any[] }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -32,7 +32,7 @@ export default function CreateProjectModal({ interns }: { interns: any[] }) {
             
             <div className="p-6">
                <div onSubmit={() => setTimeout(() => setIsOpen(false), 300)}>
-                 <CreateProjectForm interns={interns} />
+                 <CreateProjectForm interns={interns} memberManagers={memberManagers} partners={partners} />
                </div>
             </div>
           </div>

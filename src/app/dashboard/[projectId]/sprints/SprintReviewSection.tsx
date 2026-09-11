@@ -6,27 +6,27 @@ import { saveSprintReview } from '@/app/actions';
 export default function SprintReviewSection({
   sprintId,
   projectId,
-  isMentor,
+  isProjectManager,
   review
 }: {
   sprintId: string;
   projectId: string;
-  isMentor: boolean;
+  isProjectManager: boolean;
   review?: any;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  if (!isMentor && !review) {
+  if (!isProjectManager && !review) {
     return (
       <div className="mt-3 border-t border-gray-100 dark:border-[#262626] pt-3 flex justify-center">
         <span className="text-xs font-medium text-gray-400 dark:text-[#383838] bg-gray-50 dark:bg-[#0A0A0A] px-3 py-1 rounded-full italic flex items-center gap-1.5 border border-gray-100 dark:border-[#262626]">
-          <span className="animate-pulse">⏳</span> Đang chờ Mentor nghiệm thu Sprint này...
+          <span className="animate-pulse">⏳</span> Đang chờ ProjectManager nghiệm thu Sprint này...
         </span>
       </div>
     );
   }
 
-  if (isMentor) {
+  if (isProjectManager) {
     return (
       <div className="mt-4 border border-indigo-100 dark:border-indigo-900/50 bg-white dark:bg-[#171717] rounded-xl overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
         <div 
@@ -75,8 +75,8 @@ export default function SprintReviewSection({
             </div>
 
             <div className="pt-2">
-              <label className="block text-xs font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Đánh giá chung của Mentor</label>
-              <textarea name="mentorFeedback" defaultValue={review?.mentorFeedback || ''} rows={2} className="w-full rounded-lg border-gray-200 dark:border-[#383838] ring-1 ring-inset ring-transparent focus:ring-2 focus:ring-inset focus:ring-indigo-600 p-2.5 text-sm bg-gray-50/50 dark:bg-[#0A0A0A] hover:bg-white dark:hover:bg-[#171717] transition-colors" placeholder="Nhận xét tổng quan..."></textarea>
+              <label className="block text-xs font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Đánh giá chung của Quản lý</label>
+              <textarea name="managerFeedback" defaultValue={review?.managerFeedback || ''} rows={2} className="w-full rounded-lg border-gray-200 dark:border-[#383838] ring-1 ring-inset ring-transparent focus:ring-2 focus:ring-inset focus:ring-indigo-600 p-2.5 text-sm bg-gray-50/50 dark:bg-[#0A0A0A] hover:bg-white dark:hover:bg-[#171717] transition-colors" placeholder="Nhận xét tổng quan..."></textarea>
             </div>
 
             <div className="flex justify-end pt-3 border-t border-gray-100 dark:border-[#262626]">
@@ -97,7 +97,7 @@ export default function SprintReviewSection({
         onClick={() => setIsOpen(!isOpen)}
       >
         <h4 className="font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-2 text-sm">
-          <span>🎯</span> Nhật ký Nghiệm thu Sprint (Mentor Review)
+          <span>🎯</span> Nhật ký Nghiệm thu Sprint (ProjectManager Review)
         </h4>
         <button className="text-xs text-indigo-600 dark:text-indigo-400 font-medium bg-white dark:bg-[#171717] px-2.5 py-1 rounded-md border border-indigo-100 dark:border-indigo-800 shadow-sm hover:bg-indigo-50 dark:hover:bg-indigo-900 transition-colors flex items-center gap-1">
           {isOpen ? 'Đóng' : 'Xem chi tiết'}
@@ -141,11 +141,11 @@ export default function SprintReviewSection({
             )}
           </div>
 
-          {review.mentorFeedback && (
+          {review.managerFeedback && (
             <div className="pt-2">
-              <h5 className="text-[10px] font-bold text-gray-500 dark:text-[#737373] uppercase tracking-wider mb-1">Đánh giá chung của Mentor</h5>
+              <h5 className="text-[10px] font-bold text-gray-500 dark:text-[#737373] uppercase tracking-wider mb-1">Đánh giá chung của Quản lý</h5>
               <div className="text-sm text-gray-900 dark:text-[#EDEDED] bg-gray-50 dark:bg-[#0A0A0A] p-3 rounded-lg border border-gray-100 dark:border-[#262626] whitespace-pre-wrap font-medium">
-                "{review.mentorFeedback}"
+                "{review.managerFeedback}"
               </div>
             </div>
           )}

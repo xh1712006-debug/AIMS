@@ -25,7 +25,7 @@ export function getPendingActions(interns: any[]): PendingAction[] {
   const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
 
   interns.forEach(intern => {
-    intern.projects.forEach((p: any) => {
+    intern.projectsAsIntern?.forEach((p: any) => {
       // 1. Missing check-ins
       if (p.checkIns.length > 0) {
         const lastCheckInDate = new Date(p.checkIns[0].createdAt);
@@ -99,7 +99,7 @@ export function getResolvedActions(interns: any[]): ResolvedAction[] {
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
   interns.forEach(intern => {
-    intern.projects.forEach((p: any) => {
+    intern.projectsAsIntern?.forEach((p: any) => {
       // Recent Check-ins (within 7 days)
       p.checkIns?.forEach((chk: any) => {
         const chkDate = new Date(chk.createdAt);

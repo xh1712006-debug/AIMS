@@ -177,7 +177,7 @@ export default function SprintAccordion({
             <SprintReviewSection 
               sprintId={sprint.id}
               projectId={projectId}
-              isMentor={!isIntern}
+              isProjectManager={!isIntern}
               review={sprint.sprintReview}
             />
           </div>

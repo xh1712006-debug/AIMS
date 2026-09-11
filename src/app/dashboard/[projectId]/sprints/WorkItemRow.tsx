@@ -7,7 +7,8 @@ import { removeWorkItemFromSprint, updateWorkItemOrder } from '@/app/actions';
 export default function WorkItemRow({ 
   item, 
   projectId,
-  isIntern
+  isIntern,
+  priorityLevels
 }: { 
   item: any; 
   projectId: string;

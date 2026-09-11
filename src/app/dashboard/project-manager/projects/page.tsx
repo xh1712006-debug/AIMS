@@ -9,7 +9,7 @@ import EditProjectModal from "./EditProjectModal";
 export default async function MentorProjectsPage() {
   const session = await getServerSession(authOptions);
   
-  if (!session?.user || session.user.role !== 'MENTOR') {
+  if (!session?.user || session.user.role !== 'PROJECT_MANAGER') {
     redirect('/dashboard');
   }
 
@@ -25,6 +25,16 @@ export default async function MentorProjectsPage() {
     where: { role: 'INTERN' },
     select: { id: true, name: true, email: true }
   });
+  
+  const memberManagers = await prisma.user.findMany({
+    where: { role: 'MEMBER_MANAGER' },
+    select: { id: true, name: true, email: true }
+  });
+  
+  const partners = await prisma.user.findMany({
+    where: { role: 'PARTNER' },
+    select: { id: true, name: true, email: true }
+  });
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -33,7 +43,7 @@ export default async function MentorProjectsPage() {
           <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Quản lý Dự án Toàn cục</h2>
           <p className="text-gray-500 dark:text-[#737373] mt-2">Tổng hợp tất cả dự án của các sinh viên đang thực tập.</p>
         </div>
-        <CreateProjectModal interns={interns} />
+        <CreateProjectModal interns={interns} memberManagers={memberManagers} partners={partners} />
       </div>
 
       <div className="bg-white dark:bg-[#171717] rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] overflow-hidden">

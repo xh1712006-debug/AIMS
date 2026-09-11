@@ -1,50 +1,79 @@
-import { PrismaClient, Role, Track } from '@prisma/client'
-import bcrypt from 'bcryptjs'
+import { PrismaClient, Role } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
-  const passwordHash = await bcrypt.hash('170106', 10)
+  const password = await bcrypt.hash('password123', 10);
 
-  const mentor = await prisma.user.upsert({
-    where: { email: 'mentor@aims.local' },
-    update: {},
-    create: {
-      name: 'Mentor Admin',
-      email: 'mentor@aims.local',
-      password: passwordHash,
-      role: Role.MENTOR,
+  // 1. Create System Admin
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@test.com' },
+    update: {
+      password,
+      role: Role.ADMIN,
     },
-  })
+    create: {
+      email: 'admin@test.com',
+      name: 'System Admin',
+      password,
+      role: Role.ADMIN,
+    },
+  });
 
+  // 2. Create ProjectManager
+  const projectManager = await prisma.user.upsert({
+    where: { email: 'projectManager@test.com' },
+    update: {
+      password,
+      role: Role.PROJECT_MANAGER,
+    },
+    create: {
+      email: 'projectManager@test.com',
+      name: 'Test ProjectManager',
+      password,
+      role: Role.PROJECT_MANAGER,
+    },
+  });
+
+  // 3. Create Intern
   const intern = await prisma.user.upsert({
-    where: { email: 'intern@aims.local' },
-    update: {},
-    create: {
-      name: 'Nguyen Van A',
-      email: 'intern@aims.local',
-      password: passwordHash,
+    where: { email: 'intern@test.com' },
+    update: {
+      password,
       role: Role.INTERN,
-      projects: {
-        create: {
-          track: Track.SOFTWARE_DEVELOPMENT,
-          title: 'Web-based Internship Portal',
-          startDate: new Date('2026-08-17'),
-          endDate: new Date('2026-10-26'),
-        }
-      }
     },
-  })
+    create: {
+      email: 'intern@test.com',
+      name: 'Test Intern',
+      password,
+      role: Role.INTERN,
+    },
+  });
 
-  console.log('Seed dữ liệu thành công:', { mentor, intern })
+  // 4. Create Member Manager
+  const memberManager = await prisma.user.upsert({
+    where: { email: 'memberManager@test.com' },
+    update: { password, role: Role.MEMBER_MANAGER },
+    create: { email: 'memberManager@test.com', name: 'Test MemberManager', password, role: Role.MEMBER_MANAGER },
+  });
+
+  // 5. Create Partner
+  const partner = await prisma.user.upsert({
+    where: { email: 'partner@test.com' },
+    update: { password, role: Role.PARTNER },
+    create: { email: 'partner@test.com', name: 'Test Partner', password, role: Role.PARTNER },
+  });
+
+  console.log({ admin, projectManager, intern, memberManager, partner });
 }
 
 main()
   .then(async () => {
-    await prisma.$disconnect()
+    await prisma.$disconnect();
   })
   .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });

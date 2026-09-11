@@ -6,6 +6,17 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { SYSTEM_CONFIG } from "@/lib/config";
 
+function isUserInProject(project: any, session: any) {
+  if (!session?.user?.id) return false;
+  if (session.user.role === 'ADMIN') return true;
+  if (project.internId === session.user.id) return true;
+  if (project.projectManagerId === session.user.id) return true;
+  if (project.memberManagerId === session.user.id) return true;
+  if (project.partnerId === session.user.id) return true;
+  return false;
+}
+
+
 async function syncToGithub(token: string, repo: string, content: string, path: string) {
   const url = `https://api.github.com/repos/${repo}/contents/${path}`;
   let sha = undefined;
@@ -62,7 +73,7 @@ export async function createCheckIn(formData: FormData) {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
   });
-  if (!project || project.internId !== session.user.id) throw new Error("No active project found or unauthorized");
+  if (!project || !isUserInProject(project, session)) throw new Error("No active project found or unauthorized");
 
   const user = await prisma.user.findUnique({ where: { id: session.user.id } });
 
@@ -99,6 +110,14 @@ export async function createWorkItem(formData: FormData) {
 
   const title = formData.get('title') as string;
   const type = formData.get('type') as string;
+  
+  if (session.user.role === 'PROJECT_MANAGER' && (type === 'TASK' || type === 'BUG')) {
+    throw new Error("Project Manager can only create EPIC or STORY");
+  }
+
+  if (session.user.role === 'INTERN' && (type === 'EPIC' || type === 'STORY')) {
+    throw new Error("Intern can only create TASK or BUG");
+  }
   const priorityId = formData.get('priorityId') as string;
   const parentId = formData.get('parentId') as string || null;
   const sprintId = formData.get('sprintId') as string || null;
@@ -111,7 +130,7 @@ export async function createWorkItem(formData: FormData) {
     where: { id: projectId },
   });
 
-  if (!project || project.internId !== session.user.id) throw new Error("No active project found or unauthorized");
+  if (!project || !isUserInProject(project, session)) throw new Error("No active project found or unauthorized");
 
   await prisma.workItem.create({
     data: {
@@ -149,7 +168,7 @@ export async function updateWorkItem(formData: FormData) {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
   });
-  if (!project || project.internId !== session.user.id) throw new Error("Unauthorized");
+  if (!project || !isUserInProject(project, session)) throw new Error("Unauthorized");
 
   const dueDate = formData.get('dueDate') as string || null;
 
@@ -184,7 +203,7 @@ export async function assignWorkItemToSprint(formData: FormData) {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
   });
-  if (!project || project.internId !== session.user.id) throw new Error("Unauthorized");
+  if (!project || !isUserInProject(project, session)) throw new Error("Unauthorized");
 
   await prisma.workItem.update({
     where: { id },
@@ -208,7 +227,7 @@ export async function removeWorkItemFromSprint(formData: FormData) {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
   });
-  if (!project || project.internId !== session.user.id) throw new Error("Unauthorized");
+  if (!project || !isUserInProject(project, session)) throw new Error("Unauthorized");
 
   await prisma.workItem.update({
     where: { id },
@@ -232,7 +251,7 @@ export async function deleteWorkItem(formData: FormData) {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
   });
-  if (!project || project.internId !== session.user.id) throw new Error("Unauthorized");
+  if (!project || !isUserInProject(project, session)) throw new Error("Unauthorized");
 
   // First delete children if it's an epic (to prevent foreign key constraint fails)
   await prisma.workItem.deleteMany({
@@ -264,7 +283,7 @@ export async function createSprint(formData: FormData) {
     where: { id: projectId },
   });
 
-  if (!project || project.internId !== session.user.id) throw new Error("No active project found or unauthorized");
+  if (!project || !isUserInProject(project, session)) throw new Error("No active project found or unauthorized");
 
   await prisma.sprint.create({
     data: {
@@ -293,7 +312,7 @@ export async function updateSprint(formData: FormData) {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
   });
-  if (!project || project.internId !== session.user.id) throw new Error("Unauthorized");
+  if (!project || !isUserInProject(project, session)) throw new Error("Unauthorized");
 
   await prisma.sprint.update({
     where: { id },
@@ -319,7 +338,7 @@ export async function deleteSprint(formData: FormData) {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
   });
-  if (!project || project.internId !== session.user.id) throw new Error("Unauthorized");
+  if (!project || !isUserInProject(project, session)) throw new Error("Unauthorized");
 
   await prisma.sprint.delete({
     where: { id }
@@ -359,17 +378,18 @@ export async function saveSettings(formData: FormData) {
 
 import bcrypt from 'bcryptjs';
 
-export async function createInternAccount(formData: FormData) {
+export async function createUserAccount(formData: FormData) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== 'MENTOR') {
-    throw new Error("Unauthorized: Only Mentors can create accounts");
+  if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    throw new Error("Unauthorized: Only Admin can create accounts");
   }
 
   const name = formData.get('name') as string;
   const email = formData.get('email') as string;
   const passwordRaw = formData.get('password') as string;
+  const role = formData.get('role') as string;
 
-  if (!name || !email || !passwordRaw) throw new Error("All fields are required");
+  if (!name || !email || !passwordRaw || !role) throw new Error("All fields are required");
 
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) throw new Error("Email is already registered");
@@ -381,16 +401,73 @@ export async function createInternAccount(formData: FormData) {
       name,
       email,
       password: hashedPassword,
-      role: 'INTERN'
+      role: role as any
     }
   });
 
-  revalidatePath('/dashboard/interns');
+  revalidatePath('/dashboard/users');
+}
+
+export async function assignMentorToIntern(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    throw new Error("Unauthorized: Only Admin can assign mentors");
+  }
+
+  const internId = formData.get('internId') as string;
+  const projectManagerId = formData.get('projectManagerId') as string;
+
+  if (!internId) throw new Error("Intern ID is required");
+
+  await prisma.user.update({
+    where: { id: internId },
+    data: {
+      projectManagerId: projectManagerId === 'none' || !projectManagerId ? null : projectManagerId
+    }
+  });
+
+  revalidatePath('/dashboard/users');
+}
+
+export async function deleteUserAccount(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    throw new Error("Unauthorized: Only Admin can delete accounts");
+  }
+
+  const id = formData.get('id') as string;
+  if (!id) throw new Error("User ID is required");
+
+  // Prevent admin from deleting themselves
+  if (id === session.user.id) throw new Error("Cannot delete your own account");
+
+  await prisma.user.delete({
+    where: { id }
+  });
+
+  revalidatePath('/dashboard/users');
+}
+
+export async function deleteProject(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    throw new Error("Unauthorized: Only Admin can delete projects");
+  }
+
+  const id = formData.get('id') as string;
+  if (!id) throw new Error("Project ID is required");
+
+  await prisma.project.delete({
+    where: { id }
+  });
+
+  revalidatePath('/dashboard/projects');
+  revalidatePath('/dashboard');
 }
 
 export async function createProject(formData: FormData) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== 'MENTOR') {
+  if (!session?.user?.id || session.user.role !== 'PROJECT_MANAGER') {
     throw new Error("Unauthorized: Only Mentors can create projects");
   }
 
@@ -399,6 +476,8 @@ export async function createProject(formData: FormData) {
   const startDate = new Date(formData.get('startDate') as string);
   const endDate = new Date(formData.get('endDate') as string);
   const internId = formData.get('internId') as string;
+  const memberManagerId = formData.get('memberManagerId') as string;
+  const partnerId = formData.get('partnerId') as string;
   const generateTimeline = formData.get('generateTimeline') === 'true';
 
   if (!internId) throw new Error("Intern ID is required");
@@ -406,6 +485,9 @@ export async function createProject(formData: FormData) {
   const project = await prisma.project.create({
     data: {
       internId,
+      projectManagerId: session.user.id,
+      memberManagerId: memberManagerId ? memberManagerId : null,
+      partnerId: partnerId ? partnerId : null,
       title,
       track: track as any,
       startDate,
@@ -465,7 +547,7 @@ export async function createProject(formData: FormData) {
 
 export async function addFeedback(formData: FormData) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== 'MENTOR') {
+  if (!session?.user?.id || session.user.role !== 'PROJECT_MANAGER') {
     throw new Error("Unauthorized: Only Mentors can leave feedback");
   }
 
@@ -478,14 +560,14 @@ export async function addFeedback(formData: FormData) {
   await prisma.workItem.update({
     where: { id: workItemId },
     data: {
-      mentorFeedback: feedback,
+      managerFeedback: feedback,
       requiresFix: true,
       status: 'TODO', // Push back to TODO or leave it?
     }
   });
 
   revalidatePath(`/dashboard/${projectId}/work-items`);
-  revalidatePath('/dashboard/mentor/feedbacks');
+  revalidatePath('/dashboard/project-manager/feedbacks');
 }
 
 export async function resolveFeedback(formData: FormData) {
@@ -506,7 +588,7 @@ export async function resolveFeedback(formData: FormData) {
   });
 
   revalidatePath(`/dashboard/${projectId}/work-items`);
-  revalidatePath('/dashboard/mentor/feedbacks');
+  revalidatePath('/dashboard/project-manager/feedbacks');
 }
 
 export async function createPriorityLevel(formData: FormData) {
@@ -521,7 +603,7 @@ export async function createPriorityLevel(formData: FormData) {
   if (!projectId || !name || isNaN(level)) throw new Error("Missing required fields");
 
   const project = await prisma.project.findUnique({ where: { id: projectId } });
-  if (!project || project.internId !== session.user.id) throw new Error("Unauthorized");
+  if (!project || !isUserInProject(project, session)) throw new Error("Unauthorized");
 
   await prisma.priorityLevel.create({
     data: { projectId, name, level, color }
@@ -545,7 +627,7 @@ export async function updatePriorityLevel(formData: FormData) {
   if (!id || !projectId || !name || isNaN(level)) throw new Error("Missing required fields");
 
   const project = await prisma.project.findUnique({ where: { id: projectId } });
-  if (!project || project.internId !== session.user.id) throw new Error("Unauthorized");
+  if (!project || !isUserInProject(project, session)) throw new Error("Unauthorized");
 
   await prisma.priorityLevel.update({
     where: { id },
@@ -567,7 +649,7 @@ export async function deletePriorityLevel(formData: FormData) {
   if (!id || !projectId) throw new Error("Missing required fields");
 
   const project = await prisma.project.findUnique({ where: { id: projectId } });
-  if (!project || project.internId !== session.user.id) throw new Error("Unauthorized");
+  if (!project || !isUserInProject(project, session)) throw new Error("Unauthorized");
 
   // Cannot delete if in use, or set them to null.
   // We'll set to null first.
@@ -587,7 +669,7 @@ export async function deletePriorityLevel(formData: FormData) {
 
 export async function updateProject(formData: FormData) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== 'MENTOR') {
+  if (!session?.user?.id || session.user.role !== 'PROJECT_MANAGER') {
     throw new Error("Unauthorized: Only Mentors can update projects");
   }
 
@@ -615,24 +697,24 @@ export async function updateProject(formData: FormData) {
     }
   });
 
-  revalidatePath('/dashboard/mentor/projects');
-  revalidatePath('/dashboard/mentor/projects');
+  revalidatePath('/dashboard/project-manager/projects');
+  revalidatePath('/dashboard/project-manager/projects');
   revalidatePath('/dashboard');
 }
 
-export async function updateCheckInMentorAction(id: string, mentorAction: string, projectId: string) {
+export async function updateCheckInMentorAction(id: string, managerAction: string, projectId: string) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'MENTOR') throw new Error("Unauthorized");
+  if (!session || session.user.role !== 'PROJECT_MANAGER') throw new Error("Unauthorized");
   await prisma.checkIn.update({
     where: { id },
-    data: { mentorAction }
+    data: { managerAction }
   });
   revalidatePath(`/dashboard/${projectId}/check-ins`);
 }
 
 export async function saveSprintReview(formData: FormData) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'MENTOR') throw new Error("Unauthorized");
+  if (!session || session.user.role !== 'PROJECT_MANAGER') throw new Error("Unauthorized");
 
   const sprintId = formData.get('sprintId') as string;
   const projectId = formData.get('projectId') as string;
@@ -648,7 +730,7 @@ export async function saveSprintReview(formData: FormData) {
     keep: formData.get('keep') as string,
     problem: formData.get('problem') as string,
     tryItem: formData.get('tryItem') as string,
-    mentorFeedback: formData.get('mentorFeedback') as string,
+    managerFeedback: formData.get('managerFeedback') as string,
   };
 
   await prisma.sprintReview.upsert({
@@ -658,6 +740,21 @@ export async function saveSprintReview(formData: FormData) {
   });
 
   revalidatePath(`/dashboard/${projectId}/sprints`);
+}
+
+export async function addWorkItemComment(workItemId: string, text: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error("Unauthorized");
+
+  await prisma.comment.create({
+    data: {
+      text,
+      authorId: session.user.id,
+      workItemId,
+    }
+  });
+
+  revalidatePath('/dashboard/[projectId]/work-items', 'layout');
 }
 
 export async function updateWorkItemStatus(id: string, newStatus: string, projectId: string) {
@@ -712,7 +809,7 @@ export async function updateWorkItemStatus(id: string, newStatus: string, projec
         const updateEpicData: any = { status: newParentStatus };
         if (newParentStatus === 'IN_PROGRESS' && !parentEpic.startedAt) updateEpicData.startedAt = new Date();
         if (newParentStatus === 'DONE') updateEpicData.completedAt = new Date();
-        else if (parentEpic.status === 'DONE' && newParentStatus !== 'DONE') updateEpicData.completedAt = null;
+        else if (parentEpic.status === 'DONE') updateEpicData.completedAt = null;
 
         await prisma.workItem.update({
           where: { id: parentId },

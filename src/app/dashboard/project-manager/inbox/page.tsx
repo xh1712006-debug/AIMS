@@ -6,13 +6,13 @@ import { getPendingActions, getResolvedActions } from "@/lib/actionsHub";
 import InboxTabs from "./InboxTabs";
 
 export const metadata = {
-  title: 'Hộp thư Xử lý | AIMS Mentor Portal'
+  title: 'Hộp thư Xử lý | AIMS Người quản lý dự án Portal'
 };
 
 export default async function InboxPage() {
   const session = await getServerSession(authOptions);
   
-  if (!session?.user || session.user.role !== 'MENTOR') {
+  if (!session?.user || session.user.role !== 'PROJECT_MANAGER') {
     redirect("/dashboard");
   }
 
@@ -20,7 +20,7 @@ export default async function InboxPage() {
   const interns = await prisma.user.findMany({
     where: { role: 'INTERN' },
     include: {
-      projects: {
+      projectsAsIntern: {
         include: {
           workItems: true,
           checkIns: {
@@ -44,7 +44,7 @@ export default async function InboxPage() {
               <span className="bg-red-500 text-white text-sm px-3 py-1 rounded-full">{pendingActions.length}</span>
             )}
           </h2>
-          <p className="text-gray-500 dark:text-[#A3A3A3] mt-2">Nơi tập trung toàn bộ các vấn đề cần sự hỗ trợ của Mentor.</p>
+          <p className="text-gray-500 dark:text-[#A3A3A3] mt-2">Nơi tập trung toàn bộ các vấn đề cần sự hỗ trợ của ProjectManager.</p>
         </div>
       </div>
 

@@ -7,7 +7,7 @@ import Link from "next/link";
 export default async function MentorFeedbacksPage() {
   const session = await getServerSession(authOptions);
   
-  if (!session?.user || session.user.role !== 'MENTOR') {
+  if (!session?.user || session.user.role !== 'PROJECT_MANAGER') {
     redirect('/dashboard');
   }
 
@@ -26,7 +26,7 @@ export default async function MentorFeedbacksPage() {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="mb-8">
         <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Phản hồi & Khắc phục</h2>
-        <p className="text-gray-500 dark:text-[#737373] mt-2">Danh sách các công việc Mentor đã phản hồi và đang chờ sinh viên khắc phục.</p>
+        <p className="text-gray-500 dark:text-[#737373] mt-2">Danh sách các công việc ProjectManager đã phản hồi và đang chờ sinh viên khắc phục.</p>
       </div>
 
       <div className="bg-white dark:bg-[#171717] rounded-2xl shadow-sm dark:shadow-none border border-gray-200 dark:border-[#383838] overflow-hidden">
@@ -61,8 +61,8 @@ export default async function MentorFeedbacksPage() {
                     </p>
 
                     <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-xl border border-yellow-100">
-                      <p className="text-xs font-bold text-yellow-800 dark:text-yellow-200 uppercase mb-1">Mentor Phản hồi:</p>
-                      <p className="text-sm text-yellow-900 font-medium whitespace-pre-wrap">{item.mentorFeedback}</p>
+                      <p className="text-xs font-bold text-yellow-800 dark:text-yellow-200 uppercase mb-1">ProjectManager Phản hồi:</p>
+                      <p className="text-sm text-yellow-900 font-medium whitespace-pre-wrap">{item.managerFeedback}</p>
                     </div>
                   </div>
 

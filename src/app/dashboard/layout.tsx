@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Sidebar from "./Sidebar";
 import prisma from "@/lib/prisma";
 import { getPendingActions } from "@/lib/actionsHub";
+import PermissionWatcher from "@/components/PermissionWatcher";
 
 export default async function DashboardLayout({
   children,
@@ -25,11 +26,11 @@ export default async function DashboardLayout({
       orderBy: { startDate: 'desc' },
       select: { id: true, title: true }
     });
-  } else if (session.user.role === 'MENTOR') {
+  } else if (session.user.role === 'PROJECT_MANAGER') {
     const interns = await prisma.user.findMany({
       where: { role: 'INTERN' },
       include: {
-        projects: {
+        projectsAsIntern: {
           include: {
             workItems: true,
             checkIns: {
@@ -49,9 +50,10 @@ export default async function DashboardLayout({
       className="h-screen flex flex-col md:flex-row overflow-hidden"
       style={{ backgroundColor: 'var(--bg-base)' }}
     >
+      <PermissionWatcher userRole={session.user.role} />
       <Sidebar user={session.user as any} projects={projects} pendingActionCount={pendingActionCount} />
       <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-        <div className="max-w-6xl mx-auto pb-10">
+        <div className="max-w-[1600px] w-full mx-auto pb-10">
           {children}
         </div>
       </main>

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import CreateWorkItemForm from "./CreateWorkItemForm";
 import KanbanBoard from "./KanbanBoard";
 import WorkItemActionsMenu from "./WorkItemActionsMenu";
+import WorkItemComments from "./WorkItemComments";
 
 export default async function SprintsPage(props: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await props.params;
@@ -14,12 +15,20 @@ export default async function SprintsPage(props: { params: Promise<{ projectId: 
   const project = await prisma.project.findUnique({
     where: { 
       id: projectId, 
-      ...(session.user.role === 'INTERN' ? { internId: session.user.id } : {}) 
+      ...(session.user.role === 'INTERN' ? { internId: session.user.id } :
+          session.user.role === 'MEMBER_MANAGER' ? { memberManagerId: session.user.id } :
+          session.user.role === 'PARTNER' ? { partnerId: session.user.id } : {})
     },
     include: {
       workItems: { 
         orderBy: { createdAt: 'desc' },
-        include: { priority: true }
+        include: {
+          priority: true,
+          comments: {
+            include: { author: true },
+            orderBy: { createdAt: 'asc' }
+          }
+        }
       },
       priorityLevels: {
         orderBy: { level: 'asc' }
@@ -39,8 +48,8 @@ export default async function SprintsPage(props: { params: Promise<{ projectId: 
           <h2 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Roadmap & Backlog</h2>
           <p className="text-sm text-gray-500 dark:text-[#737373] mt-1">Quản lý tầm nhìn dự án (Epic) và các công việc chưa được gán vào Sprint.</p>
         </div>
-        {session.user.role === 'INTERN' && (
-          <CreateWorkItemForm projectId={projectId} epics={epics} priorityLevels={project.priorityLevels} />
+        {(session.user.role === 'INTERN' || session.user.role === 'PROJECT_MANAGER' || session.user.role === 'MEMBER_MANAGER') && (
+          <CreateWorkItemForm projectId={projectId} epics={epics} priorityLevels={project.priorityLevels} userRole={session.user.role} />
         )}
       </div>
       
@@ -109,7 +118,7 @@ export default async function SprintsPage(props: { params: Promise<{ projectId: 
                     }`}>
                       {epic.status}
                     </span>
-                    {session.user.role === 'INTERN' && (
+                    {(session.user.role === 'INTERN' || session.user.role === 'PROJECT_MANAGER' || session.user.role === 'MEMBER_MANAGER') && (
                       <div className="mt-[-4px]">
                         <WorkItemActionsMenu item={epic} epics={epics} projectId={projectId} priorityLevels={project.priorityLevels} />
                       </div>
@@ -154,6 +163,7 @@ export default async function SprintsPage(props: { params: Promise<{ projectId: 
                     </span>
                   )}
                 </div>
+                <WorkItemComments workItemId={epic.id} comments={epic.comments || []} />
               </div>
               );
             })}

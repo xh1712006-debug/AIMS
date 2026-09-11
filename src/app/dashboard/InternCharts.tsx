@@ -101,7 +101,7 @@ export default function InternCharts({ projects }: { projects: any[] }) {
                   ))}
                 </Pie>
                 <Tooltip 
-                  formatter={(value: number) => [`${value} công việc`, 'Số lượng']}
+                  formatter={(value: any) => [`${value} công việc`, 'Số lượng']}
                   contentStyle={{ borderRadius: '12px', border: '1px solid #EDEDED', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)' }}
                   itemStyle={{ color: '#171717', fontWeight: 600 }}
                 />
@@ -139,7 +139,7 @@ export default function InternCharts({ projects }: { projects: any[] }) {
                 <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{fill: '#A3A3A3', fontSize: 12}} />
                 <Tooltip 
                   cursor={{fill: '#f8fafc'}}
-                  formatter={(value: number) => [`${value} công việc`, 'Số lượng']}
+                  formatter={(value: any) => [`${value} công việc`, 'Số lượng']}
                   contentStyle={{ borderRadius: '12px', border: '1px solid #EDEDED', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                   itemStyle={{ color: '#171717', fontWeight: 600 }}
                 />

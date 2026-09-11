@@ -3,6 +3,44 @@
 ## Tổng quan
 Luồng đánh giá là trái tim của AIMS, giúp nâng cao chất lượng code và định hướng cho Intern thông qua vòng lặp phản hồi (Feedback Loop) khép kín. Việc đánh giá được phân bổ thành hai cấp độ chính: Vi mô (Từng Work Item) và Vĩ mô (Toàn bộ Sprint).
 
+## Lộ trình Feedback Hub (Swimlane Flowchart)
+Sơ đồ dưới đây trình bày chi tiết "vòng lặp vô tận" cho đến khi mã nguồn của Intern đạt yêu cầu hoàn toàn.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor I as Intern
+    participant WI as WorkItem (Backlog)
+    participant FH as Feedback Hub (Mentor)
+    actor M as Mentor
+
+    Note over I, M: Giai đoạn Yêu cầu Review
+    I->>WI: Đính kèm link PR (Evidence)
+    I->>WI: Kéo Task sang cột REVIEW
+    WI-->>FH: Báo hiệu có Task mới chờ duyệt
+    
+    Note over M, I: Giai đoạn Đánh giá (Mentor)
+    M->>WI: Đọc code PR trên GitHub
+    
+    alt Code lỗi / Chưa đạt
+        M->>WI: Nhập feedback vào mentorFeedback
+        M->>WI: Bật cờ "Requires Fix" = True
+        WI->>FH: Đẩy Task vào danh sách "Chờ Khắc Phục"
+        FH-->>I: Cảnh báo Task cần sửa
+        
+        Note over I, WI: Giai đoạn Sửa lỗi
+        I->>FH: Xem chi tiết mentorFeedback
+        I->>I: Chỉnh sửa code & Push commit mới
+        I->>WI: Cập nhật lại link Evidence
+        
+        Note over M, WI: Đánh giá lại
+        M->>FH: Thấy Intern đã update
+        M->>WI: Tắt cờ "Requires Fix"
+    end
+    
+    M->>WI: Kéo Task sang cột DONE
+```
+
 ## 1. Đánh giá Vi mô (Micro-level: Work Item Review)
 Khi Intern chuyển một Work Item sang trạng thái `REVIEW`, luồng đánh giá sẽ được kích hoạt.
 
@@ -25,15 +63,3 @@ Sau 1-2 tuần chạy Sprint, Mentor và Intern sẽ tổ chức "Sprint Retrosp
     - `problem`: Vấn đề gặp phải.
     - `tryItem`: Hành động cần thử nghiệm ở Sprint sau.
 - Điểm đánh giá (`score`): Chấm điểm hiệu suất Sprint.
-
-## Sơ đồ Quy trình (Feedback Loop)
-```mermaid
-graph TD
-    A[Intern gửi Code / Đổi trạng thái sang REVIEW] --> B(Mentor Kiểm tra)
-    B --> C{Đạt yêu cầu?}
-    C -->|Yes| D[Đổi sang DONE]
-    C -->|No| E[Thêm mentorFeedback & requiresFix = true]
-    E --> F[Hiển thị tại Feedback Hub]
-    F --> G[Intern sửa code]
-    G --> A
-```

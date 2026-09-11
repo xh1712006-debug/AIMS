@@ -12,11 +12,11 @@ const TASK_COLORS = {
   'BLOCKED': '#ef4444'     // Red
 };
 
-export default function MentorCharts({ interns }: { interns: any[] }) {
+export default function ProjectManagerCharts({ interns }: { interns: any[] }) {
   // 1. DATA FOR TREND CHART (Last 7 days check-ins)
   const now = new Date();
   const last7DaysMap = new Map();
-  const trendData = [];
+  const trendData: any[] = [];
   
   // Initialize the last 7 days
   for (let i = 6; i >= 0; i--) {
@@ -28,7 +28,7 @@ export default function MentorCharts({ interns }: { interns: any[] }) {
 
   // Count check-ins per day across ALL interns
   interns.forEach(intern => {
-    intern.projects.forEach((p: any) => {
+    intern.projectsAsIntern?.forEach((p: any) => {
       p.checkIns?.forEach((chk: any) => {
         const chkDateStr = new Date(chk.createdAt).toISOString().split('T')[0];
         if (last7DaysMap.has(chkDateStr)) {
@@ -45,7 +45,7 @@ export default function MentorCharts({ interns }: { interns: any[] }) {
   let totalDone = 0, totalInProgress = 0, totalTodo = 0, totalBlocked = 0;
   
   interns.forEach(intern => {
-    intern.projects.forEach((p: any) => {
+    intern.projectsAsIntern?.forEach((p: any) => {
       p.workItems?.forEach((wi: any) => {
         if (wi.status === 'DONE') totalDone++;
         else if (wi.status === 'IN_PROGRESS' || wi.status === 'REVIEW') totalInProgress++;

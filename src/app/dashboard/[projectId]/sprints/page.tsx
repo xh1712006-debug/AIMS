@@ -13,7 +13,9 @@ export default async function SprintsPlanningPage(props: { params: Promise<{ pro
   const project = await prisma.project.findUnique({
     where: { 
       id: projectId,
-      ...(session.user.role === 'INTERN' ? { internId: session.user.id } : {}) 
+      ...(session.user.role === 'INTERN' ? { internId: session.user.id } :
+          session.user.role === 'MEMBER_MANAGER' ? { memberManagerId: session.user.id } :
+          session.user.role === 'PARTNER' ? { partnerId: session.user.id } : {})
     },
     include: {
       sprints: {

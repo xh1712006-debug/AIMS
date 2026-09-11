@@ -1,9 +1,10 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import CreateProjectForm from "./CreateProjectForm";
-import MentorCharts from "./MentorCharts";
+import ProjectManagerCharts from "./ProjectManagerCharts";
 import InternCharts from "./InternCharts";
 import { calculateProjectRisk } from "@/lib/risk";
 
@@ -18,11 +19,19 @@ export default async function DashboardPage() {
 
   if (!user) return null;
 
-  if (user.role === 'MENTOR') {
+  if (user.role === 'MEMBER_MANAGER') {
+    redirect('/dashboard/member-manager');
+  }
+
+  if (user.role === 'PARTNER') {
+    redirect('/dashboard/partner');
+  }
+
+  if (user.role === 'PROJECT_MANAGER' || user.role === 'ADMIN') {
     const interns = await prisma.user.findMany({
       where: { role: 'INTERN' },
       include: {
-        projects: {
+        projectsAsIntern: {
           where: { status: 'ACTIVE' },
           include: {
             checkIns: { orderBy: { createdAt: 'desc' } },
@@ -32,6 +41,9 @@ export default async function DashboardPage() {
         }
       }
     });
+
+    const memberManagers = await prisma.user.findMany({ where: { role: 'MEMBER_MANAGER' } });
+    const partners = await prisma.user.findMany({ where: { role: 'PARTNER' } });
 
     // 1. Calculate Metrics & Insights
     let activeProjects = 0;
@@ -44,7 +56,7 @@ export default async function DashboardPage() {
     const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
 
     interns.forEach(intern => {
-      intern.projects.forEach(p => {
+      intern.projectsAsIntern.forEach(p => {
         activeProjects++;
         
         const risk = calculateProjectRisk(p as any);
@@ -103,7 +115,9 @@ export default async function DashboardPage() {
             <p className="text-gray-500 dark:text-[#A3A3A3] mt-2">Theo dõi tiến độ và xử lý các điểm nghẽn của Thực tập sinh.</p>
           </div>
           <div>
-            <CreateProjectForm interns={interns} />
+            {user.role === 'PROJECT_MANAGER' && (
+              <CreateProjectForm interns={interns} memberManagers={memberManagers} partners={partners} />
+            )}
           </div>
         </div>
         
@@ -123,7 +137,7 @@ export default async function DashboardPage() {
           </div>
           <div className="bg-white dark:bg-[#171717] p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] flex flex-col justify-center relative overflow-hidden">
             <div className="relative z-10">
-              <span className="text-gray-500 dark:text-[#737373] text-[10px] font-bold uppercase tracking-wider mb-1">Cần Mentor xử lý</span>
+              <span className="text-gray-500 dark:text-[#737373] text-[10px] font-bold uppercase tracking-wider mb-1">Cần ProjectManager xử lý</span>
               <span className="text-3xl font-black text-purple-600">{pendingActions.length}</span>
             </div>
             {pendingActions.length > 0 && (
@@ -132,9 +146,9 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* BIỂU ĐỒ TỔNG HỢP MENTOR */}
+        {/* BIỂU ĐỒ TỔNG HỢP PROJECT_MANAGER */}
         {interns.length > 0 && (
-          <MentorCharts interns={interns} />
+          <ProjectManagerCharts interns={interns} />
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -157,14 +171,14 @@ export default async function DashboardPage() {
                   <tbody className="divide-y divide-gray-100 dark:divide-[#262626]">
                     {[...interns]
                       .sort((a, b) => {
-                        const riskA = a.projects[0] ? calculateProjectRisk(a.projects[0] as any) : 'N/A';
-                        const riskB = b.projects[0] ? calculateProjectRisk(b.projects[0] as any) : 'N/A';
+                        const riskA = a.projectsAsIntern[0] ? calculateProjectRisk(a.projectsAsIntern[0] as any) : 'N/A';
+                        const riskB = b.projectsAsIntern[0] ? calculateProjectRisk(b.projectsAsIntern[0] as any) : 'N/A';
                         const weight: Record<string, number> = { 'RED': 3, 'YELLOW': 2, 'GREEN': 1, 'N/A': 0 };
                         return weight[riskB] - weight[riskA];
                       })
                       .slice(0, 4)
                       .map(intern => {
-                      const project = intern.projects[0];
+                      const project = intern.projectsAsIntern[0];
                       const risk = project ? calculateProjectRisk(project as any) : 'N/A';
                       
                       let progress = 0;
@@ -282,7 +296,7 @@ export default async function DashboardPage() {
                     
                     {pendingActions.length > 4 && (
                       <div className="mt-4 pt-3 border-t border-gray-100 dark:border-[#262626] text-center">
-                        <Link href="/dashboard/mentor/inbox" className="text-[12px] font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 flex items-center justify-center gap-1.5 transition-colors">
+                        <Link href="/dashboard/project-manager/inbox" className="text-[12px] font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 flex items-center justify-center gap-1.5 transition-colors">
                           + {pendingActions.length - 4} hoạt động khác chưa xử lý
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                         </Link>
@@ -363,7 +377,7 @@ export default async function DashboardPage() {
           {projects.length === 0 ? (
             <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 p-6 rounded-2xl text-yellow-800 dark:text-yellow-200 shadow-sm dark:shadow-none">
               <p className="font-semibold text-lg">Bạn chưa có dự án nào!</p>
-              <p className="mt-1 text-sm opacity-90">Hãy liên hệ Mentor để bắt đầu một dự án mới.</p>
+              <p className="mt-1 text-sm opacity-90">Hãy liên hệ ProjectManager để bắt đầu một dự án mới.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
@@ -422,7 +436,7 @@ export default async function DashboardPage() {
           <div className="bg-white dark:bg-[#171717] p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-[#262626] sticky top-6">
             <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-[#EDEDED]">Thông báo</h3>
             <p className="text-sm text-gray-600 dark:text-[#A3A3A3] leading-relaxed">
-              Quyền tạo dự án thuộc về Mentor. Vui lòng liên hệ Mentor của bạn nếu cần phân bổ thêm dự án mới.
+              Quyền tạo dự án thuộc về ProjectManager. Vui lòng liên hệ ProjectManager của bạn nếu cần phân bổ thêm dự án mới.
             </p>
             <div className="mt-6 pt-6 border-t border-gray-100 dark:border-[#262626]">
               <h4 className="text-sm font-bold text-gray-900 dark:text-[#EDEDED] mb-2">Lời khuyên (Agile)</h4>

@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { createWorkItem } from '@/app/actions';
 
-export default function CreateWorkItemForm({ projectId, epics, priorityLevels = [] }: { projectId: string, epics: any[], priorityLevels?: any[] }) {
-  const [type, setType] = useState('EPIC');
+export default function CreateWorkItemForm({ projectId, epics, priorityLevels = [], userRole }: { projectId: string, epics: any[], priorityLevels?: any[], userRole?: string }) {
+  const [type, setType] = useState(userRole === 'PROJECT_MANAGER' ? 'EPIC' : 'TASK');
 
   // Story fields
   const [role, setRole] = useState('');
@@ -54,11 +54,18 @@ export default function CreateWorkItemForm({ projectId, epics, priorityLevels = 
                     onChange={(e) => setType(e.target.value)}
                     className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm"
                   >
-                    <option value="EPIC">Epic (Tính năng lớn)</option>
-                    <option value="STORY">Story (Câu chuyện ND)</option>
-                    <option value="FEATURE">Feature (Tính năng)</option>
-                    <option value="TASK">Task (Công việc)</option>
-                    <option value="BUG">Bug (Lỗi)</option>
+                    {userRole === 'PROJECT_MANAGER' && (
+                      <>
+                        <option value="EPIC">Epic (Tính năng lớn)</option>
+                        <option value="STORY">Story (Câu chuyện ND)</option>
+                      </>
+                    )}
+                    {userRole === 'INTERN' || userRole === 'MEMBER_MANAGER' ? (
+                      <>
+                        <option value="TASK">Task (Công việc)</option>
+                        <option value="BUG">Bug (Lỗi)</option>
+                      </>
+                    ) : null}
                   </select>
                 </div>
 

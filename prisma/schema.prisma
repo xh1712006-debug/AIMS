@@ -8,8 +8,11 @@ datasource db {
 }
 
 enum Role {
+  ADMIN
   INTERN
-  MENTOR
+  PROJECT_MANAGER
+  PARTNER
+  MEMBER_MANAGER
 }
 
 enum Track {
@@ -22,7 +25,6 @@ enum Track {
 enum ItemType {
   EPIC
   STORY
-  FEATURE
   TASK
   BUG
 }
@@ -55,13 +57,29 @@ model User {
   password     String?
   role         Role      @default(INTERN)
   githubToken  String?
-  projects     Project[]
+  
+  // Manager assignment (1 manager -> many interns)
+  projectManagerId String?
+  projectManager   User?     @relation("ManagerIntern", fields: [projectManagerId], references: [id], onDelete: SetNull)
+  interns          User[]    @relation("ManagerIntern")
+
+  projectsAsIntern  Project[] @relation("ProjectIntern")
+  projectsAsPM      Project[] @relation("ProjectPM")
+  projectsAsMM      Project[] @relation("ProjectMM")
+  projectsAsPartner Project[] @relation("ProjectPartner")
+  comments          Comment[]
 }
 
 model Project {
-  id           String    @id @default(cuid())
-  internId     String
-  intern       User      @relation(fields: [internId], references: [id])
+  id               String    @id @default(cuid())
+  internId         String
+  intern           User      @relation("ProjectIntern", fields: [internId], references: [id], onDelete: Cascade)
+  projectManagerId String?
+  projectManager   User?     @relation("ProjectPM", fields: [projectManagerId], references: [id], onDelete: SetNull)
+  memberManagerId  String?
+  memberManager    User?     @relation("ProjectMM", fields: [memberManagerId], references: [id], onDelete: SetNull)
+  partnerId        String?
+  partner          User?     @relation("ProjectPartner", fields: [partnerId], references: [id], onDelete: SetNull)
   track        Track
   title        String
   startDate    DateTime
@@ -78,7 +96,7 @@ model Project {
 model PriorityLevel {
   id        String     @id @default(cuid())
   projectId String
-  project   Project    @relation(fields: [projectId], references: [id])
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   name      String
   level     Int
   color     String?
@@ -88,7 +106,7 @@ model PriorityLevel {
 model Sprint {
   id           String         @id @default(cuid())
   projectId    String
-  project      Project        @relation(fields: [projectId], references: [id])
+  project      Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
   name         String
   startDate    DateTime
   endDate      DateTime
@@ -99,22 +117,23 @@ model Sprint {
 model WorkItem {
   id           String      @id @default(cuid())
   projectId    String
-  project      Project     @relation(fields: [projectId], references: [id])
+  project      Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
   sprintId     String?
-  sprint       Sprint?     @relation(fields: [sprintId], references: [id])
+  sprint       Sprint?     @relation(fields: [sprintId], references: [id], onDelete: SetNull)
   parentId     String?
-  parent       WorkItem?   @relation("ParentChild", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parent       WorkItem?   @relation("ParentChild", fields: [parentId], references: [id], onDelete: Cascade)
   children     WorkItem[]  @relation("ParentChild")
   title        String
   description  String?
   type           ItemType
   status         Status      @default(TODO)
   priorityId     String?
-  priority       PriorityLevel? @relation(fields: [priorityId], references: [id])
+  priority       PriorityLevel? @relation(fields: [priorityId], references: [id], onDelete: SetNull)
   order          Int         @default(0)
   estimate       Int?
   evidenceLink   String?
-  mentorFeedback String?
+  comments       Comment[]
+  managerFeedback String?
   requiresFix    Boolean     @default(false)
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -126,12 +145,12 @@ model WorkItem {
 model CheckIn {
   id           String    @id @default(cuid())
   projectId    String
-  project      Project   @relation(fields: [projectId], references: [id])
+  project      Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   doneTasks    String
   nextTasks    String
   blockers     String?
   evidenceLink String?
-  mentorAction String?
+  managerAction String?
   riskStatus   Risk      @default(GREEN)
   createdAt    DateTime  @default(now())
 }
@@ -139,14 +158,43 @@ model CheckIn {
 model SprintReview {
   id             String   @id @default(cuid())
   sprintId       String   @unique
-  sprint         Sprint   @relation(fields: [sprintId], references: [id])
+  sprint         Sprint   @relation(fields: [sprintId], references: [id], onDelete: Cascade)
   goalResult     String
   increment      String?
   technicalFinds String?
   keep           String?
   problem        String?
   tryItem        String?
-  mentorFeedback String?
+  whatWentWell   String?
+  whatToImprove  String?
+  actionItems    String?
+  managerFeedback String?
   score          Int?
   createdAt      DateTime @default(now())
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  text       String
+  createdAt  DateTime @default(now())
+  authorId   String
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  workItemId String
+  workItem   WorkItem @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+}
+
+model RolePermission {
+  id        String   @id @default(cuid())
+  role      Role
+  feature   String
+  isEnabled Boolean  @default(false)
+
+  @@unique([role, feature])
+}
+
+model SystemState {
+  id        String   @id @default(cuid())
+  key       String   @unique // e.g. "lastPermissionUpdate_PROJECT_MANAGER"
+  value     String   // Stores ISO string of last update
+  updatedAt DateTime @updatedAt
 }
