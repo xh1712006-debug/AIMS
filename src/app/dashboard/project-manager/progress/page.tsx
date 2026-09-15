@@ -11,6 +11,7 @@ export default async function MentorProgressPage() {
   }
 
   const projects = await prisma.project.findMany({
+    where: { projectManagerId: session.user.id },
     include: {
       intern: true,
       workItems: {
@@ -28,87 +29,142 @@ export default async function MentorProgressPage() {
         <p className="text-gray-500 dark:text-[#737373] mt-2">Theo dõi các công việc Đã làm (DONE) và Chưa làm của tất cả sinh viên.</p>
       </div>
 
-      <div className="space-y-12">
+      <div className="space-y-4">
         {projects.map(project => {
           const doneItems = project.workItems.filter(i => i.status === 'DONE');
           const notDoneItems = project.workItems.filter(i => i.status !== 'DONE');
+          const totalItems = project.workItems.length;
           
-          if (project.workItems.length === 0) return null;
+          if (totalItems === 0) return null;
+          
+          const progressPercent = Math.round((doneItems.length / totalItems) * 100);
 
           return (
-            <div key={project.id} className="bg-white dark:bg-[#171717] rounded-2xl shadow-sm dark:shadow-none border border-gray-200 dark:border-[#383838] overflow-hidden">
-              <div className="bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#383838] p-4 flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-[#EDEDED]">{project.title}</h3>
-                  <p className="text-sm text-gray-500 dark:text-[#737373] font-medium">Thực tập sinh: <span className="text-gray-800 dark:text-[#EDEDED]">{project.intern.name}</span></p>
-                </div>
-                <div className="text-sm font-bold text-gray-700 dark:text-[#D4D4D4] bg-white dark:bg-[#171717] px-3 py-1 rounded-full border border-gray-200 dark:border-[#383838] shadow-sm dark:shadow-none">
-                  Tổng: {project.workItems.length} Tasks
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
-                {/* Chưa làm */}
-                <div className="p-6">
-                  <h4 className="text-md font-extrabold text-gray-900 dark:text-[#EDEDED] mb-4 flex items-center">
-                    <span className="w-2 h-2 rounded-full bg-yellow-400 mr-2"></span>
-                    Chưa hoàn thành ({notDoneItems.length})
-                  </h4>
-                  <div className="space-y-3">
-                    {notDoneItems.length === 0 ? (
-                      <p className="text-sm text-gray-400 dark:text-[#383838] italic">Không có công việc nào tồn đọng.</p>
-                    ) : (
-                      notDoneItems.map(item => (
-                        <div key={item.id} className="p-3 bg-gray-50 dark:bg-[#0A0A0A] rounded-xl border border-gray-100 dark:border-[#262626]">
-                          <div className="flex justify-between items-start">
-                            <p className="font-bold text-sm text-gray-900 dark:text-[#EDEDED]">{item.title}</p>
-                            <span className="text-[10px] font-black px-2 py-0.5 rounded bg-gray-200 text-gray-700 dark:text-[#D4D4D4]">{item.status}</span>
-                          </div>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-xs text-gray-500 dark:text-[#737373] font-semibold">{item.type}</span>
-                            {item.priority && (
-                              <span 
-                                className="px-1.5 py-0.5 text-[10px] rounded font-bold border opacity-90"
-                                style={{ 
-                                  backgroundColor: item.priority.color ? `${item.priority.color}20` : '#f3f4f6', 
-                                  color: item.priority.color || '#374151',
-                                  borderColor: item.priority.color ? `${item.priority.color}40` : '#e5e7eb'
-                                }}
-                              >
-                                {item.priority.name}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    )}
+            <details key={project.id} className="group aims-card overflow-hidden bg-white dark:bg-[#111]">
+              <summary className="flex items-center justify-between p-4 cursor-pointer list-none hover:bg-gray-50/50 dark:hover:bg-[#1a1a1a] transition-colors">
+                <div className="flex items-center gap-4 flex-1">
+                  {/* Caret Icon */}
+                  <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0 group-open:bg-indigo-100 dark:group-open:bg-indigo-900/30 transition-colors">
+                    <svg className="w-4 h-4 text-gray-500 dark:text-gray-400 group-open:text-indigo-600 dark:group-open:text-indigo-400 transform group-open:rotate-90 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                  
+                  <div className="flex-1">
+                    <h3 className="text-base font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                      {project.title}
+                    </h3>
+                    <p className="text-sm font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      Thực tập sinh: <span className="font-bold text-gray-900 dark:text-gray-200">{project.intern.name}</span>
+                    </p>
                   </div>
                 </div>
 
-                {/* Đã làm */}
-                <div className="p-6">
-                  <h4 className="text-md font-extrabold text-gray-900 dark:text-[#EDEDED] mb-4 flex items-center">
-                    <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                    Đã hoàn thành ({doneItems.length})
-                  </h4>
-                  <div className="space-y-3">
-                    {doneItems.length === 0 ? (
-                      <p className="text-sm text-gray-400 dark:text-[#383838] italic">Chưa hoàn thành công việc nào.</p>
-                    ) : (
-                      doneItems.map(item => (
-                        <div key={item.id} className="p-3 bg-green-50/50 rounded-xl border border-green-100 opacity-80 hover:opacity-100 transition-opacity">
-                          <p className="font-bold text-sm text-gray-900 dark:text-[#EDEDED] line-through decoration-gray-400">{item.title}</p>
-                          <div className="mt-2 text-xs text-green-700 dark:text-green-300 font-semibold flex items-center gap-1">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                            Hoàn thành lúc {new Date(item.updatedAt).toLocaleDateString('vi-VN')}
-                          </div>
-                        </div>
-                      ))
-                    )}
+                {/* Progress Stats */}
+                <div className="hidden md:flex items-center gap-8 min-w-[300px]">
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                      <span>Tiến độ</span>
+                      <span className={progressPercent === 100 ? 'text-emerald-500' : ''}>{progressPercent}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full ${progressPercent === 100 ? 'bg-emerald-500' : 'bg-indigo-500'}`}
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex flex-col items-end">
+                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Tasks</span>
+                      <span className="text-sm font-black" style={{ color: 'var(--text-primary)' }}>{doneItems.length}/{totalItems}</span>
+                    </div>
                   </div>
                 </div>
+              </summary>
+
+              {/* Accordion Content */}
+              <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-[#0a0a0a]">
+                <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100 dark:divide-gray-800">
+                  
+                  {/* Chưa hoàn thành */}
+                  <div className="p-6">
+                    <h4 className="text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                      <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                      Chưa hoàn thành ({notDoneItems.length})
+                    </h4>
+                    <div className="space-y-2">
+                      {notDoneItems.length === 0 ? (
+                        <div className="py-6 text-center border border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
+                          <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Không có công việc nào tồn đọng.</p>
+                        </div>
+                      ) : (
+                        notDoneItems.map(item => (
+                          <div key={item.id} className="group/item flex items-start gap-3 p-3 bg-white dark:bg-[#111] rounded-xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 transition-colors shadow-sm">
+                            <div className="mt-0.5 shrink-0 w-4 h-4 rounded border-2 border-gray-300 dark:border-gray-600 group-hover/item:border-indigo-500 transition-colors" />
+                            <div className="flex-1">
+                              <p className="font-bold text-sm leading-snug mb-1.5" style={{ color: 'var(--text-primary)' }}>{item.title}</p>
+                              <div className="flex items-center gap-2">
+                                <span className="badge badge-muted text-[9px] uppercase font-black">{item.type}</span>
+                                <span className={`badge text-[9px] uppercase font-black ${
+                                  item.status === 'BLOCKED' ? 'badge-danger' : 
+                                  item.status === 'REVIEW' ? 'badge-warning' : 
+                                  item.status === 'IN_PROGRESS' ? 'badge-info' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                                }`}>
+                                  {item.status}
+                                </span>
+                                {item.priority && (
+                                  <span 
+                                    className="badge text-[9px] uppercase font-black"
+                                    style={{ 
+                                      backgroundColor: item.priority.color ? `${item.priority.color}15` : 'var(--bg-muted)', 
+                                      color: item.priority.color || 'var(--text-secondary)'
+                                    }}
+                                  >
+                                    {item.priority.name}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Đã hoàn thành */}
+                  <div className="p-6">
+                    <h4 className="text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      Đã hoàn thành ({doneItems.length})
+                    </h4>
+                    <div className="space-y-2">
+                      {doneItems.length === 0 ? (
+                        <div className="py-6 text-center border border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
+                          <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Chưa hoàn thành công việc nào.</p>
+                        </div>
+                      ) : (
+                        doneItems.map(item => (
+                          <div key={item.id} className="flex items-start gap-3 p-3 opacity-60 hover:opacity-100 transition-opacity">
+                            <div className="mt-0.5 shrink-0 w-4 h-4 rounded bg-emerald-500 flex items-center justify-center">
+                              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                            </div>
+                            <div>
+                              <p className="font-bold text-sm leading-snug line-through" style={{ color: 'var(--text-primary)' }}>{item.title}</p>
+                              <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: 'var(--text-muted)' }}>
+                                Hoàn thành lúc {new Date(item.updatedAt).toLocaleDateString('vi-VN')}
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                </div>
               </div>
-            </div>
+            </details>
           )
         })}
       </div>

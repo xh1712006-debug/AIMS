@@ -66,6 +66,7 @@ export async function createCheckIn(formData: FormData) {
   const nextTasks = formData.get('nextTasks') as string;
   const blockers = formData.get('blockers') as string;
   const evidenceLink = formData.get('evidenceLink') as string;
+  const riskSelfAssessment = formData.get('riskSelfAssessment') as string | null;
 
   const projectId = formData.get('projectId') as string;
   if (!projectId) throw new Error("Project ID is required");
@@ -77,8 +78,33 @@ export async function createCheckIn(formData: FormData) {
 
   const user = await prisma.user.findUnique({ where: { id: session.user.id } });
 
+  // --- 1. Auto-Risk Calculation ---
   let riskStatus = 'GREEN';
-  if (blockers && blockers.trim().length > 0) riskStatus = 'YELLOW';
+  
+  // Rule 1: Has blockers -> YELLOW
+  if (blockers && blockers.trim().length > 0) {
+    riskStatus = 'YELLOW';
+  }
+
+  // Rule 2: Near Deadline + Blockers -> RED
+  // Find current active sprint to check deadline
+  const currentSprint = await prisma.sprint.findFirst({
+    where: {
+      projectId: project.id,
+      startDate: { lte: new Date() },
+      endDate: { gte: new Date() }
+    }
+  });
+
+  if (currentSprint && blockers && blockers.trim().length > 0) {
+    const daysUntilEnd = (currentSprint.endDate.getTime() - new Date().getTime()) / (1000 * 3600 * 24);
+    if (daysUntilEnd <= 2) {
+      riskStatus = 'RED';
+    }
+  }
+
+  // (Note: The "no activity > 4 or 7 days" is a separate cron/dashboard logic, 
+  // but we enforce the blocker/deadline rules here upon check-in).
 
   await prisma.checkIn.create({
     data: {
@@ -88,21 +114,48 @@ export async function createCheckIn(formData: FormData) {
       blockers,
       evidenceLink,
       riskStatus: riskStatus as any,
+      riskSelfAssessment: (riskSelfAssessment && ['GREEN','YELLOW','RED'].includes(riskSelfAssessment))
+        ? riskSelfAssessment as any
+        : null,
     }
   });
 
-  // Sync to GitHub if configured
+  // --- 2. Mock GitHub Sync ---
   if (user?.githubToken && project.githubRepo) {
     const dateStr = new Date().toISOString().split('T')[0];
-    const path = `check-ins/${dateStr}.md`;
-    const content = `# Daily Check-in: ${dateStr}\n\n## DONE\n${doneTasks}\n\n## NEXT\n${nextTasks}\n\n## BLOCKERS\n${blockers || 'None'}\n\n## EVIDENCE\n${evidenceLink || 'None'}`;
+    const path = `check-ins/weekly-${dateStr}.md`;
+    const content = [
+      `# Weekly Check-in: ${dateStr}`,
+      ``,
+      `## DONE (Đã làm)`,
+      doneTasks,
+      ``,
+      `## NEXT (Sẽ làm)`,
+      nextTasks,
+      ``,
+      `## BLOCKERS (Khó khăn)`,
+      blockers || 'None',
+      ``,
+      `## EVIDENCE (Minh chứng)`,
+      evidenceLink || 'None',
+      ``,
+      `## RISK SELF-ASSESSMENT`,
+      riskSelfAssessment || 'Not specified',
+    ].join('\n');
     
     await syncToGithub(user.githubToken, project.githubRepo, content, path);
   }
 
-  revalidatePath('/dashboard/check-ins');
+  revalidatePath(`/dashboard/${projectId}/check-ins`);
   revalidatePath('/dashboard');
 }
+
+// ItemType permission matrix (theo chuẩn Excel Agile)
+// PM/PO: Tạo Feature, Research, Experiment, Analysis (top-level work)
+// Intern (Dev Team): Tạo Bug, Spike, Test, Documentation (granular tasks)
+// MEMBER_MANAGER: Được tạo tất cả
+const PM_TYPES = ['FEATURE', 'RESEARCH', 'EXPERIMENT', 'ANALYSIS'];
+const INTERN_TYPES = ['BUG', 'SPIKE', 'TEST', 'DOCUMENTATION'];
 
 export async function createWorkItem(formData: FormData) {
   const session = await getServerSession(authOptions);
@@ -111,12 +164,12 @@ export async function createWorkItem(formData: FormData) {
   const title = formData.get('title') as string;
   const type = formData.get('type') as string;
   
-  if (session.user.role === 'PROJECT_MANAGER' && (type === 'TASK' || type === 'BUG')) {
-    throw new Error("Project Manager can only create EPIC or STORY");
+  if (session.user.role === 'PROJECT_MANAGER' && !PM_TYPES.includes(type)) {
+    throw new Error(`Project Manager chỉ có thể tạo: ${PM_TYPES.join(', ')}`);
   }
 
-  if (session.user.role === 'INTERN' && (type === 'EPIC' || type === 'STORY')) {
-    throw new Error("Intern can only create TASK or BUG");
+  if (session.user.role === 'INTERN' && !INTERN_TYPES.includes(type)) {
+    throw new Error(`Intern chỉ có thể tạo: ${INTERN_TYPES.join(', ')}`);
   }
   const priorityId = formData.get('priorityId') as string;
   const parentId = formData.get('parentId') as string || null;
@@ -366,7 +419,7 @@ export async function saveSettings(formData: FormData) {
     where: { id: projectId }
   });
 
-  if (project && project.internId === session.user.id) {
+  if (project && (project.internId === session.user.id || project.projectManagerId === session.user.id)) {
     await prisma.project.update({
       where: { id: project.id },
       data: { githubRepo }
@@ -506,38 +559,42 @@ export async function createProject(formData: FormData) {
   });
 
   if (generateTimeline) {
-    const s1Start = new Date(startDate);
-    const s1End = new Date(s1Start);
-    s1End.setDate(s1End.getDate() + (SYSTEM_CONFIG.TIMELINE.STANDARD_SPRINT_WEEKS * 7));
+    // Rolling 10-week model (chuẩn Excel):
+    // Week 1: Onboarding → Charter Approved
+    // Week 2-3: Sprint 1, Week 4-5: Sprint 2, Week 6-7: Sprint 3, Week 8-9: Sprint 4
+    // Week 10: Final Review
+    const addWeeks = (date: Date, weeks: number): Date => {
+      const d = new Date(date);
+      d.setDate(d.getDate() + weeks * 7);
+      return d;
+    };
+
+    const onboardingStart = new Date(startDate);
+    const onboardingEnd  = addWeeks(onboardingStart, 1); // Week 1
+
+    const s1Start = new Date(onboardingEnd);
+    const s1End   = addWeeks(s1Start, SYSTEM_CONFIG.TIMELINE.STANDARD_SPRINT_WEEKS); // Week 2-3
 
     const s2Start = new Date(s1End);
-    const s2End = new Date(s2Start);
-    s2End.setDate(s2End.getDate() + (SYSTEM_CONFIG.TIMELINE.STANDARD_SPRINT_WEEKS * 7));
+    const s2End   = addWeeks(s2Start, SYSTEM_CONFIG.TIMELINE.STANDARD_SPRINT_WEEKS); // Week 4-5
 
     const s3Start = new Date(s2End);
-    const s3End = new Date(s3Start);
-    s3End.setDate(s3End.getDate() + (SYSTEM_CONFIG.TIMELINE.STANDARD_SPRINT_WEEKS * 7));
+    const s3End   = addWeeks(s3Start, SYSTEM_CONFIG.TIMELINE.STANDARD_SPRINT_WEEKS); // Week 6-7
 
     const s4Start = new Date(s3End);
-    const s4End = new Date(s4Start);
-    s4End.setDate(s4End.getDate() + (SYSTEM_CONFIG.TIMELINE.STANDARD_SPRINT_WEEKS * 7));
+    const s4End   = addWeeks(s4Start, SYSTEM_CONFIG.TIMELINE.STANDARD_SPRINT_WEEKS); // Week 8-9
 
-    const s5Start = new Date(s4End);
-    const s5End = new Date(s5Start);
-    s5End.setDate(s5End.getDate() + (SYSTEM_CONFIG.TIMELINE.FINAL_SPRINT_WEEKS * 7));
-
-    const s6Start = new Date(s5End);
-    const s6End = new Date(s6Start);
-    s6End.setDate(s6End.getDate() + (SYSTEM_CONFIG.TIMELINE.FINAL_SPRINT_WEEKS * 7));
+    const finalStart = new Date(s4End);
+    const finalEnd   = addWeeks(finalStart, SYSTEM_CONFIG.TIMELINE.FINAL_SPRINT_WEEKS); // Week 10
 
     await prisma.sprint.createMany({
       data: [
-        { projectId: project.id, name: 'Onboarding & Tìm hiểu bài toán', startDate: s1Start, endDate: s1End },
-        { projectId: project.id, name: 'Sprint 1', startDate: s2Start, endDate: s2End },
-        { projectId: project.id, name: 'Sprint 2', startDate: s3Start, endDate: s3End },
-        { projectId: project.id, name: 'Sprint 3', startDate: s4Start, endDate: s4End },
-        { projectId: project.id, name: 'Sprint 4', startDate: s5Start, endDate: s5End },
-        { projectId: project.id, name: 'Final Review', startDate: s6Start, endDate: s6End },
+        { projectId: project.id, name: 'Onboarding',    startDate: onboardingStart, endDate: onboardingEnd },
+        { projectId: project.id, name: 'Sprint 1',      startDate: s1Start,         endDate: s1End },
+        { projectId: project.id, name: 'Sprint 2',      startDate: s2Start,         endDate: s2End },
+        { projectId: project.id, name: 'Sprint 3',      startDate: s3Start,         endDate: s3End },
+        { projectId: project.id, name: 'Sprint 4',      startDate: s4Start,         endDate: s4End },
+        { projectId: project.id, name: 'Final Review',  startDate: finalStart,      endDate: finalEnd },
       ]
     });
   }
@@ -792,7 +849,7 @@ export async function updateWorkItemStatus(id: string, newStatus: string, projec
     });
     const parentEpic = await prisma.workItem.findUnique({ where: { id: parentId } });
     
-    if (parentEpic && parentEpic.type === 'EPIC' && allSiblings.length > 0) {
+    if (parentEpic && ['FEATURE', 'RESEARCH', 'EXPERIMENT', 'ANALYSIS'].includes(parentEpic.type) && allSiblings.length > 0) {
       const allDone = allSiblings.every(s => s.status === 'DONE');
       const allTodo = allSiblings.every(s => s.status === 'TODO');
       

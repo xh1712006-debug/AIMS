@@ -3,24 +3,55 @@
 import { useState } from 'react';
 import { createWorkItem } from '@/app/actions';
 
-export default function CreateWorkItemForm({ projectId, epics, priorityLevels = [], userRole }: { projectId: string, epics: any[], priorityLevels?: any[], userRole?: string }) {
-  const [type, setType] = useState(userRole === 'PROJECT_MANAGER' ? 'EPIC' : 'TASK');
+// ItemType options per role (theo chuẩn Excel Agile)
+const PM_TYPE_OPTIONS = [
+  { value: 'FEATURE',       label: 'Feature (Tính năng)',         emoji: '🚀' },
+  { value: 'RESEARCH',      label: 'Research (Nghiên cứu)',        emoji: '🔬' },
+  { value: 'EXPERIMENT',    label: 'Experiment (Thử nghiệm)',      emoji: '🧪' },
+  { value: 'ANALYSIS',      label: 'Analysis (Phân tích dữ liệu)', emoji: '📊' },
+];
 
-  // Story fields
-  const [role, setRole] = useState('');
-  const [action, setAction] = useState('');
-  const [benefit, setBenefit] = useState('');
+const INTERN_TYPE_OPTIONS = [
+  { value: 'BUG',           label: 'Bug (Lỗi cần sửa)',           emoji: '🐛' },
+  { value: 'SPIKE',         label: 'Spike (Khám phá/Đánh giá)',    emoji: '⚡' },
+  { value: 'TEST',          label: 'Test (Kiểm thử)',              emoji: '✅' },
+  { value: 'DOCUMENTATION', label: 'Documentation (Tài liệu)',     emoji: '📝' },
+];
 
+const ALL_TYPE_OPTIONS = [...PM_TYPE_OPTIONS, ...INTERN_TYPE_OPTIONS];
+
+export default function CreateWorkItemForm({ 
+  projectId, 
+  parentItems, 
+  priorityLevels = [], 
+  userRole 
+}: { 
+  projectId: string, 
+  parentItems: any[], 
+  priorityLevels?: any[], 
+  userRole?: string 
+}) {
+  const typeOptions =
+    userRole === 'PROJECT_MANAGER' ? PM_TYPE_OPTIONS :
+    userRole === 'INTERN'          ? INTERN_TYPE_OPTIONS :
+    ALL_TYPE_OPTIONS;
+
+  const [type, setType] = useState(typeOptions[0]?.value ?? 'FEATURE');
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSubmit = async (formData: FormData) => {
     await createWorkItem(formData);
     setIsOpen(false);
-    setRole('');
-    setAction('');
-    setBenefit('');
-    setType('EPIC');
+    setType(typeOptions[0]?.value ?? 'FEATURE');
   };
+
+  // Items that can be a parent (Feature/Research/Experiment/Analysis)
+  const topLevelItems = parentItems.filter(i =>
+    ['FEATURE', 'RESEARCH', 'EXPERIMENT', 'ANALYSIS'].includes(i.type)
+  );
+
+  // Child types need a parent item
+  const isChildType = ['BUG', 'SPIKE', 'TEST', 'DOCUMENTATION'].includes(type);
 
   return (
     <>
@@ -36,8 +67,8 @@ export default function CreateWorkItemForm({ projectId, epics, priorityLevels = 
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 dark:bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white dark:bg-[#171717] rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
             <div className="px-6 py-4 border-b border-gray-100 dark:border-[#262626] flex justify-between items-center bg-gray-50/50 dark:bg-[#0A0A0A]/50">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-[#EDEDED]">Thêm Task Mới</h3>
-              <button onClick={() => setIsOpen(false)} className="text-gray-400 dark:text-[#383838] hover:text-gray-600 dark:text-[#A3A3A3] transition-colors p-1">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-[#EDEDED]">Thêm Công Việc Mới</h3>
+              <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-[#A3A3A3] transition-colors p-1">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
@@ -46,100 +77,96 @@ export default function CreateWorkItemForm({ projectId, epics, priorityLevels = 
               <form action={handleSubmit} className="space-y-4">
                 <input type="hidden" name="projectId" value={projectId} />
                 
+                {/* Type Selector */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Loại (Type)</label>
-                  <select 
-                    name="type" 
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
-                    className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm"
-                  >
-                    {userRole === 'PROJECT_MANAGER' && (
-                      <>
-                        <option value="EPIC">Epic (Tính năng lớn)</option>
-                        <option value="STORY">Story (Câu chuyện ND)</option>
-                      </>
-                    )}
-                    {userRole === 'INTERN' || userRole === 'MEMBER_MANAGER' ? (
-                      <>
-                        <option value="TASK">Task (Công việc)</option>
-                        <option value="BUG">Bug (Lỗi)</option>
-                      </>
-                    ) : null}
-                  </select>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-2">
+                    Loại công việc (Type)
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {typeOptions.map(opt => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setType(opt.value)}
+                        className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-left text-sm font-semibold transition-all ${
+                          type === opt.value
+                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                            : 'border-gray-200 dark:border-[#383838] text-gray-600 dark:text-[#A3A3A3] hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="text-base">{opt.emoji}</span>
+                        <span className="text-xs leading-tight">{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <input type="hidden" name="type" value={type} />
                 </div>
 
-                {type !== 'EPIC' && (
+                {/* Parent item picker (for child types) */}
+                {isChildType && (
                   <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Thuộc Epic (Parent) <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">
+                      Thuộc công việc cha <span className="text-red-500">*</span>
+                    </label>
                     <select 
                       name="parentId" 
                       required
                       className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm bg-gray-50 dark:bg-[#0A0A0A]"
                     >
-                      <option value="">-- Chọn Epic --</option>
-                      {epics.map(epic => (
-                        <option key={epic.id} value={epic.id}>{epic.title}</option>
+                      <option value="">-- Chọn Feature/Research/... --</option>
+                      {topLevelItems.map(item => (
+                        <option key={item.id} value={item.id}>{item.title}</option>
                       ))}
                     </select>
-                    {epics.length === 0 && <p className="text-xs text-red-500 mt-1.5 font-medium">⚠️ Bạn cần tạo ít nhất 1 Epic trước khi tạo các công việc khác.</p>}
+                    {topLevelItems.length === 0 && (
+                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-1.5 font-medium">
+                        ⚠️ Cần tạo ít nhất 1 Feature/Research trước khi thêm Bug/Spike...
+                      </p>
+                    )}
                   </div>
                 )}
 
-                {type === 'STORY' ? (
-                  <div className="space-y-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100 animate-in zoom-in-95 duration-300">
-                    <p className="text-xs font-bold text-blue-800 dark:text-blue-200 uppercase tracking-wider mb-2 flex items-center gap-1">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                      Cấu trúc User Story
-                    </p>
-                    <input type="hidden" name="title" value={`Là một ${role}, tôi muốn ${action} để ${benefit}`} />
-                    
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Là một (Đối tượng)...</label>
-                      <input required value={role} onChange={e => setRole(e.target.value)} type="text" className="w-full rounded border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 p-2 text-sm bg-white dark:bg-[#171717]" placeholder="VD: Người dùng, Quản trị viên" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Tôi muốn (Hoạt động)...</label>
-                      <input required value={action} onChange={e => setAction(e.target.value)} type="text" className="w-full rounded border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 p-2 text-sm bg-white dark:bg-[#171717]" placeholder="VD: Đăng nhập bằng Google" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Để (Kết quả)...</label>
-                      <input required value={benefit} onChange={e => setBenefit(e.target.value)} type="text" className="w-full rounded border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 p-2 text-sm bg-white dark:bg-[#171717]" placeholder="VD: Tiết kiệm thời gian tạo tài khoản" />
-                    </div>
-                    
-                    <div className="mt-4 p-3 bg-white dark:bg-[#171717] rounded-lg border border-gray-200 dark:border-[#383838] shadow-sm dark:shadow-none text-sm text-gray-600 dark:text-[#A3A3A3] leading-relaxed">
-                      <span className="font-bold text-gray-900 dark:text-[#EDEDED] block mb-1">✨ Xem trước kết quả: </span>
-                      {role || action || benefit ? (
-                        <span className="italic">Là một <span className="font-bold text-blue-600">{role || '[đối tượng]'}</span>, tôi muốn <span className="font-bold text-blue-600">{action || '[hoạt động]'}</span> để <span className="font-bold text-blue-600">{benefit || '[kết quả]'}</span>.</span>
-                      ) : <span className="italic text-gray-400 dark:text-[#383838]">Vui lòng điền thông tin ở trên...</span>}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="animate-in fade-in duration-300">
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Tên công việc</label>
-                    <input name="title" required type="text" className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" placeholder={type === 'EPIC' ? "VD: Module Quản lý Người dùng" : "VD: Thiết kế Database cho User"} />
-                  </div>
-                )}
-
+                {/* Title */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Độ ưu tiên</label>
-                  <select name="priorityId" className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm">
-                    {priorityLevels.map(p => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                  </select>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">
+                    Tiêu đề <span className="text-red-500">*</span>
+                  </label>
+                  <input 
+                    name="title" 
+                    required 
+                    type="text" 
+                    className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm"
+                    placeholder={
+                      type === 'FEATURE'       ? 'VD: Tính năng đăng nhập OAuth' :
+                      type === 'RESEARCH'      ? 'VD: Nghiên cứu kiến trúc Transformer' :
+                      type === 'EXPERIMENT'    ? 'VD: Thử nghiệm XGBoost vs Random Forest' :
+                      type === 'ANALYSIS'      ? 'VD: Phân tích EDA bộ dữ liệu điện' :
+                      type === 'BUG'           ? 'VD: Lỗi login khi email có ký tự đặc biệt' :
+                      type === 'SPIKE'         ? 'VD: Tìm hiểu giới hạn của GitHub API' :
+                      type === 'TEST'          ? 'VD: Test case luồng thanh toán' :
+                      'VD: Viết hướng dẫn cài đặt môi trường'
+                    }
+                  />
                 </div>
 
-                {type === 'EPIC' && (
-                  <div className="animate-in fade-in duration-300">
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Hạn chót (Due Date)</label>
-                    <input 
-                      name="dueDate" 
-                      type="date" 
-                      className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" 
-                    />
+                {/* Priority */}
+                {priorityLevels.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Độ ưu tiên (MoSCoW)</label>
+                    <select name="priorityId" className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm">
+                      <option value="">-- Chọn mức độ --</option>
+                      {priorityLevels.map(p => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
                   </div>
                 )}
+
+                {/* Due date */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Hạn chót (Tùy chọn)</label>
+                  <input name="dueDate" type="date" className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm" />
+                </div>
 
                 <div className="pt-4 border-t border-gray-100 dark:border-[#262626] flex gap-3 justify-end">
                   <button 
@@ -150,11 +177,11 @@ export default function CreateWorkItemForm({ projectId, epics, priorityLevels = 
                     Hủy
                   </button>
                   <button 
-                    type="submit" 
-                    disabled={type !== 'EPIC' && epics.length === 0}
-                    className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:text-gray-500 dark:text-[#737373] disabled:cursor-not-allowed shadow-sm dark:shadow-none"
+                    type="submit"
+                    disabled={isChildType && topLevelItems.length === 0}
+                    className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-sm dark:shadow-none disabled:opacity-50"
                   >
-                    Lưu công việc
+                    Tạo công việc
                   </button>
                 </div>
               </form>

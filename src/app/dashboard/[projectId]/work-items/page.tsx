@@ -12,12 +12,13 @@ export default async function SprintsPage(props: { params: Promise<{ projectId: 
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect('/login');
 
-  const project = await prisma.project.findUnique({
+  const project = await prisma.project.findFirst({
     where: { 
       id: projectId, 
       ...(session.user.role === 'INTERN' ? { internId: session.user.id } :
           session.user.role === 'MEMBER_MANAGER' ? { memberManagerId: session.user.id } :
-          session.user.role === 'PARTNER' ? { partnerId: session.user.id } : {})
+          session.user.role === 'PARTNER' ? { partnerId: session.user.id } :
+          session.user.role === 'PROJECT_MANAGER' ? { projectManagerId: session.user.id } : {})
     },
     include: {
       workItems: { 
@@ -38,35 +39,50 @@ export default async function SprintsPage(props: { params: Promise<{ projectId: 
 
   if (!project) return <div>Không tìm thấy dự án.</div>;
   const workItems = project.workItems;
-  const epics = workItems.filter(item => item.type === 'EPIC');
-  const kanbanItems = workItems.filter(item => item.type !== 'EPIC');
+  // Top-level items (Feature/Research/Experiment/Analysis) → shown in Roadmap section
+  const TOP_LEVEL_TYPES = ['FEATURE', 'RESEARCH', 'EXPERIMENT', 'ANALYSIS'];
+  const topLevelItems = workItems.filter(item => TOP_LEVEL_TYPES.includes(item.type));
+  // Child/granular items (Bug/Spike/Test/Documentation) → shown in Kanban board
+  const kanbanItems = workItems.filter(item => !TOP_LEVEL_TYPES.includes(item.type));
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1200px] mx-auto pb-12">
+      
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4 pt-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Roadmap & Backlog</h2>
-          <p className="text-sm text-gray-500 dark:text-[#737373] mt-1">Quản lý tầm nhìn dự án (Epic) và các công việc chưa được gán vào Sprint.</p>
+          <h2 className="text-3xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>Roadmap & Backlog</h2>
+          <p className="text-sm font-medium mt-1" style={{ color: 'var(--text-muted)' }}>Quản lý tầm nhìn dự án (Epic) và các công việc chưa được gán vào Sprint.</p>
         </div>
-        {(session.user.role === 'INTERN' || session.user.role === 'PROJECT_MANAGER' || session.user.role === 'MEMBER_MANAGER') && (
-          <CreateWorkItemForm projectId={projectId} epics={epics} priorityLevels={project.priorityLevels} userRole={session.user.role} />
+      {(session.user.role === 'INTERN' || session.user.role === 'PROJECT_MANAGER' || session.user.role === 'MEMBER_MANAGER') && (
+          <CreateWorkItemForm projectId={projectId} parentItems={topLevelItems} priorityLevels={project.priorityLevels} userRole={session.user.role} />
         )}
       </div>
       
-      {/* Roadmap (Epics) Section */}
-      <div className="mb-6 bg-gray-50 dark:bg-[#0A0A0A] p-5 rounded-2xl border border-gray-100 dark:border-[#262626]">
-        <h3 className="text-lg font-bold text-gray-800 dark:text-[#EDEDED] mb-3 flex items-center gap-2">
-          🗺️ Roadmap (Epics)
-          <span className="text-[11px] font-bold bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 px-2 py-0.5 rounded-md">
-            {epics.length} tính năng lớn
+      {/* ── Roadmap (Epics) Section ── */}
+      <div className="mb-12">
+        <div className="flex items-center gap-3 mb-6">
+          <h3 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+            Roadmap (Feature / Research / Experiment / Analysis)
+          </h3>
+          <span className="badge badge-accent text-[10px] uppercase font-bold shadow-sm">
+            {topLevelItems.length} mục tiêu
           </span>
-        </h3>
+        </div>
         
-        {epics.length === 0 ? (
-          <p className="text-gray-500 dark:text-[#737373] text-sm italic">Chưa có Epic nào. Hãy tạo Epic để nhóm các công việc lớn.</p>
+        {topLevelItems.length === 0 ? (
+          <div className="py-16 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center text-center max-w-4xl mx-auto" style={{ borderColor: 'var(--border-muted)' }}>
+            <div className="w-16 h-16 rounded-full bg-gray-50 dark:bg-[#111] flex items-center justify-center mb-5">
+              <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+            </div>
+            <p className="text-lg font-black" style={{ color: 'var(--text-primary)' }}>Chưa có mục tiêu nào</p>
+            <p className="text-sm font-medium mt-1.5" style={{ color: 'var(--text-muted)' }}>PM hãy tạo Feature/Research/Experiment để định hướng lộ trình dự án.</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {epics.map(epic => {
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {topLevelItems.map(epic => {
               const childItems = workItems.filter(i => i.parentId === epic.id);
               const totalChildren = childItems.length;
               const doneChildren = childItems.filter(i => i.status === 'DONE').length;
@@ -83,87 +99,90 @@ export default async function SprintsPage(props: { params: Promise<{ projectId: 
               }
               
               return (
-              <div key={epic.id} className={`bg-white dark:bg-[#171717] p-4 rounded-xl shadow-sm dark:shadow-none border border-gray-200 dark:border-[#383838] border-l-4 hover:shadow-md transition-shadow ${isBlocked ? 'border-l-red-500' : riskLevel ? 'border-l-orange-500' : 'border-l-purple-500'}`}>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex-1 pr-2">
-                    <h4 className="font-bold text-gray-900 dark:text-[#EDEDED] leading-tight mb-1">{epic.title}</h4>
-                    <div className="flex flex-wrap gap-1">
+              <div key={epic.id} className="aims-card p-5 group hover:border-gray-300 dark:hover:border-gray-700 transition-all flex flex-col h-full relative overflow-hidden">
+                {/* Status Indicator Line */}
+                <div className={`absolute top-0 left-0 bottom-0 w-1 ${isBlocked ? 'bg-red-500' : riskLevel ? 'bg-amber-500' : 'bg-indigo-500'}`} />
+                
+                <div className="flex justify-between items-start mb-3 pl-2">
+                  <div className="flex-1 pr-3">
+                    <h4 className="font-bold text-base leading-snug mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" style={{ color: 'var(--text-primary)' }}>{epic.title}</h4>
+                    <div className="flex flex-wrap gap-1.5">
                       {isBlocked && (
-                        <span className="px-1.5 py-0.5 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 text-[10px] rounded font-bold flex items-center gap-0.5">
-                          ⛔ Bị chặn
-                        </span>
+                        <span className="badge badge-danger text-[9px] uppercase">⛔ Bị chặn</span>
                       )}
                       {riskLevel === 'OVERDUE' && (
-                        <span className="px-1.5 py-0.5 bg-rose-100 text-rose-700 border border-rose-200 text-[10px] rounded font-bold flex items-center gap-0.5">
-                          ⚠️ Đã trễ hạn
-                        </span>
+                        <span className="badge badge-danger text-[9px] uppercase">⚠️ Trễ hạn</span>
                       )}
                       {riskLevel === 'RISK' && (
-                        <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 border border-orange-200 text-[10px] rounded font-bold flex items-center gap-0.5">
-                          🚩 Nguy cơ trễ hạn
-                        </span>
+                        <span className="badge badge-warning text-[9px] uppercase">🚩 Nguy cơ trễ</span>
                       )}
                       {epic.dueDate && (
-                        <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-[#262626] text-gray-600 dark:text-[#A3A3A3] border border-gray-200 dark:border-[#383838] text-[10px] rounded font-medium flex items-center gap-0.5">
+                        <span className="badge badge-muted text-[9px] uppercase">
                           📅 {new Date(epic.dueDate).toLocaleDateString('vi-VN')}
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="ml-2 shrink-0 flex items-start gap-2">
-                    <span className={`px-2 py-0.5 text-[10px] rounded font-bold border ${
-                      epic.status === 'DONE' ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800' :
-                      epic.status === 'IN_PROGRESS' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800' :
-                      'bg-gray-50 dark:bg-[#0A0A0A] text-gray-700 dark:text-[#D4D4D4] border-gray-200 dark:border-[#383838]'
+                  <div className="shrink-0 flex items-start gap-2">
+                    <span className={`badge text-[9px] uppercase ${
+                      epic.status === 'DONE' ? 'badge-success' :
+                      epic.status === 'IN_PROGRESS' ? 'badge-info' :
+                      'badge-muted'
                     }`}>
                       {epic.status}
                     </span>
                     {(session.user.role === 'INTERN' || session.user.role === 'PROJECT_MANAGER' || session.user.role === 'MEMBER_MANAGER') && (
-                      <div className="mt-[-4px]">
-                        <WorkItemActionsMenu item={epic} epics={epics} projectId={projectId} priorityLevels={project.priorityLevels} />
+                      <div className="mt-[-4px] opacity-0 group-hover:opacity-100 transition-opacity">
+                        <WorkItemActionsMenu item={epic} epics={topLevelItems} projectId={projectId} priorityLevels={project.priorityLevels} />
                       </div>
                     )}
                   </div>
                 </div>
-                {epic.description && <p className="text-sm text-gray-600 dark:text-[#A3A3A3] mb-3 line-clamp-2">{epic.description}</p>}
+                
+                {epic.description && <p className="text-sm line-clamp-2 mb-4 pl-2" style={{ color: 'var(--text-secondary)' }}>{epic.description}</p>}
+                
+                <div className="flex-1" /> {/* Spacer */}
                 
                 {/* Progress Bar */}
                 {totalChildren > 0 && (
-                  <div className="mb-3">
-                    <div className="flex justify-between items-center text-[10px] mb-1 font-medium text-gray-500 dark:text-[#737373]">
+                  <div className="mb-4 pl-2">
+                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-muted)' }}>
                       <span>Tiến độ</span>
-                      <span className={progressPercent === 100 ? 'text-green-600 font-bold' : ''}>{progressPercent}%</span>
+                      <span className={progressPercent === 100 ? 'text-emerald-500' : ''}>{progressPercent}%</span>
                     </div>
-                    <div className="w-full bg-gray-100 dark:bg-[#262626] rounded-full h-1.5 overflow-hidden">
+                    <div className="progress-bar h-1.5 bg-gray-100 dark:bg-gray-800">
                       <div 
-                        className={`h-1.5 rounded-full transition-all duration-500 ${progressPercent === 100 ? 'bg-green-500' : 'bg-purple-500'}`}
+                        className={`progress-bar-fill ${progressPercent === 100 ? 'bg-emerald-500' : 'bg-indigo-500'}`}
                         style={{ width: `${progressPercent}%` }}
-                      ></div>
+                      />
                     </div>
                   </div>
                 )}
                 
-                <div className="mt-auto pt-3 border-t border-gray-100 dark:border-[#262626] flex justify-between items-center text-xs text-gray-500 dark:text-[#737373]">
-                  <div className="flex items-center gap-1">
-                    <svg className="w-4 h-4 text-gray-400 dark:text-[#383838]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="pt-3 border-t pl-2 flex justify-between items-center" style={{ borderColor: 'var(--border-muted)' }}>
+                  <div className="flex items-center gap-1.5 text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                    <svg className="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
-                    <span>{totalChildren} công việc con</span>
+                    <span>{totalChildren} task</span>
                   </div>
                   {epic.priority && (
                     <span 
-                      className="px-1.5 py-0.5 text-[10px] rounded font-medium border"
+                      className="badge text-[9px] uppercase"
                       style={{ 
-                        backgroundColor: epic.priority.color ? `${epic.priority.color}15` : '#f3f4f6', 
-                        color: epic.priority.color || '#374151',
-                        borderColor: epic.priority.color ? `${epic.priority.color}30` : '#e5e7eb'
+                        backgroundColor: epic.priority.color ? `${epic.priority.color}15` : 'var(--bg-muted)', 
+                        color: epic.priority.color || 'var(--text-secondary)',
+                        borderColor: epic.priority.color ? `${epic.priority.color}40` : 'var(--border-color)'
                       }}
                     >
                       {epic.priority.name}
                     </span>
                   )}
                 </div>
-                <WorkItemComments workItemId={epic.id} comments={epic.comments || []} />
+                
+                <div className="pl-2 mt-3">
+                  <WorkItemComments workItemId={epic.id} comments={epic.comments || []} />
+                </div>
               </div>
               );
             })}
@@ -171,14 +190,16 @@ export default async function SprintsPage(props: { params: Promise<{ projectId: 
         )}
       </div>
       
-      {/* Kanban Board (Stories, Tasks, Bugs) */}
+      {/* ── Kanban Board Section ── */}
       <div>
-        <h3 className="text-lg font-bold text-gray-800 dark:text-[#EDEDED] mb-3 flex items-center gap-2">
-          📋 Bảng công việc chi tiết
-        </h3>
+        <div className="flex items-center gap-3 mb-6">
+          <h3 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+            Bảng công việc chi tiết
+          </h3>
+        </div>
         <KanbanBoard 
           workItems={kanbanItems} 
-          epics={epics} 
+          epics={topLevelItems} 
           projectId={projectId} 
           priorityLevels={project.priorityLevels}
           userRole={session.user.role} 

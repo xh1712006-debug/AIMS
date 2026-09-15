@@ -9,17 +9,16 @@ export default function KanbanBoard({ workItems, epics, projectId, priorityLevel
   const router = useRouter();
   const [items, setItems] = useState(workItems);
 
-  // Sync state when props change
   useEffect(() => {
     setItems(workItems);
   }, [workItems]);
   
   const columns = [
-    { id: 'TODO', title: 'To Do', color: 'bg-gray-100 dark:bg-[#262626]' },
-    { id: 'IN_PROGRESS', title: 'In Progress', color: 'bg-blue-50 dark:bg-blue-900/30' },
-    { id: 'REVIEW', title: 'Review', color: 'bg-yellow-50 dark:bg-yellow-900/30' },
-    { id: 'DONE', title: 'Done', color: 'bg-green-50 dark:bg-green-900/30' },
-    { id: 'BLOCKED', title: 'Blocked', color: 'bg-red-50 dark:bg-red-900/30' }
+    { id: 'TODO', title: 'To Do', dot: 'bg-gray-400' },
+    { id: 'IN_PROGRESS', title: 'In Progress', dot: 'bg-blue-500' },
+    { id: 'REVIEW', title: 'Review', dot: 'bg-amber-500' },
+    { id: 'DONE', title: 'Done', dot: 'bg-emerald-500' },
+    { id: 'BLOCKED', title: 'Blocked', dot: 'bg-red-500' }
   ];
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
@@ -32,10 +31,13 @@ export default function KanbanBoard({ workItems, epics, projectId, priorityLevel
 
   const handleDrop = async (e: React.DragEvent, status: string) => {
     e.preventDefault();
+    if (userRole !== 'INTERN') {
+      alert("Chỉ Thực tập sinh (Assignee) mới có quyền kéo thả để cập nhật tiến độ công việc.");
+      return;
+    }
     const id = e.dataTransfer.getData('text/plain');
     if (!id) return;
 
-    // Optimistic UI
     setItems((prevItems: any) => prevItems.map((item: any) => 
       item.id === id ? { ...item, status } : item
     ));
@@ -50,81 +52,72 @@ export default function KanbanBoard({ workItems, epics, projectId, priorityLevel
   };
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4 min-h-[500px]">
-      {columns.map(col => (
-        <div 
-          key={col.id} 
-          className={`flex-1 min-w-[280px] rounded-xl p-4 ${col.color} border border-gray-200 dark:border-[#383838] shadow-sm dark:shadow-none flex flex-col`}
-          onDragOver={handleDragOver}
-          onDrop={(e) => handleDrop(e, col.id)}
-        >
-          <div className="flex justify-between items-center mb-3">
-             <h3 className="font-bold text-gray-700 dark:text-[#D4D4D4]">{col.title}</h3>
-             <span className="bg-white dark:bg-[#171717] text-gray-600 dark:text-[#A3A3A3] text-xs font-bold px-2 py-0.5 rounded-full shadow-sm dark:shadow-none">
-               {items.filter((i: any) => i.status === col.id).length}
-             </span>
-          </div>
-          
-          <div className="flex flex-col gap-3 flex-1 min-h-[150px]">
-            {items.filter((i: any) => i.status === col.id).map((item: any) => {
-              const parentEpic = item.parentId ? epics.find((e: any) => e.id === item.parentId) : null;
-              
-              return (
-              <div 
-                key={item.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, item.id)}
-                className={`p-3 bg-white dark:bg-[#171717] rounded-lg shadow-sm dark:shadow-none cursor-grab active:cursor-grabbing border hover:border-blue-400 transition-colors ${item.requiresFix ? 'border-red-300 dark:border-red-700 bg-red-50/50' : 'border-gray-200 dark:border-[#383838]'}`}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <p className="font-bold text-sm text-gray-900 dark:text-[#EDEDED] leading-tight">{item.title}</p>
-                  {userRole === 'INTERN' && (
-                     <div className="ml-2 shrink-0">
-                       <WorkItemActionsMenu item={item} epics={epics} projectId={projectId} priorityLevels={priorityLevels} />
-                     </div>
-                  )}
-                </div>
+    <div className="flex gap-4 overflow-x-auto pb-4 min-h-[600px] snap-x">
+      {columns.map(col => {
+        const columnItems = items.filter((i: any) => i.status === col.id);
+        return (
+          <div 
+            key={col.id} 
+            className="flex-1 min-w-[280px] md:min-w-[320px] rounded-2xl bg-gray-50/80 dark:bg-[#111] p-3 flex flex-col snap-start"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, col.id)}
+          >
+            <div className="flex justify-between items-center mb-4 px-2 pt-1">
+               <h3 className="text-[11px] font-bold uppercase tracking-widest flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                 <span className={`w-2 h-2 rounded-full ${col.dot}`} />
+                 {col.title} <span className="text-gray-400 dark:text-gray-600 font-medium">({columnItems.length})</span>
+               </h3>
+            </div>
+            
+            <div className="flex flex-col gap-3 flex-1">
+              {columnItems.map((item: any) => {
+                const parentEpic = item.parentId ? epics.find((e: any) => e.id === item.parentId) : null;
                 
-                <div className="flex flex-wrap gap-1 mt-1">
-                  <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-[#262626] text-gray-600 dark:text-[#A3A3A3] text-[10px] rounded font-medium">{item.type}</span>
-                  {parentEpic && (
-                    <span 
-                      className="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 text-[10px] rounded font-bold truncate max-w-[120px]"
-                      title={parentEpic.title}
-                    >
-                      {parentEpic.title}
-                    </span>
-                  )}
-                  {item.priority && (
-                    <span 
-                      className="px-1.5 py-0.5 text-[10px] rounded font-bold border"
-                      style={{ 
-                        backgroundColor: item.priority.color ? `${item.priority.color}20` : '#f3f4f6', 
-                        color: item.priority.color || '#374151',
-                        borderColor: item.priority.color ? `${item.priority.color}40` : '#e5e7eb'
-                      }}
-                    >
-                      {item.priority.name}
-                    </span>
-                  )}
-                  {item.requiresFix && (
-                    <span className="px-1.5 py-0.5 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 text-[10px] rounded font-bold">CẦN SỬA</span>
-                  )}
-                </div>
+                const isDraggable = userRole === 'INTERN';
                 
-                {/* Time tracking display */}
-                {(item.startedAt || item.completedAt) && (
-                   <div className="mt-2 text-[10px] text-gray-500 dark:text-[#737373] border-t pt-1 flex flex-col gap-0.5">
-                     {item.startedAt && <div><span className="font-medium">Bắt đầu:</span> {new Date(item.startedAt).toLocaleDateString('vi-VN')}</div>}
-                     {item.completedAt && <div><span className="font-medium">Hoàn thành:</span> {new Date(item.completedAt).toLocaleDateString('vi-VN')}</div>}
-                   </div>
-                )}
-              </div>
-              );
-            })}
+                return (
+                <div 
+                  key={item.id}
+                  draggable={isDraggable}
+                  onDragStart={(e) => isDraggable && handleDragStart(e, item.id)}
+                  className={`aims-card p-4 transition-all group ${isDraggable ? 'cursor-grab active:cursor-grabbing hover:shadow-md hover:-translate-y-0.5' : ''} ${item.requiresFix ? 'ring-1 ring-red-500 bg-red-50/10' : ''}`}
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <p className="font-bold text-sm leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" style={{ color: 'var(--text-primary)' }}>{item.title}</p>
+                    {userRole === 'INTERN' && (
+                       <div className="ml-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <WorkItemActionsMenu item={item} epics={epics} projectId={projectId} priorityLevels={priorityLevels} />
+                       </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-1.5 mt-auto">
+                    <span className="badge badge-muted text-[9px] uppercase">{item.type}</span>
+                    {parentEpic && (
+                      <span className="badge badge-accent text-[9px] uppercase max-w-[120px] truncate" title={parentEpic.title}>
+                        {parentEpic.title}
+                      </span>
+                    )}
+                    {item.priority && (
+                      <span className="badge text-[9px] uppercase" style={{ backgroundColor: item.priority.color ? `${item.priority.color}15` : 'var(--bg-muted)', color: item.priority.color || 'var(--text-secondary)' }}>
+                        {item.priority.name}
+                      </span>
+                    )}
+                    {item.requiresFix && (
+                      <span className="badge badge-danger text-[9px] uppercase flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                        Cần sửa
+                      </span>
+                    )}
+                  </div>
+                  
+                </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

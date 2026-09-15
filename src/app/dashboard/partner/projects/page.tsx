@@ -35,7 +35,7 @@ export default async function PartnerProjectsPage() {
           </div>
         ) : (
           projects.map(project => {
-            const epics = project.workItems.filter(wi => wi.type === 'EPIC');
+            const epics = project.workItems.filter(wi => ['FEATURE', 'RESEARCH', 'EXPERIMENT', 'ANALYSIS'].includes(wi.type));
             const projectRisk = calculateProjectRisk(project);
 
             return (

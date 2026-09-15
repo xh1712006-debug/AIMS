@@ -52,8 +52,8 @@ export default async function DashboardLayout({
     >
       <PermissionWatcher userRole={session.user.role} />
       <Sidebar user={session.user as any} projects={projects} pendingActionCount={pendingActionCount} />
-      <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-        <div className="max-w-[1600px] w-full mx-auto pb-10">
+      <main className="flex-1 overflow-y-auto">
+        <div className="p-5 md:p-7 max-w-[1600px] w-full mx-auto pb-12">
           {children}
         </div>
       </main>

@@ -13,7 +13,10 @@ export default async function MentorFeedbacksPage() {
 
   // Lấy các WorkItems đang bị gắn cờ cần khắc phục
   const itemsRequiringFix = await prisma.workItem.findMany({
-    where: { requiresFix: true },
+    where: { 
+      requiresFix: true,
+      project: { projectManagerId: session.user.id }
+    },
     include: {
       project: {
         include: { intern: true }

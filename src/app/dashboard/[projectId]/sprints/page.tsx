@@ -10,12 +10,13 @@ export default async function SprintsPlanningPage(props: { params: Promise<{ pro
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect('/login');
 
-  const project = await prisma.project.findUnique({
+  const project = await prisma.project.findFirst({
     where: { 
       id: projectId,
       ...(session.user.role === 'INTERN' ? { internId: session.user.id } :
           session.user.role === 'MEMBER_MANAGER' ? { memberManagerId: session.user.id } :
-          session.user.role === 'PARTNER' ? { partnerId: session.user.id } : {})
+          session.user.role === 'PARTNER' ? { partnerId: session.user.id } :
+          session.user.role === 'PROJECT_MANAGER' ? { projectManagerId: session.user.id } : {})
     },
     include: {
       sprints: {
@@ -25,11 +26,10 @@ export default async function SprintsPlanningPage(props: { params: Promise<{ pro
             orderBy: { order: 'asc' }
           },
           sprintReview: true
-        },
-        orderBy: { startDate: 'desc' }
+        }
       },
       workItems: {
-        where: { sprintId: null, type: { not: 'EPIC' } },
+        where: { sprintId: null, type: { notIn: ['FEATURE', 'RESEARCH', 'EXPERIMENT', 'ANALYSIS'] } },
         include: { priority: true },
         orderBy: { order: 'asc' }
       },
@@ -40,45 +40,90 @@ export default async function SprintsPlanningPage(props: { params: Promise<{ pro
   });
 
   if (!project) return <div>Không tìm thấy dự án.</div>;
-  const sprints = project.sprints;
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const now = today.getTime();
+
+  const getStatus = (startStr: string | Date, endStr: string | Date) => {
+    const start = new Date(startStr).getTime();
+    const end = new Date(endStr).getTime();
+    if (now > end) return 'PAST';
+    if (now >= start && now <= end) return 'ACTIVE';
+    return 'FUTURE';
+  };
+
+  const statusOrder: Record<string, number> = { 'ACTIVE': 0, 'FUTURE': 1, 'PAST': 2 };
+
+  const sortedSprints = [...project.sprints].sort((a, b) => {
+    const statusA = getStatus(a.startDate, a.endDate);
+    const statusB = getStatus(b.startDate, b.endDate);
+    if (statusOrder[statusA] !== statusOrder[statusB]) {
+      return statusOrder[statusA] - statusOrder[statusB];
+    }
+    const aStart = new Date(a.startDate).getTime();
+    const bStart = new Date(b.startDate).getTime();
+    if (statusA === 'PAST') return bStart - aStart;
+    return aStart - bStart;
+  });
+
+  const activeSprints = sortedSprints.filter(s => getStatus(s.startDate, s.endDate) === 'ACTIVE');
+  const futureSprints = sortedSprints.filter(s => getStatus(s.startDate, s.endDate) === 'FUTURE');
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 bg-gray-50/50 dark:bg-[#0A0A0A] min-h-[calc(100vh-6rem)] -m-4 sm:-m-6 p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 bg-white dark:bg-[#171717] p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-[#262626]">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1200px] mx-auto pb-12">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4 pt-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-[#EDEDED] flex items-center gap-2">
-            <svg className="w-6 h-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+          <h2 className="text-3xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
             Kế hoạch Sprint
           </h2>
-          <p className="text-sm text-gray-500 dark:text-[#737373] mt-1 ml-8">Theo dõi mục tiêu và tiến độ công việc theo từng giai đoạn.</p>
+          <div className="flex items-center gap-3 mt-2">
+            <span className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
+              {sortedSprints.length} sprint tổng cộng
+            </span>
+            <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">
+              {activeSprints.length} Đang chạy
+            </span>
+            <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500">
+              {futureSprints.length} Sắp tới
+            </span>
+          </div>
         </div>
         {session.user.role === 'INTERN' && (
           <CreateSprintModal projectId={projectId} />
         )}
       </div>
 
-      <div className="space-y-6">
-        {sprints.length === 0 ? (
-          <div className="bg-white dark:bg-[#171717] p-12 rounded-2xl shadow-sm border border-gray-100 dark:border-[#262626] text-center text-gray-500 dark:text-[#737373] flex flex-col items-center justify-center">
-            <svg className="w-16 h-16 text-gray-200 dark:text-[#383838] mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-            <h3 className="text-lg font-bold text-gray-700 dark:text-[#D4D4D4] mb-1">Chưa có Sprint nào</h3>
-            <p className="text-sm">Hãy tạo Sprint đầu tiên để bắt đầu quá trình thực tập!</p>
+      {sortedSprints.length === 0 ? (
+        <div className="aims-card p-16 text-center flex flex-col items-center justify-center">
+          <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+               style={{ background: 'var(--bg-muted)' }}>
+            <svg className="w-8 h-8" style={{ color: 'var(--text-muted)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
           </div>
-        ) : (
-          sprints.map((sprint, index) => (
+          <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--text-primary)' }}>Chưa có Sprint nào</h3>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Hãy tạo Sprint đầu tiên để bắt đầu quá trình thực tập!</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {sortedSprints.map((sprint, index) => (
             <SprintAccordion
               key={sprint.id}
               sprint={sprint}
-              sprintIndex={sprints.length - index}
+              sprintIndex={index + 1}
+              sprintStatus={getStatus(sprint.startDate, sprint.endDate)}
               projectId={projectId}
-              projectTrack={project.track}
               isIntern={session.user.role === 'INTERN'}
               unassignedWorkItems={project.workItems}
               priorityLevels={project.priorityLevels}
             />
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -2,8 +2,8 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import ProjectTabs from "./ProjectTabs";
 import Link from "next/link";
+import ProjectTabsClient from "./ProjectTabsClient";
 
 export default async function ProjectLayout(props: {
   children: React.ReactNode;
@@ -14,54 +14,53 @@ export default async function ProjectLayout(props: {
   
   if (!session?.user?.id) redirect('/login');
 
-  const project = await prisma.project.findUnique({
+  const project = await prisma.project.findFirst({
     where: { 
       id: projectId,
       ...(session.user.role === 'INTERN' ? { internId: session.user.id } :
           session.user.role === 'MEMBER_MANAGER' ? { memberManagerId: session.user.id } :
-          session.user.role === 'PARTNER' ? { partnerId: session.user.id } : {})
+          session.user.role === 'PARTNER' ? { partnerId: session.user.id } :
+          session.user.role === 'PROJECT_MANAGER' ? { projectManagerId: session.user.id } : {})
     }
   });
 
   if (!project) return <div>Dự án không tồn tại hoặc bạn không có quyền truy cập.</div>;
 
-  return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-4 flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
-        <Link
-          href={session.user.role === 'PROJECT_MANAGER' ? '/dashboard/project-manager/projects' : '/dashboard'}
-          className="hover:underline transition-colors"
-          style={{ color: 'var(--accent)' }}
-        >
-          ← Quay lại danh sách
-        </Link>
-      </div>
+  const isInternView = session.user.role === 'INTERN';
 
+  return (
+    <div>
+      {/* PM project header with tabs */}
       {session.user.role === 'PROJECT_MANAGER' && (
-        <div
-          className="p-6 md:p-8 rounded-2xl shadow-sm dark:shadow-none mb-6"
-          style={{
-            backgroundColor: 'var(--bg-surface)',
-            border: '1px solid var(--border-color)',
-          }}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <h3
-                className="text-3xl font-black tracking-tight"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                {project.title}
-              </h3>
-              <span
-                className="inline-flex items-center px-3 py-1 mt-2 text-xs font-semibold rounded-full"
-                style={{ backgroundColor: 'var(--accent-light)', color: 'var(--accent-text)' }}
-              >
-                Track: {project.track}
-              </span>
+        <div className="sticky top-0 z-40 -mx-5 -mt-5 pt-5 px-5 md:-mx-7 md:-mt-7 md:pt-7 md:px-7 mb-6 bg-[var(--bg-base)]/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 transition-all">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <div>
+                <Link
+                  href="/dashboard/project-manager/projects"
+                  className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest mb-3 hover:opacity-70 transition-opacity"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Quay lại Danh mục
+                </Link>
+                <h2 className="text-2xl md:text-3xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                  {project.title}
+                </h2>
+                <div className="flex items-center gap-2 mt-3">
+                  <span className="badge badge-accent shadow-sm">{project.track.replace(/_/g, ' ')}</span>
+                  <span className={`badge shadow-sm ${project.status === 'ACTIVE' ? 'badge-success' : 'badge-muted'}`}>
+                    {project.status === 'ACTIVE' ? 'ĐANG HOẠT ĐỘNG' : project.status === 'COMPLETED' ? 'ĐÃ HOÀN THÀNH' : project.status}
+                  </span>
+                </div>
+              </div>
             </div>
+            
+            {/* Tab nav */}
+            <ProjectTabsClient projectId={projectId} />
           </div>
-          <ProjectTabs projectId={projectId} userRole={session.user.role} />
         </div>
       )}
 

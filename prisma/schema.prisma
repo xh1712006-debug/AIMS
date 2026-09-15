@@ -23,10 +23,14 @@ enum Track {
 }
 
 enum ItemType {
-  EPIC
-  STORY
-  TASK
-  BUG
+  FEATURE       // Software Development
+  RESEARCH      // AI/ML Research & Data Analytics
+  EXPERIMENT    // AI/ML Research
+  ANALYSIS      // Data Analytics
+  TEST          // Software Testing
+  DOCUMENTATION // All tracks
+  BUG           // All tracks
+  SPIKE         // All tracks (investigation/exploration)
 }
 
 enum Status {
@@ -143,16 +147,17 @@ model WorkItem {
 }
 
 model CheckIn {
-  id           String    @id @default(cuid())
-  projectId    String
-  project      Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  doneTasks    String
-  nextTasks    String
-  blockers     String?
-  evidenceLink String?
-  managerAction String?
-  riskStatus   Risk      @default(GREEN)
-  createdAt    DateTime  @default(now())
+  id                String    @id @default(cuid())
+  projectId         String
+  project           Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  doneTasks         String
+  nextTasks         String
+  blockers          String?
+  evidenceLink      String?
+  managerAction     String?
+  riskStatus        Risk      @default(GREEN)   // Auto-computed risk (server)
+  riskSelfAssessment Risk?                       // Intern's own risk self-assessment
+  createdAt         DateTime  @default(now())
 }
 
 model SprintReview {

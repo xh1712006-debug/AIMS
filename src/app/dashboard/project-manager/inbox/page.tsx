@@ -21,6 +21,7 @@ export default async function InboxPage() {
     where: { role: 'INTERN' },
     include: {
       projectsAsIntern: {
+        where: { projectManagerId: session.user.id },
         include: {
           workItems: true,
           checkIns: {

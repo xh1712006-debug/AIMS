@@ -3,6 +3,20 @@
 import { useState } from 'react';
 import { updateWorkItem, deleteWorkItem } from '@/app/actions';
 
+const ALL_ITEM_TYPES = [
+  { value: 'FEATURE',       label: '🚀 Feature (Tính năng)' },
+  { value: 'RESEARCH',      label: '🔬 Research (Nghiên cứu)' },
+  { value: 'EXPERIMENT',    label: '🧪 Experiment (Thử nghiệm)' },
+  { value: 'ANALYSIS',      label: '📊 Analysis (Phân tích)' },
+  { value: 'BUG',           label: '🐛 Bug (Lỗi)' },
+  { value: 'SPIKE',         label: '⚡ Spike (Khám phá)' },
+  { value: 'TEST',          label: '✅ Test (Kiểm thử)' },
+  { value: 'DOCUMENTATION', label: '📝 Documentation (Tài liệu)' },
+];
+
+const TOP_LEVEL_TYPES = ['FEATURE', 'RESEARCH', 'EXPERIMENT', 'ANALYSIS'];
+const CHILD_TYPES = ['BUG', 'SPIKE', 'TEST', 'DOCUMENTATION'];
+
 export default function WorkItemActionsMenu({ 
   item, 
   epics, 
@@ -23,7 +37,11 @@ export default function WorkItemActionsMenu({
   };
 
   const handleDelete = async (formData: FormData) => {
-    if (confirm(`Bạn có chắc chắn muốn xóa "${item.title}"?${item.type === 'EPIC' ? '\\nCẢNH BÁO: Xóa Epic sẽ xóa cả các công việc con của nó!' : ''}`)) {
+    const isTopLevel = TOP_LEVEL_TYPES.includes(item.type);
+    const confirmMsg = isTopLevel
+      ? `Bạn có chắc muốn xóa "${item.title}"?\nCẢNH BÁO: Xóa item này sẽ xóa cả các công việc con!`
+      : `Bạn có chắc muốn xóa "${item.title}"?`;
+    if (confirm(confirmMsg)) {
       await deleteWorkItem(formData);
     }
   };
@@ -79,15 +97,13 @@ export default function WorkItemActionsMenu({
                     onChange={(e) => setType(e.target.value)}
                     className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm"
                   >
-                    <option value="EPIC">Epic (Tính năng lớn)</option>
-                    <option value="STORY">Story (Câu chuyện ND)</option>
-                    <option value="FEATURE">Feature (Tính năng)</option>
-                    <option value="TASK">Task (Công việc)</option>
-                    <option value="BUG">Bug (Lỗi)</option>
+                    {ALL_ITEM_TYPES.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
                   </select>
                 </div>
 
-                {type !== 'EPIC' && (
+                {CHILD_TYPES.includes(type) && (
                   <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                     <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Thuộc Epic (Parent) <span className="text-red-500">*</span></label>
                     <select 

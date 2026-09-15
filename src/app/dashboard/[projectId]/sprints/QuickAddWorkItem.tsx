@@ -22,7 +22,7 @@ export default function QuickAddWorkItem({
 
   // Filter items that aren't epics, aren't assigned to a sprint, and match the input
   const filteredSuggestions = unassignedWorkItems.filter(item => 
-    item.type !== 'EPIC' && 
+    !['FEATURE', 'RESEARCH', 'EXPERIMENT', 'ANALYSIS'].includes(item.type) && 
     !item.sprintId &&
     item.title.toLowerCase().includes(inputValue.toLowerCase())
   );
