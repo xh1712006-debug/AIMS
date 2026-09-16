@@ -112,16 +112,10 @@ export default async function DashboardPage() {
 
     return (
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="flex justify-between items-end mb-8">
-          <div>
-            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Trung tâm Quản lý (Command Center)</h2>
-            <p className="text-gray-500 dark:text-[#A3A3A3] mt-2">Theo dõi tiến độ và xử lý các điểm nghẽn của Thực tập sinh.</p>
-          </div>
-          <div>
-            {user.role === 'PROJECT_MANAGER' && (
-              <CreateProjectForm interns={interns} memberManagers={memberManagers} partners={partners} />
-            )}
-          </div>
+        <div className="flex justify-end mb-6">
+          {user.role === 'PROJECT_MANAGER' && (
+            <CreateProjectForm interns={interns} memberManagers={memberManagers} partners={partners} />
+          )}
         </div>
         
         {/* TOP METRICS */}

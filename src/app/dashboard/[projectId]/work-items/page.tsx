@@ -49,12 +49,8 @@ export default async function SprintsPage(props: { params: Promise<{ projectId: 
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1200px] mx-auto pb-12">
       
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4 pt-4">
-        <div>
-          <h2 className="text-3xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>Roadmap & Backlog</h2>
-          <p className="text-sm font-medium mt-1" style={{ color: 'var(--text-muted)' }}>Quản lý tầm nhìn dự án (Epic) và các công việc chưa được gán vào Sprint.</p>
-        </div>
-      {(session.user.role === 'INTERN' || session.user.role === 'PROJECT_MANAGER' || session.user.role === 'MEMBER_MANAGER') && (
+      <div className="flex justify-end mb-6 pt-2">
+        {(session.user.role === 'INTERN' || session.user.role === 'PROJECT_MANAGER' || session.user.role === 'MEMBER_MANAGER') && (
           <CreateWorkItemForm projectId={projectId} parentItems={topLevelItems} priorityLevels={project.priorityLevels} userRole={session.user.role} />
         )}
       </div>
@@ -81,111 +77,124 @@ export default async function SprintsPage(props: { params: Promise<{ projectId: 
             <p className="text-sm font-medium mt-1.5" style={{ color: 'var(--text-muted)' }}>PM hãy tạo Feature/Research/Experiment để định hướng lộ trình dự án.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {topLevelItems.map(epic => {
-              const childItems = workItems.filter(i => i.parentId === epic.id);
-              const totalChildren = childItems.length;
-              const doneChildren = childItems.filter(i => i.status === 'DONE').length;
-              const progressPercent = totalChildren > 0 ? Math.round((doneChildren / totalChildren) * 100) : 0;
-              const isBlocked = childItems.some(i => i.status === 'BLOCKED');
-              let riskLevel = null;
-              if (epic.dueDate && progressPercent < 100) {
-                const dueTime = new Date(epic.dueDate).getTime();
-                const nowTime = new Date().getTime();
-                const daysDiff = (dueTime - nowTime) / (1000 * 3600 * 24);
+          <div className="bg-white dark:bg-[#171717] rounded-2xl shadow-sm border border-gray-100 dark:border-[#262626] overflow-hidden">
+            <div className="divide-y divide-gray-100 dark:divide-[#262626]">
+              {topLevelItems.map(goal => {
+                const childItems = workItems.filter(i => i.parentId === goal.id);
+                const totalChildren = childItems.length;
+                const doneChildren = childItems.filter(i => i.status === 'DONE').length;
+                const progressPercent = totalChildren > 0 ? Math.round((doneChildren / totalChildren) * 100) : 0;
+                const isBlocked = childItems.some(i => i.status === 'BLOCKED');
+                let riskLevel = null;
+                if (goal.dueDate && progressPercent < 100) {
+                  const dueTime = new Date(goal.dueDate).getTime();
+                  const nowTime = new Date().getTime();
+                  const daysDiff = (dueTime - nowTime) / (1000 * 3600 * 24);
+                  if (daysDiff < 0) riskLevel = 'OVERDUE';
+                  else if (daysDiff <= 3) riskLevel = 'RISK';
+                }
                 
-                if (daysDiff < 0) riskLevel = 'OVERDUE';
-                else if (daysDiff <= 3) riskLevel = 'RISK';
-              }
-              
-              return (
-              <div key={epic.id} className="aims-card p-5 group hover:border-gray-300 dark:hover:border-gray-700 transition-all flex flex-col h-full relative overflow-hidden">
-                {/* Status Indicator Line */}
-                <div className={`absolute top-0 left-0 bottom-0 w-1 ${isBlocked ? 'bg-red-500' : riskLevel ? 'bg-amber-500' : 'bg-indigo-500'}`} />
-                
-                <div className="flex justify-between items-start mb-3 pl-2">
-                  <div className="flex-1 pr-3">
-                    <h4 className="font-bold text-base leading-snug mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" style={{ color: 'var(--text-primary)' }}>{epic.title}</h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {isBlocked && (
-                        <span className="badge badge-danger text-[9px] uppercase">⛔ Bị chặn</span>
-                      )}
-                      {riskLevel === 'OVERDUE' && (
-                        <span className="badge badge-danger text-[9px] uppercase">⚠️ Trễ hạn</span>
-                      )}
-                      {riskLevel === 'RISK' && (
-                        <span className="badge badge-warning text-[9px] uppercase">🚩 Nguy cơ trễ</span>
-                      )}
-                      {epic.dueDate && (
-                        <span className="badge badge-muted text-[9px] uppercase">
-                          📅 {new Date(epic.dueDate).toLocaleDateString('vi-VN')}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="shrink-0 flex items-start gap-2">
-                    <span className={`badge text-[9px] uppercase ${
-                      epic.status === 'DONE' ? 'badge-success' :
-                      epic.status === 'IN_PROGRESS' ? 'badge-info' :
-                      'badge-muted'
-                    }`}>
-                      {epic.status}
-                    </span>
-                    {(session.user.role === 'INTERN' || session.user.role === 'PROJECT_MANAGER' || session.user.role === 'MEMBER_MANAGER') && (
-                      <div className="mt-[-4px] opacity-0 group-hover:opacity-100 transition-opacity">
-                        <WorkItemActionsMenu item={epic} epics={topLevelItems} projectId={projectId} priorityLevels={project.priorityLevels} />
+                return (
+                  <details key={goal.id} className="group">
+                    <summary className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-[#1f1f1f] cursor-pointer transition-colors list-none relative">
+                      <div className={`absolute left-0 top-0 bottom-0 w-1 ${isBlocked ? 'bg-red-500' : riskLevel ? 'bg-amber-500' : 'bg-indigo-500'}`} />
+                      
+                      {/* Chevron */}
+                      <svg className="w-4 h-4 text-gray-400 group-open:rotate-90 transition-transform ml-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        <div className="md:col-span-5 flex items-center gap-2">
+                          <span className="badge badge-muted text-[10px] uppercase font-bold shrink-0">{goal.type}</span>
+                          <span className="font-bold text-sm truncate" style={{ color: 'var(--text-primary)' }}>{goal.title}</span>
+                        </div>
+                        
+                        <div className="md:col-span-3 flex flex-wrap items-center gap-2">
+                          {isBlocked && <span className="badge badge-danger text-[9px] uppercase">⛔ Bị chặn</span>}
+                          {riskLevel === 'OVERDUE' && <span className="badge badge-danger text-[9px] uppercase">⚠️ Trễ hạn</span>}
+                          {riskLevel === 'RISK' && <span className="badge badge-warning text-[9px] uppercase">🚩 Nguy cơ</span>}
+                          {goal.dueDate && (
+                            <span className="badge badge-muted text-[9px] uppercase">
+                              📅 {new Date(goal.dueDate).toLocaleDateString('vi-VN')}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="md:col-span-3 flex items-center gap-4">
+                          <div className="flex-1 flex items-center gap-2">
+                            <span className="text-[10px] font-bold text-gray-500 shrink-0 w-6 text-right">{progressPercent}%</span>
+                            <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                              <div className={`h-full ${progressPercent === 100 ? 'bg-emerald-500' : 'bg-indigo-500'}`} style={{ width: `${progressPercent}%` }} />
+                            </div>
+                          </div>
+                          <span className={`badge text-[9px] uppercase shrink-0 ${
+                            goal.status === 'DONE' ? 'badge-success' :
+                            goal.status === 'IN_PROGRESS' ? 'badge-info' :
+                            'badge-muted'
+                          }`}>
+                            {goal.status}
+                          </span>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </div>
-                
-                {epic.description && <p className="text-sm line-clamp-2 mb-4 pl-2" style={{ color: 'var(--text-secondary)' }}>{epic.description}</p>}
-                
-                <div className="flex-1" /> {/* Spacer */}
-                
-                {/* Progress Bar */}
-                {totalChildren > 0 && (
-                  <div className="mb-4 pl-2">
-                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-muted)' }}>
-                      <span>Tiến độ</span>
-                      <span className={progressPercent === 100 ? 'text-emerald-500' : ''}>{progressPercent}%</span>
+
+                      {/* Actions */}
+                      <div className="shrink-0 ml-4 flex items-center gap-2">
+                        {(session.user.role === 'INTERN' || session.user.role === 'PROJECT_MANAGER' || session.user.role === 'MEMBER_MANAGER') && (
+                          <WorkItemActionsMenu item={goal} epics={topLevelItems} projectId={projectId} priorityLevels={project.priorityLevels} />
+                        )}
+                      </div>
+                    </summary>
+                    
+                    {/* Expanded Content */}
+                    <div className="p-5 pl-10 border-t border-gray-100 dark:border-[#262626] bg-gray-50/30 dark:bg-[#111]">
+                      {goal.description && (
+                        <div className="mb-6">
+                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Mô tả mục tiêu</h4>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{goal.description}</p>
+                        </div>
+                      )}
+                      
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-1">
+                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Thống kê Task con</h4>
+                          <div className="bg-white dark:bg-[#171717] rounded-xl p-4 border border-gray-100 dark:border-[#262626]">
+                            <div className="flex justify-between items-center text-sm mb-2">
+                              <span className="text-gray-500">Tổng số task:</span>
+                              <span className="font-bold">{totalChildren}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm mb-2">
+                              <span className="text-gray-500">Đã hoàn thành:</span>
+                              <span className="font-bold text-emerald-500">{doneChildren}</span>
+                            </div>
+                            {goal.priority && (
+                              <div className="flex justify-between items-center text-sm pt-2 border-t border-gray-100 dark:border-[#262626]">
+                                <span className="text-gray-500">Mức ưu tiên:</span>
+                                <span 
+                                  className="badge text-[9px] uppercase"
+                                  style={{ 
+                                    backgroundColor: goal.priority.color ? `${goal.priority.color}15` : 'var(--bg-muted)', 
+                                    color: goal.priority.color || 'var(--text-secondary)',
+                                  }}
+                                >
+                                  {goal.priority.name}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="lg:col-span-2">
+                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Trao đổi & Cập nhật</h4>
+                          <WorkItemComments workItemId={goal.id} comments={goal.comments || []} />
+                        </div>
+                      </div>
                     </div>
-                    <div className="progress-bar h-1.5 bg-gray-100 dark:bg-gray-800">
-                      <div 
-                        className={`progress-bar-fill ${progressPercent === 100 ? 'bg-emerald-500' : 'bg-indigo-500'}`}
-                        style={{ width: `${progressPercent}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-                
-                <div className="pt-3 border-t pl-2 flex justify-between items-center" style={{ borderColor: 'var(--border-muted)' }}>
-                  <div className="flex items-center gap-1.5 text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-                    <svg className="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                    <span>{totalChildren} task</span>
-                  </div>
-                  {epic.priority && (
-                    <span 
-                      className="badge text-[9px] uppercase"
-                      style={{ 
-                        backgroundColor: epic.priority.color ? `${epic.priority.color}15` : 'var(--bg-muted)', 
-                        color: epic.priority.color || 'var(--text-secondary)',
-                        borderColor: epic.priority.color ? `${epic.priority.color}40` : 'var(--border-color)'
-                      }}
-                    >
-                      {epic.priority.name}
-                    </span>
-                  )}
-                </div>
-                
-                <div className="pl-2 mt-3">
-                  <WorkItemComments workItemId={epic.id} comments={epic.comments || []} />
-                </div>
-              </div>
-              );
-            })}
+                  </details>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>

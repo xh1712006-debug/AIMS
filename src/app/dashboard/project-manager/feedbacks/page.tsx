@@ -27,10 +27,7 @@ export default async function MentorFeedbacksPage() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Phản hồi & Khắc phục</h2>
-        <p className="text-gray-500 dark:text-[#737373] mt-2">Danh sách các công việc ProjectManager đã phản hồi và đang chờ sinh viên khắc phục.</p>
-      </div>
+
 
       <div className="bg-white dark:bg-[#171717] rounded-2xl shadow-sm dark:shadow-none border border-gray-200 dark:border-[#383838] overflow-hidden">
         {itemsRequiringFix.length === 0 ? (

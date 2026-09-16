@@ -43,6 +43,8 @@ export default function EditWorkItemModal({
             <input type="hidden" name="projectId" value={projectId} />
             <input type="hidden" name="id" value={item.id} />
             <input type="hidden" name="sprintId" value={item.sprintId || ''} />
+            <input type="hidden" name="parentId" value={item.parentId || ''} />
+            <input type="hidden" name="dueDate" value={item.dueDate ? new Date(item.dueDate).toISOString() : ''} />
             
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Tên công việc</label>
@@ -53,10 +55,14 @@ export default function EditWorkItemModal({
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-[#D4D4D4] mb-1">Loại</label>
                 <select name="type" defaultValue={item.type} className="w-full rounded-lg border-gray-300 dark:border-[#383838] ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 p-2 text-sm">
-                  <option value="TASK">Task</option>
-                  <option value="STORY">Story</option>
                   <option value="FEATURE">Feature</option>
+                  <option value="RESEARCH">Research</option>
+                  <option value="EXPERIMENT">Experiment</option>
+                  <option value="ANALYSIS">Analysis</option>
+                  <option value="TEST">Test</option>
+                  <option value="DOCUMENTATION">Documentation</option>
                   <option value="BUG">Bug</option>
+                  <option value="SPIKE">Spike</option>
                 </select>
               </div>
               

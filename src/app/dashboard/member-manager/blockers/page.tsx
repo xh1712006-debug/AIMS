@@ -41,10 +41,7 @@ export default async function BlockersPage() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Giải quyết Blockers</h2>
-        <p className="text-gray-500 mt-2">Theo dõi và hỗ trợ thực tập sinh tháo gỡ các khó khăn trong dự án.</p>
-      </div>
+
       
       <BlockerBoard blockedItems={blockedItems} currentUserId={session.user.id} />
     </div>

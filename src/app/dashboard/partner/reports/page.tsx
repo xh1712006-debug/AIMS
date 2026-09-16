@@ -20,11 +20,7 @@ export default function PartnerReportsPage() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto">
-      <div className="mb-8 flex justify-between items-end print:hidden">
-        <div>
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Báo cáo Định kỳ</h2>
-          <p className="text-gray-500 mt-2">Cập nhật tiến độ dự án dưới dạng báo cáo tổng kết.</p>
-        </div>
+      <div className="mb-6 flex justify-end print:hidden">
         <button 
           onClick={handleExportPDF}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold transition-colors flex items-center gap-2"

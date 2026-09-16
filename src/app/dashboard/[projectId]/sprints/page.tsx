@@ -73,25 +73,7 @@ export default async function SprintsPlanningPage(props: { params: Promise<{ pro
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1200px] mx-auto pb-12">
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4 pt-4">
-        <div>
-          <h2 className="text-3xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
-            Kế hoạch Sprint
-          </h2>
-          <div className="flex items-center gap-3 mt-2">
-            <span className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
-              {sortedSprints.length} sprint tổng cộng
-            </span>
-            <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">
-              {activeSprints.length} Đang chạy
-            </span>
-            <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500">
-              {futureSprints.length} Sắp tới
-            </span>
-          </div>
-        </div>
+      <div className="flex justify-end mb-6 pt-2">
         {session.user.role === 'INTERN' && (
           <CreateSprintModal projectId={projectId} />
         )}

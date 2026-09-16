@@ -24,10 +24,7 @@ export default async function MentorProgressPage() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Quản lý Tiến độ</h2>
-        <p className="text-gray-500 dark:text-[#737373] mt-2">Theo dõi các công việc Đã làm (DONE) và Chưa làm của tất cả sinh viên.</p>
-      </div>
+
 
       <div className="space-y-4">
         {projects.map(project => {

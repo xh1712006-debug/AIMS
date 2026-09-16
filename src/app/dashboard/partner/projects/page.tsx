@@ -23,10 +23,7 @@ export default async function PartnerProjectsPage() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Trạng thái Dự án Chi tiết</h2>
-        <p className="text-gray-500 mt-2">Tổng quan theo dõi cấp bậc cao nhất dành cho Đối tác.</p>
-      </div>
+
 
       <div className="space-y-6">
         {projects.length === 0 ? (

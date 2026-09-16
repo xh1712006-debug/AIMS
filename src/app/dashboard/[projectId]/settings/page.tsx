@@ -35,19 +35,7 @@ export default async function SettingsPage(props: { params: Promise<{ projectId:
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1200px] mx-auto pb-12">
-      {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4 pt-4">
-        <div>
-          <h2 className="text-3xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
-            Cài đặt dự án
-          </h2>
-          <div className="flex items-center gap-3 mt-2">
-            <span className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
-              Cấu hình kết nối và tùy chỉnh mức độ ưu tiên cho dự án của bạn.
-            </span>
-          </div>
-        </div>
-      </div>
+      <div className="pt-4"></div>
       
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
         

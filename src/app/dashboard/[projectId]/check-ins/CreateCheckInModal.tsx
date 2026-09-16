@@ -102,7 +102,7 @@ export default function CreateCheckInModal({
                     )}
                   </div>
 
-                  <textarea name="doneTasks" required rows={3} 
+                  <textarea name="doneTasks" rows={3} 
                     value={doneText} onChange={(e) => setDoneText(e.target.value)}
                     className="w-full rounded-xl bg-gray-50 dark:bg-[#111] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-[#0a0a0a] focus:ring-2 focus:ring-indigo-500/20 text-sm p-3 transition-all placeholder:text-gray-400" 
                     placeholder="Liệt kê các công việc đã hoàn thành..." />
@@ -138,7 +138,7 @@ export default function CreateCheckInModal({
                     )}
                   </div>
 
-                  <textarea name="nextTasks" required rows={3} 
+                  <textarea name="nextTasks" rows={3} 
                     value={nextText} onChange={(e) => setNextText(e.target.value)}
                     className="w-full rounded-xl bg-gray-50 dark:bg-[#111] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-[#0a0a0a] focus:ring-2 focus:ring-indigo-500/20 text-sm p-3 transition-all placeholder:text-gray-400" 
                     placeholder="Dự định công việc tiếp theo..." />
@@ -226,7 +226,12 @@ export default function CreateCheckInModal({
                 type="submit" 
                 form="checkin-form"
                 onClick={() => {
-                  setTimeout(() => setIsOpen(false), 500); 
+                  setTimeout(() => {
+                    setIsOpen(false);
+                    setDoneText('');
+                    setNextText('');
+                    setBlockersText('');
+                  }, 500); 
                 }}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-md hover:shadow-lg transition-all focus:ring-4 focus:ring-indigo-500/30 flex justify-center items-center gap-2"
               >

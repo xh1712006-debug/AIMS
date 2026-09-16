@@ -52,24 +52,24 @@ export default function KanbanBoard({ workItems, epics, projectId, priorityLevel
   };
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4 min-h-[600px] snap-x">
+    <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
       {columns.map(col => {
         const columnItems = items.filter((i: any) => i.status === col.id);
         return (
           <div 
             key={col.id} 
-            className="flex-1 min-w-[280px] md:min-w-[320px] rounded-2xl bg-gray-50/80 dark:bg-[#111] p-3 flex flex-col snap-start"
+            className="flex-1 min-w-[280px] md:min-w-[320px] h-[65vh] min-h-[400px] rounded-2xl bg-gray-50/80 dark:bg-[#111] p-3 flex flex-col snap-start"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, col.id)}
           >
-            <div className="flex justify-between items-center mb-4 px-2 pt-1">
+            <div className="flex justify-between items-center mb-4 px-2 pt-1 shrink-0">
                <h3 className="text-[11px] font-bold uppercase tracking-widest flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                  <span className={`w-2 h-2 rounded-full ${col.dot}`} />
                  {col.title} <span className="text-gray-400 dark:text-gray-600 font-medium">({columnItems.length})</span>
                </h3>
             </div>
             
-            <div className="flex flex-col gap-3 flex-1">
+            <div className="flex flex-col gap-3 flex-1 overflow-y-auto custom-scrollbar pr-1 pb-2">
               {columnItems.map((item: any) => {
                 const parentEpic = item.parentId ? epics.find((e: any) => e.id === item.parentId) : null;
                 
@@ -80,37 +80,48 @@ export default function KanbanBoard({ workItems, epics, projectId, priorityLevel
                   key={item.id}
                   draggable={isDraggable}
                   onDragStart={(e) => isDraggable && handleDragStart(e, item.id)}
-                  className={`aims-card p-4 transition-all group ${isDraggable ? 'cursor-grab active:cursor-grabbing hover:shadow-md hover:-translate-y-0.5' : ''} ${item.requiresFix ? 'ring-1 ring-red-500 bg-red-50/10' : ''}`}
+                  className={`shrink-0 bg-white dark:bg-[#1A1A1A] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm p-3 transition-all group relative overflow-hidden flex flex-col ${isDraggable ? 'cursor-grab active:cursor-grabbing hover:shadow-md hover:border-gray-200 dark:hover:border-gray-700' : ''} ${item.requiresFix ? 'border-red-300 dark:border-red-900/50 bg-red-50/10' : ''}`}
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <p className="font-bold text-sm leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" style={{ color: 'var(--text-primary)' }}>{item.title}</p>
+                  {/* Subtle color accent based on priority */}
+                  {item.priority?.color && (
+                    <div className="absolute left-0 top-0 bottom-0 w-0.5 opacity-60 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: item.priority.color }} />
+                  )}
+
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1 min-w-0 pr-2">
+                      {parentEpic && (
+                        <div className="text-[8px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1 truncate flex items-center gap-1">
+                          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                          {parentEpic.title}
+                        </div>
+                      )}
+                      <p className="font-bold text-sm leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors break-words text-gray-900 dark:text-[#EDEDED]">
+                        {item.title}
+                      </p>
+                    </div>
                     {userRole === 'INTERN' && (
-                       <div className="ml-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                       <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity -mt-1 -mr-1">
                          <WorkItemActionsMenu item={item} epics={epics} projectId={projectId} priorityLevels={priorityLevels} />
                        </div>
                     )}
                   </div>
                   
-                  <div className="flex flex-wrap gap-1.5 mt-auto">
-                    <span className="badge badge-muted text-[9px] uppercase">{item.type}</span>
-                    {parentEpic && (
-                      <span className="badge badge-accent text-[9px] uppercase max-w-[120px] truncate" title={parentEpic.title}>
-                        {parentEpic.title}
-                      </span>
-                    )}
+                  <div className="flex flex-wrap items-center gap-1.5 mt-auto pt-2 border-t border-gray-50 dark:border-gray-800/50">
+                    <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded border border-gray-200 text-gray-500 dark:border-gray-800 dark:text-gray-400 bg-gray-50 dark:bg-[#111]">
+                      {item.type}
+                    </span>
                     {item.priority && (
-                      <span className="badge text-[9px] uppercase" style={{ backgroundColor: item.priority.color ? `${item.priority.color}15` : 'var(--bg-muted)', color: item.priority.color || 'var(--text-secondary)' }}>
+                      <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded border flex items-center gap-1" style={{ borderColor: item.priority.color ? `${item.priority.color}30` : 'var(--border-muted)', color: item.priority.color || 'var(--text-secondary)', backgroundColor: item.priority.color ? `${item.priority.color}10` : 'transparent' }}>
+                        <span className="w-1 h-1 rounded-full" style={{ backgroundColor: item.priority.color }} />
                         {item.priority.name}
                       </span>
                     )}
                     {item.requiresFix && (
-                      <span className="badge badge-danger text-[9px] uppercase flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                      <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded border border-red-200 text-red-600 dark:border-red-900/50 dark:text-red-400 bg-red-50 dark:bg-red-900/10 flex items-center gap-1">
                         Cần sửa
                       </span>
                     )}
                   </div>
-                  
                 </div>
                 );
               })}

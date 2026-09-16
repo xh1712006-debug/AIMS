@@ -25,10 +25,7 @@ export default async function MMProjectsPage() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Theo dõi Dự án</h2>
-        <p className="text-gray-500 mt-2">Tổng quan chi tiết các dự án bạn đang đảm nhiệm vai trò Scrum Master.</p>
-      </div>
+
       
       <div className="bg-white dark:bg-[#171717] rounded-2xl shadow-sm border border-gray-100 dark:border-[#262626] overflow-hidden">
         <div className="overflow-x-auto">

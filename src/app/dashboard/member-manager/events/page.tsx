@@ -8,6 +8,13 @@ export const metadata = {
   title: 'Quản lý Sự kiện | AIMS',
 };
 
+const Icons = {
+  calendar: (props: any) => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
+  chevronDown: (props: any) => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>,
+  checkCircle: (props: any) => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+  clock: (props: any) => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+};
+
 export default async function EventsPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== 'MEMBER_MANAGER') redirect('/dashboard');
@@ -28,75 +35,128 @@ export default async function EventsPage() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Quản lý Sự kiện Scrum</h2>
-        <p className="text-gray-500 mt-2">Theo dõi Sprints hiện tại và các buổi lễ Scrum Planning, Review của nhóm.</p>
-      </div>
+
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {projects.map(project => {
-          const currentSprints = project.sprints.filter(s => new Date(s.startDate) <= now && new Date(s.endDate) >= now);
-          const upcomingSprints = project.sprints.filter(s => new Date(s.startDate) > now);
+      <div className="bg-white dark:bg-[#171717] rounded-2xl shadow-sm border border-gray-100 dark:border-[#262626] overflow-hidden">
+        {projects.length === 0 ? (
+          <div className="py-16 text-center">
+             <div className="w-16 h-16 bg-gray-50 dark:bg-[#262626] rounded-full flex items-center justify-center mx-auto mb-4">
+               <Icons.calendar className="w-8 h-8 text-gray-400" />
+             </div>
+             <p className="text-gray-500 font-medium">Bạn chưa được phân công quản lý dự án nào.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead className="bg-gray-50 dark:bg-[#0A0A0A] text-gray-500 dark:text-[#737373] uppercase text-[10px] tracking-wider font-extrabold border-b border-gray-100 dark:border-[#262626]">
+                <tr>
+                  <th className="px-6 py-4">Dự án & Phụ trách</th>
+                  <th className="px-6 py-4">Sprint Đang diễn ra</th>
+                  <th className="px-6 py-4">Sự kiện Scrum (Review/Standup)</th>
+                  <th className="px-6 py-4 text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-[#262626]">
+                {projects.map(project => {
+                  const currentSprints = project.sprints.filter(s => new Date(s.startDate) <= now && new Date(s.endDate) >= now);
+                  const upcomingSprints = project.sprints.filter(s => new Date(s.startDate) > now);
+                  
+                  const activeSprint = currentSprints.length > 0 ? currentSprints[0] : null;
 
-          return (
-            <div key={project.id} className="bg-white dark:bg-[#171717] rounded-2xl shadow-sm border border-gray-100 dark:border-[#262626] overflow-hidden">
-              <div className="p-5 border-b border-gray-100 dark:border-[#262626] flex justify-between items-center bg-gray-50/50 dark:bg-[#0A0A0A]/50">
-                <div>
-                  <h3 className="font-bold text-gray-900 dark:text-[#EDEDED]">{project.title}</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">Phụ trách: {project.intern.name}</p>
-                </div>
-                <Link href={`/dashboard/${project.id}/sprints`} className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors">
-                  Đến bảng Sprint
-                </Link>
-              </div>
-              <div className="p-5 space-y-4">
-                <div>
-                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Sprint Đang diễn ra</h4>
-                  {currentSprints.length > 0 ? currentSprints.map(sprint => (
-                    <div key={sprint.id} className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 p-4 rounded-xl mb-2">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="font-bold text-blue-800 dark:text-blue-300">{sprint.name}</span>
-                        <span className="text-[10px] bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-100 px-2 py-0.5 rounded-full font-semibold">Active</span>
-                      </div>
-                      <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
-                        {new Date(sprint.startDate).toLocaleDateString('vi-VN')} - {new Date(sprint.endDate).toLocaleDateString('vi-VN')}
-                      </p>
+                  return (
+                    <tr key={project.id} className="hover:bg-gray-50/50 dark:hover:bg-[#262626]/30 transition-colors">
+                      {/* Cột 1: Dự án */}
+                      <td className="px-6 py-3.5 align-top">
+                        <div className="font-bold text-gray-900 dark:text-[#EDEDED] text-sm mb-1">{project.title}</div>
+                        <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
+                          <div className="w-4 h-4 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[8px]">
+                            {project.intern.name.charAt(0)}
+                          </div>
+                          {project.intern.name}
+                        </div>
+                      </td>
                       
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-[#D4D4D4]">
-                          <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                          <span>Daily Standup (Tự động hóa qua Check-ins)</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-[#D4D4D4]">
-                          <span className={`w-2 h-2 rounded-full ${sprint.sprintReview ? 'bg-green-500' : 'bg-orange-500'}`}></span>
-                          <span>Sprint Review / Retrospective {sprint.sprintReview ? '(Đã có)' : '(Đang chờ)'}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )) : <p className="text-sm text-gray-500 italic">Không có Sprint nào đang diễn ra.</p>}
-                </div>
+                      {/* Cột 2: Sprint Hiện tại & Sắp tới */}
+                      <td className="px-6 py-3.5 align-top">
+                        {activeSprint ? (
+                          <div className="mb-2">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-bold text-sm text-blue-700 dark:text-blue-400">{activeSprint.name}</span>
+                              <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 text-[8px] font-black uppercase tracking-wider">
+                                Active
+                              </span>
+                            </div>
+                            <div className="text-[10px] font-medium text-gray-500 flex items-center gap-1">
+                              <Icons.calendar className="w-3 h-3" />
+                              {new Date(activeSprint.startDate).toLocaleDateString('vi-VN')} - {new Date(activeSprint.endDate).toLocaleDateString('vi-VN')}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-[11px] italic text-gray-400 mb-2">Không có Sprint đang chạy</div>
+                        )}
+                        
+                        {upcomingSprints.length > 0 && (
+                          <details className="group">
+                            <summary className="text-[10px] font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white cursor-pointer list-none flex items-center gap-1 select-none">
+                              Xem {upcomingSprints.length} Sprint sắp tới
+                              <Icons.chevronDown className="w-3 h-3 group-open:rotate-180 transition-transform" />
+                            </summary>
+                            <div className="mt-1.5 space-y-1 pl-2 border-l-2 border-gray-100 dark:border-[#262626]">
+                              {upcomingSprints.map(sprint => (
+                                <div key={sprint.id} className="flex justify-between items-center text-[10px]">
+                                  <span className="font-semibold text-gray-600 dark:text-[#A3A3A3]">{sprint.name}</span>
+                                  <span className="text-gray-400">{new Date(sprint.startDate).toLocaleDateString('vi-VN')}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </details>
+                        )}
+                      </td>
 
-                {upcomingSprints.length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 mt-4">Sprint Sắp tới</h4>
-                    <div className="space-y-2">
-                      {upcomingSprints.slice(0, 2).map(sprint => (
-                        <div key={sprint.id} className="flex justify-between items-center p-3 rounded-lg border border-gray-100 dark:border-[#262626]">
-                          <span className="text-sm font-semibold text-gray-700 dark:text-[#D4D4D4]">{sprint.name}</span>
-                          <span className="text-xs text-gray-500">{new Date(sprint.startDate).toLocaleDateString('vi-VN')}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )
-        })}
+                      {/* Cột 3: Trạng thái Sự kiện */}
+                      <td className="px-6 py-3.5 align-top">
+                        {activeSprint ? (
+                          <div className="space-y-2">
+                            <div className="flex items-start gap-1.5">
+                              <Icons.checkCircle className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
+                              <div>
+                                <div className="text-[11px] font-bold text-gray-700 dark:text-[#D4D4D4]">Daily Standup</div>
+                                <div className="text-[9px] text-gray-500">Tự động hóa qua Check-ins</div>
+                              </div>
+                            </div>
+                            <div className="flex items-start gap-1.5">
+                              {activeSprint.sprintReview ? (
+                                <Icons.checkCircle className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
+                              ) : (
+                                <Icons.clock className="w-3.5 h-3.5 text-orange-400 mt-0.5 shrink-0" />
+                              )}
+                              <div>
+                                <div className="text-[11px] font-bold text-gray-700 dark:text-[#D4D4D4]">Sprint Review / Retrospective</div>
+                                <div className={`text-[9px] font-semibold ${activeSprint.sprintReview ? 'text-green-600' : 'text-orange-500'}`}>
+                                  {activeSprint.sprintReview ? 'Đã hoàn thành' : 'Đang lên lịch'}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-xs">-</span>
+                        )}
+                      </td>
 
-        {projects.length === 0 && (
-          <div className="col-span-full py-16 text-center bg-white dark:bg-[#171717] rounded-2xl border border-gray-100 dark:border-[#262626]">
-            <p className="text-gray-500">Bạn chưa được phân công quản lý dự án nào.</p>
+                      {/* Cột 4: Thao tác */}
+                      <td className="px-6 py-3.5 align-top text-right">
+                        <Link 
+                          href={`/dashboard/${project.id}/sprints`} 
+                          className="inline-flex items-center justify-center text-[11px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 hover:text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40 transition-colors"
+                        >
+                          Bảng Sprint
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

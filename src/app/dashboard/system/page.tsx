@@ -37,10 +37,7 @@ export default async function SystemSettingsPage() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Cài đặt & Thống kê Hệ thống</h2>
-        <p className="text-gray-500 mt-2">Tổng quan về trạng thái hoạt động và các thông số kỹ thuật của hệ thống AIMS.</p>
-      </div>
+
 
       {/* Thống kê tổng */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">

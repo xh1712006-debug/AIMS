@@ -103,10 +103,14 @@ export default function QuickAddWorkItem({
         
         <div className="flex items-center gap-2 opacity-0 group-focus-within:opacity-100 transition-opacity">
           <select name="type" className="text-xs font-medium bg-transparent border-none focus:ring-0 text-gray-500 dark:text-[#737373] cursor-pointer p-0" disabled={isSubmitting}>
-            <option value="TASK">Task</option>
-            <option value="STORY">Story</option>
-            <option value="FEATURE">Feature</option>
+            <option value="TEST">Test</option>
+            <option value="DOCUMENTATION">Documentation</option>
             <option value="BUG">Bug</option>
+            <option value="SPIKE">Spike</option>
+            <option value="FEATURE">Feature</option>
+            <option value="RESEARCH">Research</option>
+            <option value="EXPERIMENT">Experiment</option>
+            <option value="ANALYSIS">Analysis</option>
           </select>
           
           <select name="priorityId" className="text-xs font-medium bg-transparent border-none focus:ring-0 text-gray-500 dark:text-[#737373] cursor-pointer p-0" disabled={isSubmitting}>

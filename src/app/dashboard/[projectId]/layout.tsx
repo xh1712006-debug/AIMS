@@ -28,16 +28,22 @@ export default async function ProjectLayout(props: {
 
   const isInternView = session.user.role === 'INTERN';
 
+  const backLink = 
+    session.user.role === 'PROJECT_MANAGER' ? '/dashboard/project-manager/projects' :
+    session.user.role === 'MEMBER_MANAGER' ? '/dashboard/member-manager/projects' :
+    session.user.role === 'PARTNER' ? '/dashboard/partner/projects' :
+    '/dashboard';
+
   return (
     <div>
-      {/* PM project header with tabs */}
-      {session.user.role === 'PROJECT_MANAGER' && (
+      {/* PM/MM/Partner project header with tabs */}
+      {!isInternView && (
         <div className="sticky top-0 z-40 -mx-5 -mt-5 pt-5 px-5 md:-mx-7 md:-mt-7 md:pt-7 md:px-7 mb-6 bg-[var(--bg-base)]/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 transition-all">
           <div className="max-w-[1200px] mx-auto">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div>
                 <Link
-                  href="/dashboard/project-manager/projects"
+                  href={backLink}
                   className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest mb-3 hover:opacity-70 transition-opacity"
                   style={{ color: 'var(--text-muted)' }}
                 >

@@ -37,17 +37,7 @@ export default async function InboxPage() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex justify-between items-end mb-8">
-        <div>
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight flex items-center gap-3">
-            Hộp thư Xử lý
-            {pendingActions.length > 0 && (
-              <span className="bg-red-500 text-white text-sm px-3 py-1 rounded-full">{pendingActions.length}</span>
-            )}
-          </h2>
-          <p className="text-gray-500 dark:text-[#A3A3A3] mt-2">Nơi tập trung toàn bộ các vấn đề cần sự hỗ trợ của ProjectManager.</p>
-        </div>
-      </div>
+
 
       <InboxTabs pendingActions={pendingActions} resolvedActions={resolvedActions} />
     </div>

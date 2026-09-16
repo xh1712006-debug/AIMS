@@ -9,7 +9,7 @@ export default function ProjectTabsClient({ projectId }: { projectId: string }) 
   const tabs = [
     { href: `/dashboard/${projectId}`,            label: 'Tổng quan' },
     { href: `/dashboard/${projectId}/work-items`, label: 'Quản lý Công việc' },
-    { href: `/dashboard/${projectId}/sprints`,    label: 'Kế hoạch Sprints' },
+    { href: `/dashboard/${projectId}/sprints`,    label: 'Bảng Sprints' },
     { href: `/dashboard/${projectId}/check-ins`,  label: 'Báo cáo Tiến độ' },
     { href: `/dashboard/${projectId}/settings`,   label: 'Cấu hình Dự án' },
   ];

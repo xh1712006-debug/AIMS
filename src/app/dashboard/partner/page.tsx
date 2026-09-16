@@ -35,10 +35,7 @@ export default async function PartnerDashboard() {
   
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Trang chủ Đối tác</h2>
-        <p className="text-gray-500 dark:text-[#A3A3A3] mt-2">Tổng quan giám sát và xem báo cáo tiến độ các dự án bạn tài trợ/hợp tác.</p>
-      </div>
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-white dark:bg-[#171717] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-[#262626]">

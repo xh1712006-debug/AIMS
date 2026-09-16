@@ -39,11 +39,7 @@ export default async function MentorProjectsPage() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-[#EDEDED] tracking-tight">Danh mục Dự án</h2>
-          <p className="text-gray-500 dark:text-[#737373] mt-2">Tổng hợp các dự án sinh viên do bạn quản lý.</p>
-        </div>
+      <div className="mb-6 flex justify-end">
         <CreateProjectModal interns={interns} memberManagers={memberManagers} partners={partners} />
       </div>
 

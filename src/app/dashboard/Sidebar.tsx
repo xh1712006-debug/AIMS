@@ -40,7 +40,7 @@ function NavLink({ href, label, icon, exact = false, badge, activeOverride }: { 
     ? pathname === href 
     : (pathname === href || pathname.startsWith(href + '/')) && href !== '/dashboard';
   const isRootActive = href === '/dashboard' && pathname === '/dashboard';
-  const active = activeOverride ?? (isActive || isRootActive);
+  const active = activeOverride || (isActive || isRootActive);
   return (
     <Link href={href} className={`sidebar-nav-item ${active ? 'active' : ''}`}>
       <Icon d={icon} />
@@ -131,10 +131,10 @@ export default function Sidebar({ user, projects = [], pendingActionCount = 0 }:
               <div key={project.id} className="pt-2">
 
                 <NavLinkWrapper href={`/dashboard/${project.id}`}            icon={ICONS.dashboard} label="Tổng quan" exact />
-                <NavLinkWrapper href={`/dashboard/${project.id}/work-items`} icon={ICONS.roadmap}   label="Roadmap & Backlog" />
-                <NavLinkWrapper href={`/dashboard/${project.id}/sprints`}    icon={ICONS.sprint}    label="Kế hoạch Sprint" />
+                <NavLinkWrapper href={`/dashboard/${project.id}/work-items`} icon={ICONS.roadmap}   label="Quản lý Công việc" />
+                <NavLinkWrapper href={`/dashboard/${project.id}/sprints`}    icon={ICONS.sprint}    label="Bảng Sprints" />
                 <NavLinkWrapper href={`/dashboard/${project.id}/check-ins`}  icon={ICONS.checkin}   label="Báo cáo Tiến độ" />
-                <NavLinkWrapper href={`/dashboard/${project.id}/settings`}   icon={ICONS.github}    label="Tích hợp GitHub" />
+                <NavLinkWrapper href={`/dashboard/${project.id}/settings`}   icon={ICONS.settings}  label="Cấu hình Dự án" />
               </div>
             ))}
           </>
@@ -174,7 +174,7 @@ export default function Sidebar({ user, projects = [], pendingActionCount = 0 }:
         {/* ─── MEMBER MANAGER / SCRUM MASTER ─── */}
         {user.role === 'MEMBER_MANAGER' && (
           <>
-            <NavLinkWrapper href="/dashboard" icon={ICONS.home} label="Trang chủ" exact />
+            <NavLinkWrapper href="/dashboard/member-manager" icon={ICONS.home} label="Trang chủ" exact />
 
             <p className="px-2 text-[9px] font-bold uppercase tracking-widest mb-1 mt-4"
                style={{ color: 'var(--text-muted)' }}>
@@ -189,7 +189,7 @@ export default function Sidebar({ user, projects = [], pendingActionCount = 0 }:
         {/* ─── PARTNER ─── */}
         {user.role === 'PARTNER' && (
           <>
-            <NavLinkWrapper href="/dashboard" icon={ICONS.home} label="Trang chủ" exact />
+            <NavLinkWrapper href="/dashboard/partner" icon={ICONS.home} label="Trang chủ" exact />
 
             <p className="px-2 text-[9px] font-bold uppercase tracking-widest mb-1 mt-4"
                style={{ color: 'var(--text-muted)' }}>

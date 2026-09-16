@@ -49,18 +49,7 @@ export default async function CheckInsPage(props: { params: Promise<{ projectId:
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1200px] mx-auto pb-12">
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4 pt-4">
-        <div>
-          <h2 className="text-3xl md:text-4xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
-            Báo cáo Tiến độ
-          </h2>
-          <div className="flex items-center gap-3 mt-3">
-            <span className="text-sm font-medium opacity-80" style={{ color: 'var(--text-secondary)' }}>
-              Theo dõi và cập nhật tiến độ công việc hàng ngày, giải quyết các khó khăn gặp phải.
-            </span>
-          </div>
-        </div>
-        
+      <div className="flex justify-end mb-6 pt-2">
         {session.user.role === 'INTERN' && (
           <CreateCheckInModal 
             projectId={projectId}
