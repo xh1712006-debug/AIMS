@@ -407,6 +407,23 @@ export async function saveSettings(formData: FormData) {
   const githubToken = formData.get('githubToken') as string;
   const githubRepo = formData.get('githubRepo') as string;
 
+  // Verify GitHub connection if both are provided
+  if (githubToken && githubRepo) {
+    try {
+      const res = await fetch(`https://api.github.com/repos/${githubRepo}`, {
+        headers: {
+          Authorization: `token ${githubToken}`,
+          Accept: 'application/vnd.github.v3+json',
+        }
+      });
+      if (!res.ok) {
+        return { success: false, message: "Lỗi kết nối: Token không hợp lệ hoặc không tìm thấy repo." };
+      }
+    } catch (error) {
+      return { success: false, message: "Không thể kết nối tới GitHub. Vui lòng thử lại." };
+    }
+  }
+
   await prisma.user.update({
     where: { id: session.user.id },
     data: { githubToken }
@@ -427,6 +444,10 @@ export async function saveSettings(formData: FormData) {
   }
 
   revalidatePath(`/dashboard/${projectId}/settings`);
+  return { 
+    success: true, 
+    message: githubToken ? "Đã xác thực và kết nối GitHub thành công!" : "Đã lưu cài đặt trống!" 
+  };
 }
 
 import bcrypt from 'bcryptjs';
@@ -894,4 +915,24 @@ export async function updateWorkItemOrder(id: string, newOrder: number, sprintId
 
   revalidatePath(`/dashboard/${projectId}/sprints`);
   revalidatePath(`/dashboard/${projectId}/work-items`);
+}
+
+// Mark a task as acknowledged by PM (toggle on/off)
+export async function markTaskAcknowledged(workItemId: string, projectId: string, acknowledged: boolean) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) throw new Error('Unauthorized');
+  if (session.user.role !== 'PROJECT_MANAGER' && session.user.role !== 'ADMIN') throw new Error('Unauthorized role');
+
+  await prisma.workItem.update({
+    where: { id: workItemId },
+    data: {
+      managerFeedback: acknowledged
+        ? `[PM_ACK] \u0110\u00e3 xem x\u00e9t v\u00e0 x\u1eed l\u00fd b\u1edfi ${session.user.name || session.user.email}`
+        : null,
+    }
+  });
+
+  revalidatePath(`/dashboard/${projectId}/work-items`);
+  revalidatePath(`/dashboard/project-manager/inbox`);
+  revalidatePath(`/dashboard`);
 }

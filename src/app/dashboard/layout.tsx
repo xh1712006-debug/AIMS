@@ -31,6 +31,7 @@ export default async function DashboardLayout({
       where: { role: 'INTERN' },
       include: {
         projectsAsIntern: {
+          where: { projectManagerId: session.user.id },
           include: {
             workItems: true,
             checkIns: {

@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { updateCheckInMentorAction } from '@/app/actions';
 
 type CheckIn = {
@@ -22,6 +24,19 @@ export default function CheckInListClient({
   userRole: string;
   projectId: string;
 }) {
+  const searchParams = useSearchParams();
+  const highlightId = searchParams.get('checkInId');
+  const highlightRef = useRef<HTMLDetailsElement>(null);
+
+  // Auto-scroll and open targeted check-in
+  useEffect(() => {
+    if (highlightId && highlightRef.current) {
+      highlightRef.current.open = true;
+      setTimeout(() => {
+        highlightRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [highlightId]);
 
   const riskStyle = (r: string) => r === 'RED' ? 'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30' 
                                : r === 'YELLOW' ? 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-900/30' 
@@ -47,8 +62,13 @@ export default function CheckInListClient({
         {checkIns.map((ci) => {
           const date = new Date(ci.createdAt);
           
+          const isHighlighted = ci.id === highlightId;
           return (
-            <details key={ci.id} className="group aims-accordion">
+            <details 
+              key={ci.id} 
+              ref={isHighlighted ? highlightRef : null}
+              className={`group aims-accordion transition-all ${isHighlighted ? 'ring-2 ring-indigo-500 ring-inset rounded-none' : ''}`}
+            >
               <summary className="flex items-center gap-4 p-4 md:p-5 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] cursor-pointer transition-colors list-none relative">
                 {/* Status Indicator Line */}
                 <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${ci.riskStatus === 'RED' ? 'bg-red-500' : ci.riskStatus === 'YELLOW' ? 'bg-amber-500' : 'bg-emerald-500'}`} />

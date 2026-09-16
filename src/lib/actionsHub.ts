@@ -37,7 +37,7 @@ export function getPendingActions(interns: any[]): PendingAction[] {
             internName: intern.name || intern.email,
             projectId: p.id,
             urgency: 'medium',
-            link: `/dashboard/${p.id}/check-ins`,
+            link: `/dashboard/${p.id}/check-ins?checkInId=${p.checkIns[0].id}`,
             createdAt: lastCheckInDate
           });
         }
@@ -52,7 +52,7 @@ export function getPendingActions(interns: any[]): PendingAction[] {
             internName: intern.name || intern.email,
             projectId: p.id,
             urgency: 'high',
-            link: `/dashboard/${p.id}/check-ins`,
+            link: `/dashboard/${p.id}/check-ins?highlight=none`,
             createdAt: startDate
           });
         }
@@ -60,7 +60,7 @@ export function getPendingActions(interns: any[]): PendingAction[] {
 
       // 2. Blocked or Pending Review Tasks
       p.workItems?.forEach((wi: any) => {
-        if (wi.status === 'BLOCKED') {
+        if (wi.status === 'BLOCKED' && !wi.managerFeedback?.startsWith('[PM_ACK]')) {
           pendingActions.push({
             id: `wi-${wi.id}`,
             type: 'BLOCKED_TASK',
@@ -68,10 +68,10 @@ export function getPendingActions(interns: any[]): PendingAction[] {
             internName: intern.name || intern.email,
             projectId: p.id,
             urgency: 'high',
-            link: `/dashboard/${p.id}/work-items`,
+            link: `/dashboard/${p.id}/work-items?taskId=${wi.id}`,
             createdAt: new Date(wi.updatedAt || wi.createdAt)
           });
-        } else if (wi.status === 'REVIEW') {
+        } else if (wi.status === 'REVIEW' && !wi.managerFeedback?.startsWith('[PM_ACK]')) {
           pendingActions.push({
             id: `wi-${wi.id}`,
             type: 'PENDING_REVIEW',
@@ -79,7 +79,7 @@ export function getPendingActions(interns: any[]): PendingAction[] {
             internName: intern.name || intern.email,
             projectId: p.id,
             urgency: 'medium',
-            link: `/dashboard/${p.id}/work-items`,
+            link: `/dashboard/${p.id}/work-items?taskId=${wi.id}`,
             createdAt: new Date(wi.updatedAt || wi.createdAt)
           });
         }

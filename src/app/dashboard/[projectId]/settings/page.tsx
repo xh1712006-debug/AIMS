@@ -3,7 +3,8 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { saveSettings } from "@/app/actions";
-import PrioritySettings from "./PrioritySettings";
+import GithubSettingsForm from "./GithubSettingsForm";
+import GithubActivityWidget from "./GithubActivityWidget";
 
 export default async function SettingsPage(props: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await props.params;
@@ -47,49 +48,20 @@ export default async function SettingsPage(props: { params: Promise<{ projectId:
           </h3>
           <p className="text-sm font-medium mb-6" style={{ color: 'var(--text-muted)' }}>Kết nối để tự động đồng bộ báo cáo Check-ins của bạn lên GitHub.</p>
           
-          <form action={saveSettings} className="space-y-5">
-            <input type="hidden" name="projectId" value={projectId} />
-            <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-                GitHub Personal Access Token (PAT)
-              </label>
-              <input 
-                name="githubToken" 
-                type="password" 
-                defaultValue={githubToken}
-                className="w-full rounded-xl bg-gray-50 dark:bg-[#111] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-[#0a0a0a] focus:ring-2 focus:ring-indigo-500/20 text-sm p-3 transition-all placeholder:text-gray-400 font-mono" 
-                placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxx" 
-              />
-              <p className="text-[10px] font-semibold text-orange-500 mt-2">
-                * Lưu ý: Token cần có quyền `repo` để đẩy code.
-              </p>
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-                GitHub Repository
-              </label>
-              <input 
-                name="githubRepo" 
-                type="text" 
-                defaultValue={githubRepo}
-                className="w-full rounded-xl bg-gray-50 dark:bg-[#111] border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-[#0a0a0a] focus:ring-2 focus:ring-indigo-500/20 text-sm p-3 transition-all placeholder:text-gray-400 font-mono" 
-                placeholder="username/repository-name" 
-              />
-              <p className="text-[10px] font-semibold mt-2" style={{ color: 'var(--text-muted)' }}>
-                Định dạng: tên-tài-khoản/tên-kho-chứa.
-              </p>
-            </div>
-            <div className="pt-2">
-              <button type="submit" className="w-full bg-[#24292e] hover:bg-[#1b1f23] dark:bg-white dark:text-black dark:hover:bg-gray-200 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all focus:ring-4 focus:ring-gray-500/30">
-                Lưu cài đặt GitHub
-              </button>
-            </div>
-          </form>
+          <GithubSettingsForm 
+            projectId={projectId} 
+            initialToken={githubToken} 
+            initialRepo={githubRepo} 
+          />
         </div>
 
-        {/* ── Priority Settings ── */}
+        {/* ── GitHub Tracking Dashboard ── */}
         <div className="xl:col-span-7">
-          <PrioritySettings projectId={projectId} initialPriorities={project?.priorityLevels || []} />
+          <GithubActivityWidget 
+            projectId={projectId} 
+            githubRepo={githubRepo} 
+            githubToken={githubToken} 
+          />
         </div>
       </div>
     </div>

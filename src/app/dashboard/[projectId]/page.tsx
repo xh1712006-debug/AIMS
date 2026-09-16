@@ -67,6 +67,7 @@ export default async function ProjectDetailPage(props: { params: Promise<{ proje
   // Priority tasks
   const priorityTasks = project.workItems
     .filter(wi => wi.status !== 'DONE' && !['FEATURE', 'RESEARCH', 'EXPERIMENT', 'ANALYSIS'].includes(wi.type))
+    .sort((a, b) => (a.priority?.level ?? 999) - (b.priority?.level ?? 999))
     .slice(0, 5);
 
   // Project duration
@@ -233,7 +234,7 @@ export default async function ProjectDetailPage(props: { params: Promise<{ proje
 
           <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
             <div className="flex flex-col gap-2">
-              {project.workItems.filter(wi => wi.status !== 'DONE' && !['FEATURE', 'RESEARCH', 'EXPERIMENT', 'ANALYSIS'].includes(wi.type)).length === 0 ? (
+              {priorityTasks.length === 0 ? (
                 <div className="flex flex-col items-center justify-center text-center h-full pt-10">
                   <div className="w-12 h-12 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center mb-3">
                     <svg className="w-6 h-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -244,10 +245,8 @@ export default async function ProjectDetailPage(props: { params: Promise<{ proje
                   <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Tuyệt vời! Bạn đã xử lý xong mọi công việc.</p>
                 </div>
               ) : (
-                project.workItems
-                  .filter(wi => wi.status !== 'DONE' && !['FEATURE', 'RESEARCH', 'EXPERIMENT', 'ANALYSIS'].includes(wi.type))
-                  .map(item => {
-                    const sm = statusMeta[item.status as keyof typeof statusMeta];
+                priorityTasks.map(item => {
+                  const sm = statusMeta[item.status as keyof typeof statusMeta];
                     return (
                       <Link href={`/dashboard/${project.id}/work-items?itemId=${item.id}`} key={item.id}>
                         <div className="group flex items-center gap-4 p-3 rounded-xl border border-transparent hover:border-gray-200 dark:hover:border-gray-700/50 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-all cursor-pointer">
@@ -313,7 +312,7 @@ export default async function ProjectDetailPage(props: { params: Promise<{ proje
           {/* Recent Check-ins */}
           <div className="aims-card p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold uppercase tracking-widest" style={{ color: 'var(--text-primary)' }}>Check-in gần đây</h3>
+              <h3 className="text-sm font-bold uppercase tracking-widest" style={{ color: 'var(--text-primary)' }}>Báo cáo gần đây</h3>
               <Link href={`/dashboard/${project.id}/check-ins`} className="text-xs font-bold text-indigo-500 hover:text-indigo-600">
                 Lịch sử →
               </Link>

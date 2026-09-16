@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import CreateWorkItemForm from "./CreateWorkItemForm";
 import KanbanBoard from "./KanbanBoard";
 import WorkItemActionsMenu from "./WorkItemActionsMenu";
@@ -206,13 +207,15 @@ export default async function SprintsPage(props: { params: Promise<{ projectId: 
             Bảng công việc chi tiết
           </h3>
         </div>
-        <KanbanBoard 
-          workItems={kanbanItems} 
-          epics={topLevelItems} 
-          projectId={projectId} 
-          priorityLevels={project.priorityLevels}
-          userRole={session.user.role} 
-        />
+        <Suspense fallback={<div className="h-64 flex items-center justify-center text-gray-400">Đang tải...</div>}>
+          <KanbanBoard 
+            workItems={kanbanItems} 
+            epics={topLevelItems} 
+            projectId={projectId} 
+            priorityLevels={project.priorityLevels}
+            userRole={session.user.role} 
+          />
+        </Suspense>
       </div>
     </div>
   );
